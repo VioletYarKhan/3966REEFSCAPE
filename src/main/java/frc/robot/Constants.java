@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
@@ -34,7 +37,8 @@ public final class Constants {
   public static final class DriveConstants {
     // Driving Parameters - Note that these are not the maximum capable speeds of
     // the robot, rather the allowed maximum speeds
-    public static final double kMaxSpeedMetersPerSecond = 4.8;
+    public static final double kMaxSpeedMetersPerSecond = 2;
+    public static final double kMaxAutomatedSpeedMetersPerSecond = 1;
     public static final double kMaxAngularSpeed = 2 * Math.PI; // radians per second
 
     // Chassis configuration
@@ -113,17 +117,20 @@ public final class Constants {
     public static final String kCameraName = "gccamera";
     // Cam mounted facing forward, half a meter forward of center, half a meter up from center,
     // pitched upward.
-    private static final double camPitch = Units.degreesToRadians(26.0);
+    private static final double camPitch = Units.degreesToRadians(20.0);
     public static final Transform3d kRobotToCam =
-            new Transform3d(new Translation3d(-0.381, -0.2, 0.254), new Rotation3d(0, -camPitch, 180));
+            new Transform3d(new Translation3d(-0.46, -0.05, 0.42), new Rotation3d(0, -camPitch, 180));
     public static final Transform3d kCamToRobot = kRobotToCam.inverse();
 
     // The layout of the AprilTags on the field
-    public static final AprilTagFieldLayout kTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2023ChargedUp);
+    public static final AprilTagFieldLayout kTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
     // The standard deviations of our vision estimated poses, which affect correction rate
     // (Fake values. Experiment and determine estimation noise on an actual robot.)
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+
+    public static final ArrayList<Integer> redSideReef = new ArrayList<Integer>(Arrays.asList(6, 7, 8, 9, 10, 11));
+    public static final ArrayList<Integer> blueSideReef = new ArrayList<Integer>(Arrays.asList(17, 18, 19, 20, 21, 22));
   }
 }

@@ -5,19 +5,27 @@
 package frc.robot;
 
 
+
+import frc.GryphonLib.MovementCalculations;
+
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.*;
 
 /*
@@ -36,63 +44,44 @@ public class RobotContainer {
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
 
-
     private final SendableChooser<Command> autoChooser = new SendableChooser<>();
-    public Field2d m_field = new Field2d();
 
-  // Commands
-    private Supplier<Integer> tagToChase;
-    private final MoveToTag ChaseTagCommand = new MoveToTag(m_vision.getResult(), m_robotDrive, ()->m_field.getRobotPose(), tagToChase);
+    private final double[] goalFromTag = new double[]{2, 0};
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    configureButtonBindings();
     // Configure default commands
     m_robotDrive.setDefaultCommand(
         // The left stick controls translation of the robot.
         // Turning is controlled by the X axis of the right stick.
          new RunCommand(
-            () -> {
-                m_field.setRobotPose(m_poseEst.getCurrentPose());
-                if (m_driverController.getRightBumperButton()){
-                  tagToChase = ()->m_vision.getBestTag();
-                  ChaseTagCommand.schedule();
-                } else{
-                  double forward = m_driverController.getLeftY();
-                  double strafe = m_driverController.getLeftX();
-                  double turn = m_driverController.getRightX();
+            () -> { 
+                double forward = m_driverController.getLeftY();
+                double strafe = m_driverController.getLeftX();
+                double turn = m_driverController.getRightX();
 
+                double targetYaw = m_vision.targetYaw(7);
+                if (m_driverController.getAButton()){
+                  m_robotDrive.driveRobotRelativeChassis(new MoveTowardsTagGoal(m_vision.targetTransform(7), goalFromTag).getSpeeds());
+                } else{
                   if (m_driverController.getStartButton()){
-                    turn = Math.min(Math.abs(m_vision.targetYaw(7))/20, 1);
+                    turn = MovementCalculations.getTurnRate(targetYaw, 0.5 * 1);
                   }
 
-                  m_robotDrive.drive(
-                  -MathUtil.applyDeadband(forward, OIConstants.kDriveDeadband),
-                  -MathUtil.applyDeadband(strafe, OIConstants.kDriveDeadband),
-                  -MathUtil.applyDeadband(turn, OIConstants.kDriveDeadband), true);}},
-            m_robotDrive));
-
-    /*m_elevator.setDefaultCommand(
-      new RunCommand(
-        () -> {
-          if (m_driverController.getPOV() == 0) {
-            m_elevator.set(0.2);
-          } else if (m_driverController.getPOV() == 180) {
-            m_elevator.set(-0.15);
-          } else {
-            if (m_driverController.getYButton()){
-              m_elevator.setPosition(6);
-            } else if (m_driverController.getAButton()){
-              m_elevator.setPosition(0);
-            }
-          }
-        }
-      , m_elevator));*/
+                    m_robotDrive.drive(
+                    -MathUtil.applyDeadband(forward, OIConstants.kDriveDeadband),
+                    -MathUtil.applyDeadband(strafe, OIConstants.kDriveDeadband),
+                    -MathUtil.applyDeadband(turn, OIConstants.kDriveDeadband), true);}},
+          m_robotDrive));
 
   autoChooser.setDefaultOption("None", new RunCommand((()-> m_robotDrive.setX()), m_robotDrive));
     SmartDashboard.putData("Auto Chooser", autoChooser);
   }
+
+  private void configureButtonBindings() {}
 
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();

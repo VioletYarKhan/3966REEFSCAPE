@@ -5,10 +5,14 @@ import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
 
@@ -21,6 +25,8 @@ public class Vision extends SubsystemBase {
 
     public void periodic() {
         result = camera.getLatestResult();
+        if (result.hasTargets()){SmartDashboard.putNumber("Best Tag Seen", result.getBestTarget().getFiducialId());}
+        else{SmartDashboard.putNumber("Best Tag Seen", 0);}
     }
 
     public PhotonPipelineResult getResult(){
@@ -33,6 +39,10 @@ public class Vision extends SubsystemBase {
 
     public PhotonCamera getCamera(){
         return camera;
+    }
+
+    public boolean resultHasTargets(){
+        return result.hasTargets();
     }
 
     public int[] tagsInFrame(){
@@ -75,22 +85,44 @@ public class Vision extends SubsystemBase {
     }
 
 
-    public double targetDistance(int targetNumber){
+    public double[] targetDistance(int targetNumber){
         if (result.hasTargets()) {
             // At least one AprilTag was seen by the camera
             for (var target : result.getTargets()) {
                 if (target.getFiducialId() == targetNumber) {
                     // Found Tag, record its information
-                    double targetRange =
-                                PhotonUtils.calculateDistanceToTargetMeters(
-                                        0.5, // Measured with a tape measure, or in CAD.
-                                        1.435, // From 2024 game manual for ID 7
-                                        Units.degreesToRadians(-30.0), // Measured with a protractor, or in CAD.
-                                        Units.degreesToRadians(target.getPitch()));
-                    return targetRange;
+                    double targetRangeX = target.getBestCameraToTarget().getX();
+                    double targetRangeY = target.getBestCameraToTarget().getY();
+                    double targetRangeOmega = target.getBestCameraToTarget().getRotation().getAngle();
+                    return new double[]{targetRangeX, targetRangeY, targetRangeOmega};
                 }
             }
         }
-        return 0;
+        return new double[]{0, 0, 0};
+    }
+
+
+    public Transform3d targetTransform(int targetNumber){
+        if (result.hasTargets()) {
+            // At least one AprilTag was seen by the camera
+            for (var target : result.getTargets()) {
+                if (target.getFiducialId() == targetNumber) {
+                    return target.getBestCameraToTarget();
+                }
+            }
+        }
+        return new Transform3d();
+    }
+
+    public PhotonTrackedTarget returnTag (int targetNumber){
+        if (result.hasTargets()) {
+            // At least one AprilTag was seen by the camera
+            for (var target : result.getTargets()) {
+                if (target.getFiducialId() == targetNumber) {
+                    return target;
+                }
+            }
+        }
+        return new PhotonTrackedTarget();
     }
 }

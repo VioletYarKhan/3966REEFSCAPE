@@ -206,4 +206,8 @@ public class DriveSubsystem extends SubsystemBase {
   public Rotation2d getRotation(){
     return Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ));
   }
+
+  public void stop(){
+    driveRobotRelativeChassis(new ChassisSpeeds());
+  }
 }
