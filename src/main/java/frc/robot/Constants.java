@@ -123,7 +123,7 @@ public final class Constants {
     public static final Transform3d kCamToRobot = kRobotToCam.inverse();
 
     // The layout of the AprilTags on the field
-    public static final AprilTagFieldLayout kTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+    public static final AprilTagFieldLayout kTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
 
     // The standard deviations of our vision estimated poses, which affect correction rate
     // (Fake values. Experiment and determine estimation noise on an actual robot.)

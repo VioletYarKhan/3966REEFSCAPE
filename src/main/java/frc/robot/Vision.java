@@ -22,7 +22,6 @@ public class Vision extends SubsystemBase {
     private PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(VisionConstants.kTagLayout, PoseStrategy.CLOSEST_TO_REFERENCE_POSE, VisionConstants.kRobotToCam);
     private int[] tags;
 
-
     public void periodic() {
         result = camera.getLatestResult();
         if (result.hasTargets()){SmartDashboard.putNumber("Best Tag Seen", result.getBestTarget().getFiducialId());}
