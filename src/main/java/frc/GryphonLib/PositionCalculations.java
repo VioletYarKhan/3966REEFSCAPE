@@ -8,9 +8,13 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
 public class PositionCalculations {
+    public static ShuffleboardTab tab = Shuffleboard.getTab("Ghosts");
+
     public static Pose2d goalPose;
 
     private static Field2d ghostField = new Field2d();
@@ -50,6 +54,7 @@ public class PositionCalculations {
                 // Transform the tag's pose to set our goal
                 goalPose = targetPose.transformBy(tagToGoal).toPose2d();
                 ghostField.setRobotPose(goalPose);
+                tab.add("Ghost Field", ghostField).withPosition(2, 0).withSize(6, 4);
                 return goalPose;
             }
         }

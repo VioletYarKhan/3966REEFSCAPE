@@ -90,7 +90,7 @@ public class DriveSubsystem extends SubsystemBase {
         visionMeasurementStdDevs);
     
     tab.addString("Pose", this::getFomattedPose).withPosition(0, 0).withSize(2, 0);
-    tab.add("Field", field2d).withPosition(2, 0).withSize(6, 4);
+    tab.add("TrueRobotField", field2d).withPosition(2, 0).withSize(6, 4);
 
     RobotConfig config;
     try{

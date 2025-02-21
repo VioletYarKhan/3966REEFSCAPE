@@ -11,7 +11,6 @@ public class coralEffector extends SubsystemBase {
     public void outtake(){
         effectorWheel.set(0.5);
     }
-
     public void intake(){
         effectorWheel.set(-0.5);
     }
