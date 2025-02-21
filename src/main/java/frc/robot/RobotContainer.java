@@ -8,24 +8,19 @@ package frc.robot;
 
 import frc.GryphonLib.MovementCalculations;
 
-import java.util.function.Supplier;
+
+import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.PoseEstimatorSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.*;
 
 /*
@@ -38,13 +33,13 @@ public class RobotContainer {
   // The robot's subsystems
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
   public final Vision m_vision = new Vision();
-  // public final Elevator m_elevator = new Elevator();
+  public final Elevator m_elevator = new Elevator();
   public final PoseEstimatorSubsystem m_poseEst = new PoseEstimatorSubsystem(m_vision.getCamera(), m_robotDrive);
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
 
-    private final SendableChooser<Command> autoChooser = new SendableChooser<>();
+    private SendableChooser<Command> autoChooser;
 
     private final double[] goalFromTag = new double[]{2, 0};
 
@@ -76,8 +71,22 @@ public class RobotContainer {
                     -MathUtil.applyDeadband(strafe, OIConstants.kDriveDeadband),
                     -MathUtil.applyDeadband(turn, OIConstants.kDriveDeadband), true);}},
           m_robotDrive));
+    
+    m_elevator.setDefaultCommand(
+      new RunCommand(
+        ()-> {
+          SmartDashboard.putNumber("Elevator Position", m_elevator.getPosition());
+          if (m_driverController.getPOV() == 0){
+            m_elevator.set(0.2);
+          } else if (m_driverController.getPOV() == 180){
+            m_elevator.set(-0.2);
+          } else{
+            m_elevator.set(0);
+          }
+        }, m_elevator)
+    );
 
-  autoChooser.setDefaultOption("None", new RunCommand((()-> m_robotDrive.setX()), m_robotDrive));
+  autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 

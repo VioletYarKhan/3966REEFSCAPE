@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
+
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -15,89 +16,73 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Elevator extends SubsystemBase {
+    SparkMax elevatorL = new SparkMax(10, MotorType.kBrushless);
+    SparkMax elevatorR = new SparkMax(11, MotorType.kBrushless);
+    SparkMaxConfig configL = new SparkMaxConfig();
+    SparkMaxConfig configR = new SparkMaxConfig();
+    RelativeEncoder encoderL = elevatorL.getEncoder();
+    RelativeEncoder encoderR = elevatorL.getEncoder();
+    SparkClosedLoopController pid;
+
     double targetReference;
     ControlType currentControlType;
-    private SparkMax[] motors = new SparkMax[4];
-    private RelativeEncoder[] encoders = new RelativeEncoder[4];
-    private SparkMaxConfig[] configs = new SparkMaxConfig[4];
-    private SparkClosedLoopController[] pids = new SparkClosedLoopController[4];
-    private int[] ids = new int[4];
 
     public Elevator() {
-        motors = new SparkMax[ids.length];
-        encoders = new RelativeEncoder[ids.length];
-        configs = new SparkMaxConfig[ids.length];
-        pids = new SparkClosedLoopController[ids.length];
-        
-
-        for (int i = 0; i < ids.length; i++) {
-            motors[i] = new SparkMax(ids[i], MotorType.kBrushless);
-            configs[i] = new SparkMaxConfig();
-            configs[i].idleMode(IdleMode.kBrake).openLoopRampRate(0).closedLoopRampRate(0);
-            encoders[i] = motors[i].getEncoder();
-            configs[i].closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.05, 0, 0).minOutput(2).maxOutput(-0.1);
-            configs[i].encoder.positionConversionFactor(1).velocityConversionFactor(1);
-            motors[i].configure(configs[i], ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-            pids[i] = motors[i].getClosedLoopController();
-            
-        }
+        configL.idleMode(IdleMode.kBrake).inverted(false).openLoopRampRate(0).closedLoopRampRate(0.5).closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.05, 0, 0).minOutput(1).maxOutput(-0.2);
+        configL.encoder.positionConversionFactor(1).velocityConversionFactor(1);
+        configR.follow(10);
+        elevatorL.configure(configL, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        elevatorR.configure(configR, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        pid = elevatorL.getClosedLoopController();
 
         targetReference = 0;
         currentControlType = ControlType.kDutyCycle;
     }
 
     public void set(double speed) {
-        for (SparkMax motor : motors) {
-            motor.set(speed);
-        }
+        elevatorL.set(speed);
         currentControlType = ControlType.kDutyCycle;
     }
 
     public void setVelocity(double velocity) {
-        for (SparkClosedLoopController pid : pids) {
-            pid.setReference(velocity, ControlType.kVelocity);
-        }
+        pid.setReference(velocity, ControlType.kVelocity);
 
         targetReference = velocity;
         currentControlType = ControlType.kVelocity;
     }
 
     public void setPosition(double position) {
-        for (SparkClosedLoopController pid : pids) {
-            pid.setReference(position, ControlType.kPosition);
-        }
+        pid.setReference(position, ControlType.kPosition);
 
         targetReference = position;
         currentControlType = ControlType.kPosition;
     }
 
     public void setVoltage(double voltage) {
-        for (SparkMax motor : motors) {
-            motor.setVoltage(voltage);
-        }
+        elevatorL.setVoltage(voltage);
+        
         currentControlType = ControlType.kVoltage;
     }
 
     public void setEncoderPosition(double position) {
-        for (RelativeEncoder encoder: encoders) {
-            encoder.setPosition(position);
-        }
+        encoderL.setPosition(position);
+        encoderR.setPosition(position);
     }
 
     public double getVelocity() {
         double velocity = 0;
-        for (RelativeEncoder encoder : encoders) {
-            velocity += encoder.getVelocity();
-        }
-        return velocity / encoders.length;
+        velocity += encoderL.getVelocity();
+        velocity += encoderR.getVelocity();
+        return velocity / 2;
     }
 
     public double getPosition() {
         double position = 0;
-        for (RelativeEncoder encoder : encoders) {
-            position += encoder.getPosition();
-        }
-        return position / encoders.length;
+        
+        position += encoderL.getPosition();
+        position += encoderR.getPosition();
+        
+        return position / 2;
     }
 
     public boolean atTarget(double threshold) {
