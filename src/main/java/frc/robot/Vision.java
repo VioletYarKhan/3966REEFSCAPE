@@ -14,8 +14,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
 
 public class Vision extends SubsystemBase {
-    private PhotonCamera camera = new PhotonCamera(VisionConstants.kCameraName);
-    private PhotonPipelineResult result;
+    private static PhotonCamera camera = new PhotonCamera(VisionConstants.kCameraName);
+    private static PhotonPipelineResult result;
     private PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(VisionConstants.kTagLayout, PoseStrategy.CLOSEST_TO_REFERENCE_POSE, VisionConstants.kRobotToCam);
     private int[] tags;
 
@@ -25,7 +25,7 @@ public class Vision extends SubsystemBase {
         else{SmartDashboard.putNumber("Best Tag Seen", 0);}
     }
 
-    public PhotonPipelineResult getResult(){
+    public static PhotonPipelineResult getResult(){
         return result;
     }
 
@@ -33,7 +33,7 @@ public class Vision extends SubsystemBase {
         return result.getBestTarget().fiducialId;
     }
 
-    public PhotonCamera getCamera(){
+    public static PhotonCamera getCamera(){
         return camera;
     }
 

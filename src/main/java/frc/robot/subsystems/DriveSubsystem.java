@@ -4,22 +4,41 @@
 
 package frc.robot.subsystems;
 
+import java.util.Optional;
+
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import frc.robot.Constants;
+import frc.robot.Vision;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
@@ -47,20 +66,32 @@ public class DriveSubsystem extends SubsystemBase {
   // The gyro sensor
   private final ADIS16470_IMU m_gyro = new ADIS16470_IMU();
 
-  // Odometry class for tracking robot pose
-  SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(
-      DriveConstants.kDriveKinematics,
-      Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)),
-      new SwerveModulePosition[] {
-          m_frontLeft.getPosition(),
-          m_frontRight.getPosition(),
-          m_rearLeft.getPosition(),
-          m_rearRight.getPosition()
-      });
+  private final AprilTagFieldLayout layout = Constants.VisionConstants.kTagLayout;;
+  private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
+  private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(10));
+  private final SwerveDrivePoseEstimator poseEstimator;
+  private final Field2d field2d = new Field2d();
+  private double previousPipelineTimestamp = 0;
 
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
+    var alliance = DriverStation.getAlliance();
+    layout.setOrigin(alliance.get() == Alliance.Blue ?
+        OriginPosition.kBlueAllianceWallRightSide : OriginPosition.kRedAllianceWallRightSide);
+    ShuffleboardTab tab = Shuffleboard.getTab("Vision");
+
+    poseEstimator =  new SwerveDrivePoseEstimator(
+        DriveConstants.kDriveKinematics,
+        getRotation(),
+        getPositions(),
+        new Pose2d(),
+        stateStdDevs,
+        visionMeasurementStdDevs);
+    
+    tab.addString("Pose", this::getFomattedPose).withPosition(0, 0).withSize(2, 0);
+    tab.add("TrueRobotField", field2d).withPosition(2, 0).withSize(6, 4);
+
     RobotConfig config;
     try{
       config = RobotConfig.fromGUISettings();
@@ -70,8 +101,8 @@ public class DriveSubsystem extends SubsystemBase {
       return;
     }
     AutoBuilder.configure(
-      this::getPose, // Robot pose supplier
-      this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting pose)
+      this::getCurrentPose, // Robot pose supplier
+      this::setCurrentPose, // Method to reset odometry (will be called if your auto has a starting pose)
       this::getCurrentSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
       (speeds, feedforwards) -> driveRobotRelativeChassis(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
       new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
@@ -83,8 +114,6 @@ public class DriveSubsystem extends SubsystemBase {
         // Boolean supplier that controls when the path will be mirrored for the red alliance
         // This will flip the path being followed to the red side of the field.
         // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-        var alliance = DriverStation.getAlliance();
         if (alliance.isPresent()) {
           return alliance.get() == DriverStation.Alliance.Red;
         }
@@ -92,45 +121,6 @@ public class DriveSubsystem extends SubsystemBase {
       },
       this // Reference to this subsystem to set requirements
     );
-  }
-
-  @Override
-  public void periodic() {
-    // Update the odometry in the periodic block
-    m_odometry.update(
-        Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)),
-        new SwerveModulePosition[] {
-            m_frontLeft.getPosition(),
-            m_frontRight.getPosition(),
-            m_rearLeft.getPosition(),
-            m_rearRight.getPosition()
-        });
-  }
-
-  /**
-   * Returns the currently-estimated pose of the robot.
-   *
-   * @return The pose.
-   */
-  public Pose2d getPose() {
-    return m_odometry.getPoseMeters();
-  }
-
-  /**
-   * Resets the odometry to the specified pose.
-   *
-   * @param pose The pose to which to set the odometry.
-   */
-  public void resetOdometry(Pose2d pose) {
-    m_odometry.resetPosition(
-        Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)),
-        new SwerveModulePosition[] {
-            m_frontLeft.getPosition(),
-            m_frontRight.getPosition(),
-            m_rearLeft.getPosition(),
-            m_rearRight.getPosition()
-        },
-        pose);
   }
 
   public void driveRobotRelativeChassis(ChassisSpeeds speeds) {
@@ -249,5 +239,66 @@ public class DriveSubsystem extends SubsystemBase {
 
   public void stop(){
     driveRobotRelativeChassis(new ChassisSpeeds());
+  }
+
+  public void PathToPose(Pose2d goalPose){
+    Command pathfindingCommand = AutoBuilder.pathfindToPose(
+        goalPose,
+        AutoConstants.constraints,
+        0.0 // Goal end velocity in meters/sec
+    );
+    pathfindingCommand.schedule();
+  }
+
+  @Override
+  public void periodic() {
+    // Update pose estimator with the best visible target
+    var pipelineResult = Vision.getResult();
+    var resultTimestamp = pipelineResult.getTimestampSeconds();
+    if (resultTimestamp != previousPipelineTimestamp && pipelineResult.hasTargets()) {
+      previousPipelineTimestamp = resultTimestamp;
+      var target = pipelineResult.getBestTarget();
+      var fiducialId = target.getFiducialId();
+      // Get the tag pose from field layout - consider that the layout will be null if it failed to load
+      Optional<Pose3d> tagPose = layout == null ? Optional.empty() : layout.getTagPose(fiducialId);
+      if (target.getPoseAmbiguity() <= .2 && fiducialId >= 0 && tagPose.isPresent()) {
+        var targetPose = tagPose.get();
+        Transform3d camToTarget = target.getBestCameraToTarget();
+        Pose3d camPose = targetPose.transformBy(camToTarget.inverse());
+
+        var visionMeasurement = camPose.transformBy(Constants.VisionConstants.kCamToRobot);
+        poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), resultTimestamp);
+      }
+    }
+    // Update pose estimator with drivetrain sensors
+    poseEstimator.update(
+      getRotation(),
+      getPositions());
+   
+    field2d.setRobotPose(getCurrentPose());
+  }
+  private String getFomattedPose() {
+    var pose = getCurrentPose();
+    return String.format("(%.2f, %.2f) %.2f degrees", 
+        pose.getX(),
+        pose.getY(),
+        pose.getRotation().getDegrees());
+  }
+
+  public Pose2d getCurrentPose() {
+    return poseEstimator.getEstimatedPosition();
+  }
+
+  /**
+   * Resets the current pose to the specified pose. This should ONLY be called
+   * when the robot's position on the field is known, like at the beginning of
+   * a match.
+   * @param newPose new pose
+   */
+  public void setCurrentPose(Pose2d newPose) {
+    poseEstimator.resetPosition(
+      getRotation(),
+      getPositions(),
+      newPose);
   }
 }
