@@ -7,21 +7,21 @@ package frc.robot;
 
 
 import frc.GryphonLib.MovementCalculations;
-
+import frc.GryphonLib.PositionCalculations;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.PoseEstimatorSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import frc.robot.commands.*;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -34,15 +34,11 @@ public class RobotContainer {
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
   public final Vision m_vision = new Vision();
   public final Elevator m_elevator = new Elevator();
-  public final PoseEstimatorSubsystem m_poseEst = new PoseEstimatorSubsystem(m_vision.getCamera(), m_robotDrive);
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
 
     private SendableChooser<Command> autoChooser;
-
-    private final double[] goalFromTag = new double[]{2, 0};
-
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -60,7 +56,8 @@ public class RobotContainer {
 
                 double targetYaw = m_vision.targetYaw(7);
                 if (m_driverController.getAButton()){
-                  m_robotDrive.driveRobotRelativeChassis(new MoveTowardsTagGoal(m_vision.targetTransform(7), goalFromTag).getSpeeds());
+                  Pose2d goalPose = PositionCalculations.getGoalPoseFromTag(Vision.getCamera(), m_robotDrive.getCurrentPose(), new Transform3d(), 7);
+                  m_robotDrive.PathToPose(goalPose);
                 } else{
                   if (m_driverController.getStartButton()){
                     turn = MovementCalculations.getTurnRate(targetYaw, 0.5 * 1);
