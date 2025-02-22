@@ -90,6 +90,6 @@ public class RobotContainer {
   private void configureButtonBindings() {}
 
   public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
+    return Parser.parse(SmartDashboard.getString("Auto Code", ""));
   }
 }
