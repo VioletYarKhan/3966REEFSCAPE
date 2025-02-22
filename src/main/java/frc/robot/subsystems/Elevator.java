@@ -30,7 +30,7 @@ public class Elevator extends SubsystemBase {
     public Elevator() {
         configL.idleMode(IdleMode.kBrake).inverted(false).openLoopRampRate(0).closedLoopRampRate(0).closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.05, 0, 0).minOutput(-0.2).maxOutput(1);
         configL.encoder.positionConversionFactor(1).velocityConversionFactor(1);
-        configR.follow(10);
+        configR.follow(10).idleMode(IdleMode.kBrake);
         elevatorL.configure(configL, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         elevatorR.configure(configR, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         pid = elevatorL.getClosedLoopController();
