@@ -241,13 +241,13 @@ public class DriveSubsystem extends SubsystemBase {
     driveRobotRelativeChassis(new ChassisSpeeds());
   }
 
-  public void PathToPose(Pose2d goalPose){
+  public Command PathToPose(Pose2d goalPose){
     Command pathfindingCommand = AutoBuilder.pathfindToPose(
         goalPose,
         AutoConstants.constraints,
         0.0 // Goal end velocity in meters/sec
     );
-    pathfindingCommand.schedule();
+    return pathfindingCommand;
   }
 
   @Override
