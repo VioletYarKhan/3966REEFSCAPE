@@ -20,6 +20,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.coralEffector;
+import frc.robot.subsystems.effectorWrist;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 
@@ -33,6 +35,9 @@ public class RobotContainer {
   // The robot's subsystems
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
   public final Elevator m_elevator = new Elevator();
+  public final effectorWrist m_wrist = new effectorWrist();
+  private final coralEffector m_coralHand = new coralEffector();
+
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -80,6 +85,33 @@ public class RobotContainer {
             m_elevator.set(0);
           }
         }, m_elevator)
+    );
+
+    m_wrist.setDefaultCommand(
+      new RunCommand(
+        ()-> {
+          SmartDashboard.putNumber("Wrist Position", m_wrist.getPosition());
+          if (m_driverController.getPOV() == 90){
+            m_wrist.set(0.2);
+          } else if (m_driverController.getPOV() == 270){
+            m_wrist.set(-0.2);
+          } else{
+            m_wrist.set(0);
+          }
+        }, m_wrist)
+    );
+
+    m_coralHand.setDefaultCommand(
+      new RunCommand(
+        ()-> {
+          if (m_driverController.getRightTriggerAxis() > 0.5){
+            m_coralHand.outtake();
+          } else if (m_driverController.getLeftTriggerAxis() > 0.5){
+            m_coralHand.intake();
+          } else{
+            m_coralHand.stop();
+          }
+        }, m_coralHand)
     );
 
   autoChooser = AutoBuilder.buildAutoChooser();
