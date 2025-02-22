@@ -17,6 +17,7 @@ public class MoveTowardsTagGoal {
         double[] targetDistance) {
     this.distances = distances;
     this.targetDistance = targetDistance;;
+    
   }
 
   public ChassisSpeeds getSpeeds() {

@@ -31,7 +31,6 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
  */
 public class RobotContainer {
   // The robot's subsystems
-  public final Vision m_vision = new Vision();
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
   public final Elevator m_elevator = new Elevator();
 
@@ -54,9 +53,9 @@ public class RobotContainer {
                 double strafe = m_driverController.getLeftX();
                 double turn = m_driverController.getRightX();
 
-                double targetYaw = m_vision.targetYaw(7);
+                double targetYaw = Vision.targetYaw(7);
                 if (m_driverController.getAButton()){
-                  Pose2d goalPose = PositionCalculations.getGoalPoseFromTag(Vision.getCamera(), m_robotDrive.getCurrentPose(), new Transform3d(), 7);
+                  Pose2d goalPose = PositionCalculations.getGoalPoseFromTag(Vision.getCamera(), m_robotDrive.getCurrentPose(), new Transform3d(), Vision.getBestTag());
                   m_robotDrive.PathToPose(goalPose);
                 } else{
                   if (m_driverController.getStartButton()){

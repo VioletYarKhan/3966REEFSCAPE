@@ -16,8 +16,8 @@ import frc.robot.Constants.VisionConstants;
 public class Vision extends SubsystemBase {
     private static PhotonCamera camera = new PhotonCamera(VisionConstants.kCameraName);
     private static PhotonPipelineResult result;
-    private PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(VisionConstants.kTagLayout, PoseStrategy.CLOSEST_TO_REFERENCE_POSE, VisionConstants.kRobotToCam);
-    private int[] tags;
+    private static PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(VisionConstants.kTagLayout, PoseStrategy.CLOSEST_TO_REFERENCE_POSE, VisionConstants.kRobotToCam);
+    private static int[] tags;
 
     public void periodic() {
         result = camera.getLatestResult();
@@ -29,7 +29,7 @@ public class Vision extends SubsystemBase {
         return result;
     }
 
-    public int getBestTag(){
+    public static int getBestTag(){
         return result.getBestTarget().fiducialId;
     }
 
@@ -37,11 +37,11 @@ public class Vision extends SubsystemBase {
         return camera;
     }
 
-    public boolean resultHasTargets(){
+    public static boolean resultHasTargets(){
         return result.hasTargets();
     }
 
-    public int[] tagsInFrame(){
+    public static int[] tagsInFrame(){
         tags = new int[0];
         if (result.hasTargets()) {
             // At least one AprilTag was seen by the camera
@@ -55,7 +55,7 @@ public class Vision extends SubsystemBase {
         return tags;
     }
 
-    public Pose2d getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
+    public static Pose2d getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
         Pose2d botPose = prevEstimatedRobotPose;
         if (result.hasTargets()) {
             var update = photonPoseEstimator.update(result);
@@ -67,7 +67,7 @@ public class Vision extends SubsystemBase {
     }
 
 
-    public double targetYaw(int targetNumber){
+    public static double targetYaw(int targetNumber){
         if (result.hasTargets()) {
             // At least one AprilTag was seen by the camera
             for (var target : result.getTargets()) {
@@ -81,7 +81,7 @@ public class Vision extends SubsystemBase {
     }
 
 
-    public double[] targetDistance(int targetNumber){
+    public static double[] targetDistance(int targetNumber){
         if (result.hasTargets()) {
             // At least one AprilTag was seen by the camera
             for (var target : result.getTargets()) {
@@ -98,7 +98,7 @@ public class Vision extends SubsystemBase {
     }
 
 
-    public Transform3d targetTransform(int targetNumber){
+    public static Transform3d targetTransform(int targetNumber){
         if (result.hasTargets()) {
             // At least one AprilTag was seen by the camera
             for (var target : result.getTargets()) {
@@ -110,7 +110,7 @@ public class Vision extends SubsystemBase {
         return new Transform3d();
     }
 
-    public PhotonTrackedTarget returnTag (int targetNumber){
+    public static PhotonTrackedTarget returnTag (int targetNumber){
         if (result.hasTargets()) {
             // At least one AprilTag was seen by the camera
             for (var target : result.getTargets()) {
