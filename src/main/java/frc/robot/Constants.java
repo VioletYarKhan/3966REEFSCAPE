@@ -113,10 +113,28 @@ public final class Constants {
     public static final PathConstraints constraints = new PathConstraints(
         3.0, 4.0,
         Units.degreesToRadians(540), Units.degreesToRadians(720));
+
+    public static final Transform3d leftBranchCoral = new Transform3d(0.381, 0.381, 0, new Rotation3d());
+    public static final Transform3d rightBranchCoral = new Transform3d(0.381, -0.381, 0, new Rotation3d());
   }
 
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
+  }
+
+  public static final class ElevatorConstants {
+    public static final double L1Height = 1;
+    public static final double L2Height = 2;
+    public static final double L3Height = 3;
+    public static final double L4Height = 4;
+    public static final double IntakeHeight = 0.5;
+  }
+
+  public static final class WristConstants {
+    public static final double L1Angle = 1;
+    public static final double L2_3Angle = 2;
+    public static final double L4Angle = 4;
+    public static final double IntakeAngle = 0.5;
   }
 
   public static class VisionConstants {
