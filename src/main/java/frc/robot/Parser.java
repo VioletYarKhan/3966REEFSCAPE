@@ -11,8 +11,7 @@ import com.pathplanner.lib.util.FileVersionException;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
-public enum Parser {
-    ;
+public class Parser {
     
     private static final SequentialCommandGroup defaultCommand = new SequentialCommandGroup();
     // (1/2S)-(1-6)(1-4)(L/R)-(1/2C)-(1-6)(1-4)(L/R)-(1/2C)-(1-6)(1-4)(L/R)
