@@ -10,19 +10,24 @@ import com.pathplanner.lib.util.FileVersionException;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.commands.ScoreCoral;
+import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.coralEffector;
+import frc.robot.subsystems.effectorWrist;
 
 public class Parser {
     
     private static final SequentialCommandGroup defaultCommand = new SequentialCommandGroup();
     // (1/2S)-(1-6)(1-4)(L/R)-(1/2C)-(1-6)(1-4)(L/R)-(1/2C)-(1-6)(1-4)(L/R)
     // (Start location)-(Side)(Level)(Pole)-(Coral station)-(Side)(Level)(Pole)-(Coral station)-(Side)(Level)(Pole)
-    public static SequentialCommandGroup parse(String input) {
+    public static SequentialCommandGroup parse(String input, DriveSubsystem drivetrain, coralEffector hand, effectorWrist wrist, Elevator elevator) {
         SequentialCommandGroup commands = new SequentialCommandGroup();
         String[] steps = input.split("-");
         try {
             for (int i = 0; i < 5; i += 2) {
                 commands.addCommands(pathFromCode(steps[i], steps[i + 1].substring(0, 1)));
-                commands.addCommands(new PutCoralCommand(steps[i + 1].split("")));
+                commands.addCommands(scoreCoral(steps[i + 1].split(""), drivetrain, hand, wrist, elevator));
                 if (i < 4) {
                     commands.addCommands(pathFromCode(steps[i + 1].substring(0, 1), steps[i + 2]));
                     commands.addCommands(new GetCoralCommand());
@@ -38,12 +43,9 @@ public class Parser {
         return AutoBuilder.followPath(PathPlannerPath.fromPathFile(start + "-" + end));
     }
 
-    // Placeholder
-    private static class PutCoralCommand extends Command {
-        public PutCoralCommand(int side, int level, boolean left) {}
-        public PutCoralCommand(String[] code) {
-            this(Integer.parseInt(code[0]), Integer.parseInt(code[1]), code[2].equalsIgnoreCase("L"));
-        }
+    private static ScoreCoral scoreCoral(String[] code, DriveSubsystem drivetrain, coralEffector hand, effectorWrist wrist, Elevator elevator) {
+        return new ScoreCoral(Integer.parseInt(code[1]), code[2].equalsIgnoreCase("L"), drivetrain, hand, wrist, elevator);
     }
+
     private static class GetCoralCommand extends Command {}
 }

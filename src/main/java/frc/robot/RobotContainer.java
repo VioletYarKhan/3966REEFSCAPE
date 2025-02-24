@@ -121,6 +121,6 @@ public class RobotContainer {
   private void configureButtonBindings() {}
 
   public Command getAutonomousCommand() {
-    return Parser.parse(SmartDashboard.getString("Auto Code", ""));
+    return Parser.parse(SmartDashboard.getString("Auto Code", ""), m_robotDrive, m_coralHand, m_wrist, m_elevator);
   }
 }
