@@ -254,22 +254,24 @@ public class DriveSubsystem extends SubsystemBase {
   public void periodic() {
     // Update pose estimator with the best visible target
     var pipelineResult = Vision.getResult();
-    var resultTimestamp = pipelineResult.getTimestampSeconds();
-    if (resultTimestamp != previousPipelineTimestamp && pipelineResult.hasTargets()) {
-      previousPipelineTimestamp = resultTimestamp;
-      var target = pipelineResult.getBestTarget();
-      var fiducialId = target.getFiducialId();
-      // Get the tag pose from field layout - consider that the layout will be null if it failed to load
-      Optional<Pose3d> tagPose = layout == null ? Optional.empty() : layout.getTagPose(fiducialId);
-      if (target.getPoseAmbiguity() <= .2 && fiducialId >= 0 && tagPose.isPresent()) {
-        var targetPose = tagPose.get();
-        Transform3d camToTarget = target.getBestCameraToTarget();
-        Pose3d camPose = targetPose.transformBy(camToTarget.inverse());
+    try{
+      var resultTimestamp = pipelineResult.getTimestampSeconds();
+      if (resultTimestamp != previousPipelineTimestamp && pipelineResult.hasTargets()) {
+        previousPipelineTimestamp = resultTimestamp;
+        var target = pipelineResult.getBestTarget();
+        var fiducialId = target.getFiducialId();
+        // Get the tag pose from field layout - consider that the layout will be null if it failed to load
+        Optional<Pose3d> tagPose = layout == null ? Optional.empty() : layout.getTagPose(fiducialId);
+        if (target.getPoseAmbiguity() <= .2 && fiducialId >= 0 && tagPose.isPresent()) {
+          var targetPose = tagPose.get();
+          Transform3d camToTarget = target.getBestCameraToTarget();
+          Pose3d camPose = targetPose.transformBy(camToTarget.inverse());
 
-        var visionMeasurement = camPose.transformBy(Constants.VisionConstants.kCamToRobot);
-        poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), resultTimestamp);
+          var visionMeasurement = camPose.transformBy(Constants.VisionConstants.kCamToRobot);
+          poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), resultTimestamp);
+        }
       }
-    }
+    } catch(NullPointerException e){}
     // Update pose estimator with drivetrain sensors
     poseEstimator.update(
       getRotation(),
