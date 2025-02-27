@@ -23,7 +23,9 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.coralEffector;
 import frc.robot.subsystems.effectorWrist;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -38,15 +40,16 @@ public class RobotContainer {
   public final effectorWrist m_wrist = new effectorWrist();
   private final coralEffector m_coralHand = new coralEffector();
 
-
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
+  CommandXboxController m_operatorController = new CommandXboxController(1);
 
     private SendableChooser<Command> autoChooser;
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    PositionCalculations.CreateGhostField();
     configureButtonBindings();
     // Configure default commands
     m_robotDrive.setDefaultCommand(
@@ -118,7 +121,9 @@ public class RobotContainer {
     SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 
-  private void configureButtonBindings() {}
+  private void configureButtonBindings() {
+    m_operatorController.a().onTrue(new InstantCommand(()->m_robotDrive.stop(), m_robotDrive));
+  }
 
   public Command getAutonomousCommand() {
     return Parser.parse(SmartDashboard.getString("Auto Code", ""));

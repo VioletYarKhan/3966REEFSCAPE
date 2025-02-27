@@ -10,16 +10,15 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
 
-public class Vision extends SubsystemBase {
+public class Vision {
     private static PhotonCamera camera = new PhotonCamera(VisionConstants.kCameraName);
     private static PhotonPipelineResult result;
     private static PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(VisionConstants.kTagLayout, PoseStrategy.CLOSEST_TO_REFERENCE_POSE, VisionConstants.kRobotToCam);
     private static int[] tags;
 
-    public void periodic() {
+    public static void periodic() {
         result = camera.getLatestResult();
         if (result.hasTargets()){SmartDashboard.putNumber("Best Tag Seen", result.getBestTarget().getFiducialId());}
         else{SmartDashboard.putNumber("Best Tag Seen", 0);}
