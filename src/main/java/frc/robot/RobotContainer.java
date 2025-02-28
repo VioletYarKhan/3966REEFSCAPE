@@ -37,6 +37,7 @@ public class RobotContainer {
   // The robot's subsystems
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
   public final Elevator m_elevator = new Elevator();
+  public final Vision m_vision = new Vision();
   public final effectorWrist m_wrist = new effectorWrist();
   private final coralEffector m_coralHand = new coralEffector();
 
@@ -80,16 +81,19 @@ public class RobotContainer {
       new RunCommand(
         ()-> {
           SmartDashboard.putNumber("Elevator Position", m_elevator.getPosition());
-          if (m_driverController.getPOV() == 0){
-            m_elevator.set(0.2);
-          } else if (m_driverController.getPOV() == 180){
+          if (m_elevator.getPosition() > 180){
             m_elevator.set(-0.2);
-          } else{
-            m_elevator.set(0);
+          } else if (m_driverController.getXButton()){
+            m_elevator.setPosition(1);
+          } else if (m_driverController.getBButton()){
+            m_elevator.setPosition(175);
+          } else {
+            m_elevator.setPosition(m_elevator.getPosition());
+            SmartDashboard.putString("Elevator", "stop");
           }
         }, m_elevator)
     );
-
+    
     m_wrist.setDefaultCommand(
       new RunCommand(
         ()-> {
@@ -99,7 +103,7 @@ public class RobotContainer {
           } else if (m_driverController.getPOV() == 270){
             m_wrist.set(-0.2);
           } else{
-            m_wrist.set(0);
+            m_wrist.setPosition(m_wrist.getPosition());
           }
         }, m_wrist)
     );
@@ -122,7 +126,11 @@ public class RobotContainer {
   }
 
   private void configureButtonBindings() {
-    m_operatorController.a().onTrue(new InstantCommand(()->m_robotDrive.stop(), m_robotDrive));
+    m_operatorController.leftBumper().onTrue(new InstantCommand(()->m_robotDrive.stop(), m_robotDrive));
+    m_operatorController.povUp().whileTrue(new InstantCommand(()->m_elevator.set(0.3), m_elevator)).onFalse(new InstantCommand(()->m_elevator.set(0), m_elevator));
+    m_operatorController.povDown().whileTrue(new InstantCommand(()->m_elevator.set(-0.3), m_elevator)).onFalse(new InstantCommand(()->m_elevator.set(0), m_elevator));
+    m_operatorController.povRight().whileTrue(new InstantCommand(()->m_wrist.set(0.3), m_wrist)).onFalse(new InstantCommand(()->m_wrist.set(0), m_wrist));
+    m_operatorController.povLeft().whileTrue(new InstantCommand(()->m_wrist.set(-0.3), m_wrist)).onFalse(new InstantCommand(()->m_wrist.set(0), m_wrist));
   }
 
   public Command getAutonomousCommand() {
