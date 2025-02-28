@@ -14,7 +14,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class coralFunnel extends SubsystemBase {
-    SparkMax funnelMotor = new SparkMax(12, MotorType.kBrushless);
+    SparkMax funnelMotor = new SparkMax(13, MotorType.kBrushless);
     SparkMaxConfig funnelConfig = new SparkMaxConfig();
     RelativeEncoder funnelRelativeEncoder = funnelMotor.getAlternateEncoder();
     SparkClosedLoopController pid;
