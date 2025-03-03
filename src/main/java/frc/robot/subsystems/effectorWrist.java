@@ -14,6 +14,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkBase.ResetMode;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Configs;
 
 public class effectorWrist extends SubsystemBase {
     SparkMax wristMotor = new SparkMax(11, MotorType.kBrushless);
@@ -25,9 +26,7 @@ public class effectorWrist extends SubsystemBase {
     ControlType currentControlType;
 
     public effectorWrist() {
-        wristConfig.idleMode(IdleMode.kBrake).inverted(true).openLoopRampRate(0).closedLoopRampRate(0).closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.05, 0, 0).minOutput(-0.4).maxOutput(0.6);
-        wristConfig.encoder.positionConversionFactor(1).velocityConversionFactor(1);
-        wristMotor.configure(wristConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        wristMotor.configure(Configs.Wrist.wristConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
         pid = wristMotor.getClosedLoopController();
 
         targetReference = 0;

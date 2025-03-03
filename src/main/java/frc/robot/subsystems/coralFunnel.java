@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -12,24 +13,25 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Configs;
 
 public class coralFunnel extends SubsystemBase {
     SparkMax funnelMotor = new SparkMax(13, MotorType.kBrushless);
-    SparkMaxConfig funnelConfig = new SparkMaxConfig();
-    RelativeEncoder funnelRelativeEncoder = funnelMotor.getAlternateEncoder();
+    RelativeEncoder funnelRelativeEncoder = funnelMotor.getEncoder();
+    AbsoluteEncoder funnelAbsoluteEncoder = funnelMotor.getAbsoluteEncoder();
     SparkClosedLoopController pid;
 
     double targetReference;
     ControlType currentControlType;
 
     public coralFunnel() {
-        funnelConfig.idleMode(IdleMode.kBrake).inverted(false).openLoopRampRate(0).closedLoopRampRate(0).closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.05, 0, 0).minOutput(-0.2).maxOutput(1);
-        funnelConfig.encoder.positionConversionFactor(1).velocityConversionFactor(1);
-        funnelMotor.configure(funnelConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+
+        funnelMotor.configure(Configs.Funnel.funnelConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         pid = funnelMotor.getClosedLoopController();
 
         targetReference = 0;
         currentControlType = ControlType.kDutyCycle;
+        funnelRelativeEncoder.setPosition(funnelAbsoluteEncoder.getPosition());
     }
 
     public void set(double speed) {

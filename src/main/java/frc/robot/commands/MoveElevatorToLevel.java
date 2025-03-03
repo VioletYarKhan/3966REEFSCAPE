@@ -11,10 +11,7 @@ public class MoveElevatorToLevel extends Command {
     public Elevator elevator;
     public effectorWrist wrist;
 
-    public MoveElevatorToLevel(
-        int level,
-        effectorWrist wrist,
-        Elevator elevator){
+    public MoveElevatorToLevel(int level, effectorWrist wrist, Elevator elevator){
 
         this.level = level;
         this.wrist = wrist;

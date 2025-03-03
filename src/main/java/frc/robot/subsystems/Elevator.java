@@ -14,12 +14,11 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkBase.ResetMode;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Configs;
 
 public class Elevator extends SubsystemBase {
     SparkMax elevatorL = new SparkMax(10, MotorType.kBrushless);
     SparkMax elevatorR = new SparkMax(9, MotorType.kBrushless);
-    SparkMaxConfig configL = new SparkMaxConfig();
-    SparkMaxConfig configR = new SparkMaxConfig();
     RelativeEncoder encoderL = elevatorL.getEncoder();
     RelativeEncoder encoderR = elevatorL.getEncoder();
     SparkClosedLoopController pid;
@@ -28,11 +27,8 @@ public class Elevator extends SubsystemBase {
     ControlType currentControlType;
 
     public Elevator() {
-        configL.idleMode(IdleMode.kBrake).inverted(true).openLoopRampRate(0).closedLoopRampRate(0).closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.05, 0, 0).minOutput(-0.4).maxOutput(0.6);
-        configL.encoder.positionConversionFactor(1).velocityConversionFactor(1);
-        configR.follow(10, true).idleMode(IdleMode.kBrake);
-        elevatorL.configure(configL, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-        elevatorR.configure(configR, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        elevatorL.configure(Configs.Elevator.elevatorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        elevatorR.configure(Configs.Elevator.elevatorFollowerConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
         pid = elevatorL.getClosedLoopController();
 
         targetReference = 0;
