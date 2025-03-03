@@ -7,25 +7,24 @@ import frc.robot.Vision;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.coralEffector;
-import frc.robot.subsystems.effectorWrist;
+import frc.robot.subsystems.CoralEffector;
+import frc.robot.subsystems.EffectorWrist;
 
 public class ScoreCoral extends SequentialCommandGroup{
     public int level;
     public boolean left;
     public DriveSubsystem drivetrain;
     public Elevator elevator;
-    public coralEffector coralHand;
-    public effectorWrist wrist;
-    public SequentialCommandGroup scoreCoral;
+    public CoralEffector coralHand;
+    public EffectorWrist wrist;
 
 
     public ScoreCoral(
         int level,
         boolean left,
         DriveSubsystem drivetrain,
-        coralEffector hand,
-        effectorWrist wrist,
+        CoralEffector hand,
+        EffectorWrist wrist,
         Elevator elevator){
 
         super(

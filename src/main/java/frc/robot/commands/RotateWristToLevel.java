@@ -2,16 +2,16 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.WristConstants;
-import frc.robot.subsystems.effectorWrist;
+import frc.robot.subsystems.EffectorWrist;
 
 public class RotateWristToLevel extends Command {
     public int level;
-    public effectorWrist wrist;
+    public EffectorWrist wrist;
 
 
     public RotateWristToLevel(
         int level,
-        effectorWrist wrist){
+        EffectorWrist wrist){
 
         this.level = level;
         this.wrist = wrist;
@@ -21,7 +21,9 @@ public class RotateWristToLevel extends Command {
 
     @Override
     public void execute(){
-        if(level == 1){
+        if(level == 0){
+            wrist.setPosition(WristConstants.IntakeAngle);
+        } else if(level == 1){
             wrist.setPosition(WristConstants.L1Angle);
         } else if(level == 2 || level == 3){
             wrist.setPosition(WristConstants.L2_3Angle);

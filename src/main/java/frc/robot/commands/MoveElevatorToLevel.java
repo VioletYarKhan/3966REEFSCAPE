@@ -4,16 +4,16 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.WristConstants;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.effectorWrist;
+import frc.robot.subsystems.EffectorWrist;
 
 public class MoveElevatorToLevel extends Command {
     public int level;
     public Elevator elevator;
-    public effectorWrist wrist;
+    public EffectorWrist wrist;
 
     public MoveElevatorToLevel(
         int level,
-        effectorWrist wrist,
+        EffectorWrist wrist,
         Elevator elevator){
 
         this.level = level;

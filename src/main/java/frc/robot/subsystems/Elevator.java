@@ -28,7 +28,7 @@ public class Elevator extends SubsystemBase {
     ControlType currentControlType;
 
     public Elevator() {
-        configL.idleMode(IdleMode.kBrake).inverted(true).openLoopRampRate(0).closedLoopRampRate(0).closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.05, 0, 0).minOutput(-0.4).maxOutput(0.6);
+        configL.idleMode(IdleMode.kBrake).inverted(true).openLoopRampRate(0).closedLoopRampRate(0).closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.05, 0, 0).minOutput(-0.4).maxOutput(0.4);
         configL.encoder.positionConversionFactor(1).velocityConversionFactor(1);
         configR.follow(10, true).idleMode(IdleMode.kBrake);
         elevatorL.configure(configL, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
