@@ -22,6 +22,8 @@ public class RotateWristToLevel extends Command {
     @Override
     public void execute(){
         if(level == 1){
+            wrist.setPosition(WristConstants.IntakeAngle);
+        } else if(level == 1){
             wrist.setPosition(WristConstants.L1Angle);
         } else if(level == 2 || level == 3){
             wrist.setPosition(WristConstants.L2_3Angle);

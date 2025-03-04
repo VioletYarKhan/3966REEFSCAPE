@@ -6,21 +6,25 @@ package frc.robot;
 
 
 
-import frc.GryphonLib.MovementCalculations;
 import frc.GryphonLib.PositionCalculations;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.Constants.WristConstants;
+import frc.robot.commands.MoveTowardsTagGoal;
+import frc.robot.commands.RotateFunnel;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.coralEffector;
+import frc.robot.subsystems.coralFunnel;
 import frc.robot.subsystems.effectorWrist;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -40,6 +44,7 @@ public class RobotContainer {
   public final Vision m_vision = new Vision();
   public final effectorWrist m_wrist = new effectorWrist();
   private final coralEffector m_coralHand = new coralEffector();
+  private final coralFunnel m_funnel = new coralFunnel();
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -62,19 +67,15 @@ public class RobotContainer {
                 double strafe = m_driverController.getLeftX();
                 double turn = m_driverController.getRightX();
 
-                double targetYaw = Vision.targetYaw(7);
-                if (m_driverController.getAButton()){
-                  Pose2d goalPose = PositionCalculations.getGoalPoseFromTag(Vision.getCamera(), m_robotDrive.getCurrentPose(), new Transform3d(), Vision.getBestTag());
-                  m_robotDrive.PathToPose(goalPose);
+                if (m_driverController.getLeftBumperButton()){
+                  // Pose2d goalPose = PositionCalculations.getGoalPoseFromTag(Vision.getCamera(), m_robotDrive.getCurrentPose(), new Transform3d(), Vision.getBestTag());
+                  // m_robotDrive.PathToPose(goalPose);
+                  new MoveTowardsTagGoal(Vision.targetTransform(7), new double[] {0.2, 0.2, 0.2}, m_robotDrive, new Transform2d(0.5, 0.5, new Rotation2d())).schedule();
                 } else{
-                  if (m_driverController.getStartButton()){
-                    turn = MovementCalculations.getTurnRate(targetYaw, 0.5 * 1);
-                  }
-
-                    m_robotDrive.drive(
-                    -MathUtil.applyDeadband(forward, OIConstants.kDriveDeadband),
-                    -MathUtil.applyDeadband(strafe, OIConstants.kDriveDeadband),
-                    -MathUtil.applyDeadband(turn, OIConstants.kDriveDeadband), true);}},
+                  m_robotDrive.drive(
+                  -MathUtil.applyDeadband(forward, OIConstants.kDriveDeadband),
+                  -MathUtil.applyDeadband(strafe, OIConstants.kDriveDeadband),
+                  -MathUtil.applyDeadband(turn, OIConstants.kDriveDeadband), true);}},
           m_robotDrive));
     
     m_elevator.setDefaultCommand(
@@ -83,13 +84,14 @@ public class RobotContainer {
           SmartDashboard.putNumber("Elevator Position", m_elevator.getPosition());
           if (m_elevator.getPosition() > 180){
             m_elevator.set(-0.2);
-          } else if (m_driverController.getXButton()){
-            m_elevator.setPosition(1);
-          } else if (m_driverController.getBButton()){
-            m_elevator.setPosition(175);
-          } else {
-            m_elevator.setPosition(m_elevator.getPosition());
-            SmartDashboard.putString("Elevator", "stop");
+          } else if (m_driverController.getPOV() == 180){
+            m_elevator.setPosition(ElevatorConstants.IntakeHeight);
+          } else if (m_driverController.getPOV() == 90){
+            m_elevator.setPosition(ElevatorConstants.L1Height);
+          } else if (m_driverController.getPOV() == 270){
+            m_elevator.setPosition(ElevatorConstants.L2Height);
+          } else if (m_driverController.getPOV() == 0){
+            m_elevator.setPosition(ElevatorConstants.L4Height);
           }
         }, m_elevator)
     );
@@ -98,12 +100,14 @@ public class RobotContainer {
       new RunCommand(
         ()-> {
           SmartDashboard.putNumber("Wrist Position", m_wrist.getPosition());
-          if (m_driverController.getPOV() == 90){
-            m_wrist.set(0.2);
-          } else if (m_driverController.getPOV() == 270){
-            m_wrist.set(-0.2);
-          } else{
-            m_wrist.setPosition(m_wrist.getPosition());
+          if (m_driverController.getAButton()){
+            m_wrist.setPosition(WristConstants.IntakeAngle);
+          } else if (m_driverController.getXButton()){
+              m_wrist.setPosition(WristConstants.L1Angle);
+          } else if (m_driverController.getBButton()){
+            m_wrist.setPosition(WristConstants.L2_3Angle);
+          } else if (m_driverController.getYButton()){
+            m_wrist.setPosition(WristConstants.L4Angle);
           }
         }, m_wrist)
     );
@@ -116,22 +120,45 @@ public class RobotContainer {
           } else if (m_driverController.getLeftTriggerAxis() > 0.5){
             m_coralHand.intake();
           } else{
-            m_coralHand.stop();
+            if(m_wrist.getPosition() > WristConstants.L4Angle){
+              m_coralHand.intake();
+            } else {
+              m_coralHand.stop();
+            }
+             
           }
         }, m_coralHand)
     );
+
+
+    m_funnel.setDefaultCommand(
+      new RunCommand(
+        ()-> {
+          SmartDashboard.putNumber("Funnel Position", m_funnel.getPosition());
+        }, m_funnel)
+    );
+
 
   autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 
   private void configureButtonBindings() {
-    m_operatorController.leftBumper().onTrue(new InstantCommand(()->m_robotDrive.stop(), m_robotDrive));
-    m_operatorController.povUp().whileTrue(new InstantCommand(()->m_elevator.set(0.3), m_elevator)).onFalse(new InstantCommand(()->m_elevator.set(0), m_elevator));
-    m_operatorController.povDown().whileTrue(new InstantCommand(()->m_elevator.set(-0.3), m_elevator)).onFalse(new InstantCommand(()->m_elevator.set(0), m_elevator));
-    m_operatorController.povRight().whileTrue(new InstantCommand(()->m_wrist.set(0.3), m_wrist)).onFalse(new InstantCommand(()->m_wrist.set(0), m_wrist));
-    m_operatorController.povLeft().whileTrue(new InstantCommand(()->m_wrist.set(-0.3), m_wrist)).onFalse(new InstantCommand(()->m_wrist.set(0), m_wrist));
+    m_operatorController.start().onTrue(new InstantCommand(()->m_robotDrive.zeroHeading(), m_robotDrive));
+    m_operatorController.povUp().whileTrue(new InstantCommand(()->m_elevator.set(0.3), m_elevator)).onFalse(new InstantCommand(()->m_elevator.setPosition(m_elevator.getPosition()), m_elevator));
+    m_operatorController.povDown().whileTrue(new InstantCommand(()->m_elevator.set(-0.3), m_elevator)).onFalse(new InstantCommand(()->m_elevator.setPosition(m_elevator.getPosition()), m_elevator));
+    m_operatorController.leftBumper().whileTrue(new InstantCommand(()->m_wrist.set(-0.15), m_wrist)).onFalse(new InstantCommand(()->m_wrist.setPosition(m_wrist.getPosition()), m_wrist));
+    m_operatorController.rightBumper().whileTrue(new InstantCommand(()->m_wrist.set(0.15), m_wrist)).onFalse(new InstantCommand(()->m_wrist.setPosition(m_wrist.getPosition()), m_wrist));
+    m_operatorController.rightTrigger().whileTrue(new InstantCommand(()->m_coralHand.outtake(), m_coralHand)).onFalse(new InstantCommand(()->m_coralHand.stop()));
+    m_operatorController.leftTrigger().whileTrue(new InstantCommand(()->m_coralHand.intake(), m_coralHand)).onFalse(new InstantCommand(()->m_coralHand.stop()));
+    m_operatorController.povLeft().whileTrue(new InstantCommand(()->m_funnel.set(0.3), m_funnel)).onFalse(new InstantCommand(()->m_funnel.setPosition(m_funnel.getPosition()), m_funnel));
+    m_operatorController.povRight().whileTrue(new InstantCommand(()->m_funnel.set(-0.3), m_funnel)).onFalse(new InstantCommand(()->m_funnel.setPosition(m_funnel.getPosition()), m_funnel));
+    m_operatorController.x().onTrue(new InstantCommand(()->m_wrist.setEncoderPosition(0), m_wrist));
+    m_operatorController.a().onTrue(new InstantCommand(()->m_robotDrive.stop(), m_robotDrive));
+    m_operatorController.b().onTrue(new RotateFunnel(m_funnel, 0));
+    m_operatorController.y().onTrue(new RotateFunnel(m_funnel, 0.32));
   }
+  
 
   public Command getAutonomousCommand() {
     return Parser.parse(SmartDashboard.getString("Auto Code", ""));

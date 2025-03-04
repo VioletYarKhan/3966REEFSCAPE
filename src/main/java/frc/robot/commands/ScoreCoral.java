@@ -17,7 +17,6 @@ public class ScoreCoral extends SequentialCommandGroup{
     public Elevator elevator;
     public coralEffector coralHand;
     public effectorWrist wrist;
-    public SequentialCommandGroup scoreCoral;
 
 
     public ScoreCoral(

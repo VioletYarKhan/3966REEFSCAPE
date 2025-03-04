@@ -8,16 +8,13 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 
 public class coralFunnel extends SubsystemBase {
-    SparkMax funnelMotor = new SparkMax(13, MotorType.kBrushless);
-    RelativeEncoder funnelRelativeEncoder = funnelMotor.getEncoder();
+    SparkMax funnelMotor = new SparkMax(13, MotorType.kBrushed);
     AbsoluteEncoder funnelAbsoluteEncoder = funnelMotor.getAbsoluteEncoder();
     SparkClosedLoopController pid;
 
@@ -31,7 +28,6 @@ public class coralFunnel extends SubsystemBase {
 
         targetReference = 0;
         currentControlType = ControlType.kDutyCycle;
-        funnelRelativeEncoder.setPosition(funnelAbsoluteEncoder.getPosition());
     }
 
     public void set(double speed) {
@@ -47,6 +43,7 @@ public class coralFunnel extends SubsystemBase {
 
     public void setPosition(double position) {
         pid.setReference(position, ControlType.kPosition);
+        SmartDashboard.putNumber("Funnel Requested Position", position);
         targetReference = position;
         currentControlType = ControlType.kPosition;
     }
@@ -56,16 +53,12 @@ public class coralFunnel extends SubsystemBase {
         currentControlType = ControlType.kVoltage;
     }
 
-    public void setEncoderPosition(double position) {
-        funnelRelativeEncoder.setPosition(position);
-    }
-
     public double getVelocity() {
-        return funnelRelativeEncoder.getVelocity();
+        return funnelAbsoluteEncoder.getVelocity();
     }
 
     public double getPosition() {
-        return funnelRelativeEncoder.getPosition();
+        return funnelAbsoluteEncoder.getPosition();
     }
 
     public boolean atTarget(double threshold) {

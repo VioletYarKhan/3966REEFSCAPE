@@ -127,16 +127,16 @@ public final class Constants {
 
   public static final class ElevatorConstants {
     public static final double L1Height = 1;
-    public static final double L2Height = 2;
+    public static final double L2Height = 65;
     public static final double L3Height = 3;
     public static final double L4Height = 4;
-    public static final double IntakeHeight = 0.5;
+    public static final double IntakeHeight = 0;
   }
 
   public static final class WristConstants {
     public static final double L1Angle = 1;
-    public static final double L2_3Angle = 2;
-    public static final double L4Angle = 4;
+    public static final double L2_3Angle = 5;
+    public static final double L4Angle = 2.7 ;
     public static final double IntakeAngle = 0.5;
   }
 
@@ -144,9 +144,9 @@ public final class Constants {
     public static final String kCameraName = "gccamera";
     // Cam mounted facing forward, half a meter forward of center, half a meter up from center,
     // pitched upward.
-    private static final double camPitch = Units.degreesToRadians(20.0);
+    private static final double camPitch = Units.degreesToRadians(-30);
     public static final Transform3d kRobotToCam =
-            new Transform3d(new Translation3d(-0.46, -0.05, 0.42), new Rotation3d(0, -camPitch, 180));
+            new Transform3d(new Translation3d(-Units.inchesToMeters(13), 0, Units.inchesToMeters(6)), new Rotation3d(0, camPitch, 0));
     public static final Transform3d kCamToRobot = kRobotToCam.inverse();
 
     // The layout of the AprilTags on the field

@@ -30,7 +30,11 @@ public class Vision extends SubsystemBase {
     }
 
     public static int getBestTag(){
+        try{
         return result.getBestTarget().fiducialId;
+        } catch (NullPointerException e){
+            return 0;
+        }
     }
 
     public static PhotonCamera getCamera(){
@@ -78,23 +82,6 @@ public class Vision extends SubsystemBase {
             }
         }
         return 0;
-    }
-
-
-    public static double[] targetDistance(int targetNumber){
-        if (result.hasTargets()) {
-            // At least one AprilTag was seen by the camera
-            for (var target : result.getTargets()) {
-                if (target.getFiducialId() == targetNumber) {
-                    // Found Tag, record its information
-                    double targetRangeX = target.getBestCameraToTarget().getX();
-                    double targetRangeY = target.getBestCameraToTarget().getY();
-                    double targetRangeOmega = target.getBestCameraToTarget().getRotation().getAngle();
-                    return new double[]{targetRangeX, targetRangeY, targetRangeOmega};
-                }
-            }
-        }
-        return new double[]{0, 0, 0};
     }
 
 
