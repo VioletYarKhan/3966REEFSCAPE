@@ -11,21 +11,18 @@ import frc.GryphonLib.PositionCalculations;
 import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.WristConstants;
-import frc.robot.commands.MoveTowardsTagGoal;
 import frc.robot.commands.RotateFunnel;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.coralEffector;
-import frc.robot.subsystems.coralFunnel;
-import frc.robot.subsystems.effectorWrist;
+import frc.robot.subsystems.CoralEffector;
+import frc.robot.subsystems.CoralFunnel;
+import frc.robot.subsystems.EffectorWrist;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -42,9 +39,9 @@ public class RobotContainer {
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
   public final Elevator m_elevator = new Elevator();
   public final Vision m_vision = new Vision();
-  public final effectorWrist m_wrist = new effectorWrist();
-  private final coralEffector m_coralHand = new coralEffector();
-  private final coralFunnel m_funnel = new coralFunnel();
+  public final EffectorWrist m_wrist = new EffectorWrist();
+  private final CoralEffector m_coralHand = new CoralEffector();
+  private final CoralFunnel m_funnel = new CoralFunnel();
 
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
@@ -70,7 +67,7 @@ public class RobotContainer {
                 if (m_driverController.getLeftBumperButton()){
                   // Pose2d goalPose = PositionCalculations.getGoalPoseFromTag(Vision.getCamera(), m_robotDrive.getCurrentPose(), new Transform3d(), Vision.getBestTag());
                   // m_robotDrive.PathToPose(goalPose);
-                  new MoveTowardsTagGoal(Vision.targetTransform(7), new double[] {0.2, 0.2, 0.2}, m_robotDrive, new Transform2d(0.5, 0.5, new Rotation2d())).schedule();
+                  // new MoveTowardsTagGoal(Vision.targetTransform(7), new double[] {0.2, 0.2, 0.2}, m_robotDrive, new Transform2d(0.5, 0.5, new Rotation2d())).schedule();
                 } else{
                   m_robotDrive.drive(
                   -MathUtil.applyDeadband(forward, OIConstants.kDriveDeadband),
@@ -135,6 +132,11 @@ public class RobotContainer {
       new RunCommand(
         ()-> {
           SmartDashboard.putNumber("Funnel Position", m_funnel.getPosition());
+          if (m_driverController.getLeftBumperButtonPressed()) {
+            new RotateFunnel(m_funnel, 0).schedule();
+          } else if (m_driverController.getRightBumperButtonPressed()) {
+            new RotateFunnel(m_funnel, 0.32).schedule();
+          }
         }, m_funnel)
     );
 
@@ -155,8 +157,8 @@ public class RobotContainer {
     m_operatorController.povRight().whileTrue(new InstantCommand(()->m_funnel.set(-0.3), m_funnel)).onFalse(new InstantCommand(()->m_funnel.setPosition(m_funnel.getPosition()), m_funnel));
     m_operatorController.x().onTrue(new InstantCommand(()->m_wrist.setEncoderPosition(0), m_wrist));
     m_operatorController.a().onTrue(new InstantCommand(()->m_robotDrive.stop(), m_robotDrive));
-    m_operatorController.b().onTrue(new RotateFunnel(m_funnel, 0));
-    m_operatorController.y().onTrue(new RotateFunnel(m_funnel, 0.32));
+    m_operatorController.b().onTrue(new InstantCommand(() -> m_elevator.setEncoderPosition(0)));
+    m_operatorController.y().onTrue(new InstantCommand(() -> m_robotDrive.setX()));
   }
   
 

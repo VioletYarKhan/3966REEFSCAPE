@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.AbsoluteEncoder;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -13,7 +12,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 
-public class coralFunnel extends SubsystemBase {
+public class CoralFunnel extends SubsystemBase {
     SparkMax funnelMotor = new SparkMax(13, MotorType.kBrushed);
     AbsoluteEncoder funnelAbsoluteEncoder = funnelMotor.getAbsoluteEncoder();
     SparkClosedLoopController pid;
@@ -21,7 +20,7 @@ public class coralFunnel extends SubsystemBase {
     double targetReference;
     ControlType currentControlType;
 
-    public coralFunnel() {
+    public CoralFunnel() {
 
         funnelMotor.configure(Configs.Funnel.funnelConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         pid = funnelMotor.getClosedLoopController();

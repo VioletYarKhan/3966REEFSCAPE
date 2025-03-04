@@ -1,30 +1,20 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.coralFunnel;
+import frc.robot.subsystems.CoralFunnel;
 
 public class RotateFunnel extends Command {
-    private final coralFunnel m_funnel;
-    private boolean up;
-
-    public RotateFunnel(coralFunnel funnel, double setpoint){
+    private final CoralFunnel m_funnel;
+    private final double setpoint;
+    public RotateFunnel(CoralFunnel funnel, double setpoint){
         this.m_funnel = funnel;
-
+        this.setpoint = setpoint;
         addRequirements(m_funnel);
     }
 
     @Override
-    public void initialize() {
-        if (m_funnel.getPosition() < 0.005 || m_funnel.getPosition() > 0.995){
-            up = true;
-        } else {
-            up = false;
-        }
-    }
-
-    @Override
     public void execute() {
-        if(up){
+        if(m_funnel.getPosition() > setpoint){
             m_funnel.set(-0.2);
         } else {
             m_funnel.set(0.2);
@@ -33,11 +23,7 @@ public class RotateFunnel extends Command {
 
     @Override
     public boolean isFinished() {
-        if (up){
-            return (m_funnel.getPosition() < 0.005 || m_funnel.getPosition() > 0.995);
-        } else {
-            return (m_funnel.getPosition() < 0.325 || m_funnel.getPosition() > 0.315);
-        }
+        return (Math.abs(m_funnel.getPosition() - setpoint) < 0.005);
     }
 
     @Override

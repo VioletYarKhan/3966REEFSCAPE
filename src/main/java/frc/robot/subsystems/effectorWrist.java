@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 
-public class effectorWrist extends SubsystemBase {
+public class EffectorWrist extends SubsystemBase {
     SparkMax wristMotor = new SparkMax(11, MotorType.kBrushless);
     SparkMaxConfig wristConfig = new SparkMaxConfig();
     RelativeEncoder wristEncoder = wristMotor.getEncoder();
@@ -24,7 +24,7 @@ public class effectorWrist extends SubsystemBase {
     double targetReference;
     ControlType currentControlType;
 
-    public effectorWrist() {
+    public EffectorWrist() {
         wristMotor.configure(Configs.Wrist.wristConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
         pid = wristMotor.getClosedLoopController();
 

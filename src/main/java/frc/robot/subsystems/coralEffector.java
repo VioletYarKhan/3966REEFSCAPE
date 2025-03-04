@@ -4,7 +4,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class coralEffector extends SubsystemBase {
+public class CoralEffector extends SubsystemBase {
     TalonFX effectorWheel = new TalonFX(12);
 
     public void outtake(){

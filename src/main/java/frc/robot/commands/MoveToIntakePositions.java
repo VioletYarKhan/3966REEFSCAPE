@@ -4,18 +4,18 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.coralEffector;
-import frc.robot.subsystems.effectorWrist;
+import frc.robot.subsystems.CoralEffector;
+import frc.robot.subsystems.EffectorWrist;
 
 public class MoveToIntakePositions extends SequentialCommandGroup {
     public Elevator elevator;
-    public coralEffector coralHand;
-    public effectorWrist wrist;
+    public CoralEffector coralHand;
+    public EffectorWrist wrist;
 
 
     public MoveToIntakePositions(
-        coralEffector hand,
-        effectorWrist wrist,
+        CoralEffector hand,
+        EffectorWrist wrist,
         Elevator elevator){
 
         super(
