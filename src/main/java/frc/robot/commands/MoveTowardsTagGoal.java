@@ -16,17 +16,20 @@ public class MoveTowardsTagGoal extends Command {
   private final double[] thresholds;
   private final DriveSubsystem driveSubsystem;
   private final Transform2d distancesFromTarget;
+  private final boolean rotateTowards;
 
   public MoveTowardsTagGoal(
         Transform3d distances, 
         double[] thresholds,
         DriveSubsystem driveSubsystem,
-        Transform2d distancesFromTarget
+        Transform2d distancesFromTarget,
+        boolean rotateTowards
         ) {
     this.distances = distances;
     this.thresholds = thresholds;
     this.driveSubsystem = driveSubsystem;
     this.distancesFromTarget = distancesFromTarget;
+    this.rotateTowards = rotateTowards;
     
   }
   @Override
@@ -36,13 +39,13 @@ public class MoveTowardsTagGoal extends Command {
       Transform3d camToTarget = distances;
       Transform3d robotToTarget = camToTarget.plus(VisionConstants.kRobotToCam);
       double omegaChange = 0;
-      
-      if (Units.radiansToDegrees(distances.getRotation().getZ()) < 0){
-        omegaChange =  Units.radiansToDegrees(Math.PI - Math.abs(distances.getRotation().getZ()));
-      } else {
-        omegaChange = -(180 - Math.abs(Units.radiansToDegrees(distances.getRotation().getZ())));
+      if (rotateTowards){
+        if (Units.radiansToDegrees(distances.getRotation().getZ()) < 0){
+          omegaChange =  Units.radiansToDegrees(Math.PI - Math.abs(distances.getRotation().getZ()));
+        } else {
+          omegaChange = -(180 - Math.abs(Units.radiansToDegrees(distances.getRotation().getZ())));
+        }
       }
-      
 
       double xSpeed = MovementCalculations.getInRangeRate(robotToTarget.getX(), distancesFromTarget.getX(), 0.5);
       double ySpeed = MovementCalculations.getInRangeRate(robotToTarget.getY(), distancesFromTarget.getY(), 0.5);
@@ -66,6 +69,11 @@ public class MoveTowardsTagGoal extends Command {
 
   @Override
   public boolean isFinished(){
-    return (Math.abs(distances.getX()) < thresholds[0] && Math.abs(distances.getY()) < thresholds[1] && Math.abs(distances.getRotation().getZ()) < thresholds[2]);
+    if (rotateTowards){
+      return (Math.abs(distances.getX()) < thresholds[0] && Math.abs(distances.getY()) < thresholds[1] && Math.abs(distances.getRotation().getZ()) < thresholds[2]);
+    } else {
+      return (Math.abs(distances.getX()) < thresholds[0] && Math.abs(distances.getY()) < thresholds[1]);
+    }
+    
   }
 }

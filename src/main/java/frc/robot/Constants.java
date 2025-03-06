@@ -12,7 +12,9 @@ import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -163,7 +165,9 @@ public final class Constants {
     public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
     public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
 
-    public static final ArrayList<Integer> redSideReef = new ArrayList<Integer>(Arrays.asList(6, 7, 8, 9, 10, 11));
-    public static final ArrayList<Integer> blueSideReef = new ArrayList<Integer>(Arrays.asList(17, 18, 19, 20, 21, 22));
+
+    public static final Transform2d leftBranch = new Transform2d(0.5, 0.3, new Rotation2d());
+    public static final Transform2d rightBranch = new Transform2d(0.5, -0.3, new Rotation2d());
+    public static final Transform2d middleReef = new Transform2d(0.5, 0, new Rotation2d());
   }
 }

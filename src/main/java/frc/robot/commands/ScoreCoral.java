@@ -21,14 +21,11 @@ public class ScoreCoral extends SequentialCommandGroup{
 
     public ScoreCoral(
         int level,
-        boolean left,
-        DriveSubsystem drivetrain,
         CoralEffector hand,
         EffectorWrist wrist,
         Elevator elevator){
 
         super(
-            drivetrain.PathToPose(PositionCalculations.getGoalPoseFromTag(Vision.getCamera(), drivetrain.getCurrentPose(), left ? AutoConstants.leftBranchCoral : AutoConstants.rightBranchCoral, Vision.getBestTag())),
             new RotateWristToLevel(level, wrist),
             new MoveElevatorToLevel(level, elevator),
             new InstantCommand(()-> hand.outtake(), hand).withTimeout(0.5),

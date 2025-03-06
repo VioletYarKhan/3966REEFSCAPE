@@ -17,10 +17,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.FunnelConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.Constants.VisionConstants;
 import frc.robot.Constants.WristConstants;
 import frc.robot.commands.MoveElevatorToLevel;
 import frc.robot.commands.MoveToIntakePositions;
 import frc.robot.commands.MoveToScoringPosition;
+import frc.robot.commands.MoveTowardsTagGoal;
 import frc.robot.commands.RotateFunnel;
 import frc.robot.commands.RotateWristToLevel;
 import frc.robot.subsystems.DriveSubsystem;
@@ -70,9 +72,9 @@ public class RobotContainer {
                 double turn = m_driverController.getRightX();
 
                 if (m_driverController.getLeftBumperButton()){
-                  // Pose2d goalPose = PositionCalculations.getGoalPoseFromTag(Vision.getCamera(), m_robotDrive.getCurrentPose(), new Transform3d(), Vision.getBestTag());
-                  // m_robotDrive.PathToPose(goalPose);
-                  // new MoveTowardsTagGoal(Vision.targetTransform(7), new double[] {0.2, 0.2, 0.2}, m_robotDrive, new Transform2d(0.5, 0.5, new Rotation2d())).schedule();
+                  new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.middleReef, false).andThen(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.leftBranch, false)).schedule();
+                } else if (m_driverController.getRightBumperButton()){
+                  new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.middleReef, false).andThen(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.rightBranch, false)).schedule();
                 } else{
                   m_robotDrive.drive(
                   -MathUtil.applyDeadband(forward, OIConstants.kDriveDeadband),
@@ -112,7 +114,6 @@ public class RobotContainer {
             } else {
               m_coralHand.stop();
             }
-             
           }
         }, m_coralHand)
     );
@@ -122,9 +123,9 @@ public class RobotContainer {
       new RunCommand(
         ()-> {
           SmartDashboard.putNumber("Funnel Position", m_funnel.getPosition());
-          if (m_driverController.getLeftBumperButtonPressed()) {
+          if (m_driverController.getPOV() == 90) {
             new RotateFunnel(m_funnel, FunnelConstants.IntakeAngle).schedule();
-          } else if (m_driverController.getRightBumperButtonPressed()) {
+          } else if (m_driverController.getPOV() == 270) {
             new RotateFunnel(m_funnel, FunnelConstants.ClimbAngle).schedule();
           }
         }, m_funnel)
@@ -148,7 +149,7 @@ public class RobotContainer {
     m_operatorController.x().onTrue(new InstantCommand(()->m_wrist.setEncoderPosition(0), m_wrist));
     m_operatorController.a().onTrue(new InstantCommand(()->m_robotDrive.stop(), m_robotDrive));
     m_operatorController.b().onTrue(new InstantCommand(() -> m_elevator.setEncoderPosition(0)));
-    m_operatorController.y().onTrue(new InstantCommand(() -> m_robotDrive.setX()));
+    m_operatorController.y().onTrue(new InstantCommand(() -> m_robotDrive.setX(), m_robotDrive));
   }
   
 
