@@ -15,9 +15,9 @@ public class RotateFunnel extends Command {
     @Override
     public void execute() {
         if(m_funnel.getPosition() > setpoint){
-            m_funnel.set(-0.2);
-        } else {
             m_funnel.set(0.2);
+        } else {
+            m_funnel.set(-0.2);
         }
     }
 

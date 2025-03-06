@@ -15,9 +15,14 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.ElevatorConstants;
+import frc.robot.Constants.FunnelConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.WristConstants;
+import frc.robot.commands.MoveElevatorToLevel;
+import frc.robot.commands.MoveToIntakePositions;
+import frc.robot.commands.MoveToScoringPosition;
 import frc.robot.commands.RotateFunnel;
+import frc.robot.commands.RotateWristToLevel;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.CoralEffector;
@@ -79,34 +84,18 @@ public class RobotContainer {
       new RunCommand(
         ()-> {
           SmartDashboard.putNumber("Elevator Position", m_elevator.getPosition());
-          if (m_elevator.getPosition() > 180){
+          if (m_elevator.getPosition() > 175){
             m_elevator.set(-0.2);
-          } else if (m_driverController.getPOV() == 180){
-            m_elevator.setPosition(ElevatorConstants.IntakeHeight);
-          } else if (m_driverController.getPOV() == 90){
-            m_elevator.setPosition(ElevatorConstants.L1Height);
-          } else if (m_driverController.getPOV() == 270){
-            m_elevator.setPosition(ElevatorConstants.L2Height);
-          } else if (m_driverController.getPOV() == 0){
-            m_elevator.setPosition(ElevatorConstants.L4Height);
+          } else if (m_driverController.getAButtonPressed()){
+            new MoveToScoringPosition(1, m_wrist, m_elevator).schedule(); 
+          } else if (m_driverController.getXButtonPressed()){
+            new MoveToScoringPosition(2, m_wrist, m_elevator).schedule();
+          } else if (m_driverController.getBButtonPressed()){
+            new MoveToScoringPosition(3, m_wrist, m_elevator).schedule(); 
+          } else if (m_driverController.getYButtonPressed()){
+            new MoveToScoringPosition(4, m_wrist, m_elevator).schedule();
           }
         }, m_elevator)
-    );
-    
-    m_wrist.setDefaultCommand(
-      new RunCommand(
-        ()-> {
-          SmartDashboard.putNumber("Wrist Position", m_wrist.getPosition());
-          if (m_driverController.getAButton()){
-            m_wrist.setPosition(WristConstants.IntakeAngle);
-          } else if (m_driverController.getXButton()){
-              m_wrist.setPosition(WristConstants.L1Angle);
-          } else if (m_driverController.getBButton()){
-            m_wrist.setPosition(WristConstants.L2_3Angle);
-          } else if (m_driverController.getYButton()){
-            m_wrist.setPosition(WristConstants.L4Angle);
-          }
-        }, m_wrist)
     );
 
     m_coralHand.setDefaultCommand(
@@ -115,6 +104,7 @@ public class RobotContainer {
           if (m_driverController.getRightTriggerAxis() > 0.5){
             m_coralHand.outtake();
           } else if (m_driverController.getLeftTriggerAxis() > 0.5){
+            new MoveToIntakePositions(m_wrist, m_elevator).schedule();
             m_coralHand.intake();
           } else{
             if(m_wrist.getPosition() > WristConstants.L4Angle){
@@ -133,9 +123,9 @@ public class RobotContainer {
         ()-> {
           SmartDashboard.putNumber("Funnel Position", m_funnel.getPosition());
           if (m_driverController.getLeftBumperButtonPressed()) {
-            new RotateFunnel(m_funnel, 0).schedule();
+            new RotateFunnel(m_funnel, FunnelConstants.IntakeAngle).schedule();
           } else if (m_driverController.getRightBumperButtonPressed()) {
-            new RotateFunnel(m_funnel, 0.32).schedule();
+            new RotateFunnel(m_funnel, FunnelConstants.ClimbAngle).schedule();
           }
         }, m_funnel)
     );

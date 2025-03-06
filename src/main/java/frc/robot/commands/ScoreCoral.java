@@ -29,10 +29,10 @@ public class ScoreCoral extends SequentialCommandGroup{
 
         super(
             drivetrain.PathToPose(PositionCalculations.getGoalPoseFromTag(Vision.getCamera(), drivetrain.getCurrentPose(), left ? AutoConstants.leftBranchCoral : AutoConstants.rightBranchCoral, Vision.getBestTag())),
-            new MoveElevatorToLevel(level, wrist, elevator),
             new RotateWristToLevel(level, wrist),
+            new MoveElevatorToLevel(level, elevator),
             new InstantCommand(()-> hand.outtake(), hand).withTimeout(0.5),
-            new MoveElevatorToLevel(0, wrist, elevator)
+            new MoveToIntakePositions(wrist, elevator)
         );
     }
 }
