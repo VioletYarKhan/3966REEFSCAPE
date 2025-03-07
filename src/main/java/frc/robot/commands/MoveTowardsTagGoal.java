@@ -74,6 +74,5 @@ public class MoveTowardsTagGoal extends Command {
     } else {
       return (Math.abs(distances.getX()) < thresholds[0] && Math.abs(distances.getY()) < thresholds[1]);
     }
-    
   }
 }

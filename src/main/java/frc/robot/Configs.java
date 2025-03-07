@@ -73,7 +73,7 @@ public final class Configs {
                     // These are example gains you may need to them for your own robot!
                     .pid(0.05, 0, 0)
                     .velocityFF(0)
-                    .outputRange(-0.27, 0.4);
+                    .outputRange(-0.3, 0.45);
                         
 
                 elevatorFollowerConfig

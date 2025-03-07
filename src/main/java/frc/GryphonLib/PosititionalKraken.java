@@ -7,7 +7,9 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.SparkBase.ControlType;
 
-public class PosititionalKraken {
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+public class PosititionalKraken extends SubsystemBase {
     
     TalonFX krakenMotor = new TalonFX(13);
     TalonFXConfiguration krakenConfig = new TalonFXConfiguration();
