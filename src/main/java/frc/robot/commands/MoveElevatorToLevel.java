@@ -2,10 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ElevatorConstants;
-import frc.robot.Constants.WristConstants;
-import frc.robot.subsystems.EffectorWrist;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.EffectorWrist;
 
 public class MoveElevatorToLevel extends Command {
     public int level;
@@ -20,7 +17,7 @@ public class MoveElevatorToLevel extends Command {
     }
 
     @Override
-    public void execute(){
+    public void initialize(){
         if (level == 0){
             elevator.setPosition(ElevatorConstants.IntakeHeight);
         } else if(level == 1){
@@ -36,9 +33,10 @@ public class MoveElevatorToLevel extends Command {
 
     @Override
     public boolean isFinished() {
-        return (elevator.atTarget(0.1));
+        return (elevator.atTarget(0.5));
     }
 
     @Override
-    public void end(boolean interrupt){}
+    public void end(boolean interrupt){
+    }
 }

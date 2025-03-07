@@ -6,8 +6,6 @@ package frc.robot.subsystems;
 
 import java.util.Optional;
 
-import org.photonvision.PhotonUtils;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -269,9 +267,9 @@ public class DriveSubsystem extends SubsystemBase {
           Pose3d camPose = targetPose.transformBy(camToTarget.inverse());
 
           var visionMeasurement = camPose.transformBy(Constants.VisionConstants.kCamToRobot);
-          if (PhotonUtils.getDistanceToPose(getCurrentPose(), visionMeasurement.toPose2d()) < 1){
+          //if (PhotonUtils.getDistanceToPose(getCurrentPose(), visionMeasurement.toPose2d()) < 1){
             poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), resultTimestamp);
-          }
+          //}
         }
       }
     } catch(NullPointerException e){}

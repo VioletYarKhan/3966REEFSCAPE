@@ -32,6 +32,12 @@ public class EffectorWrist extends SubsystemBase {
         currentControlType = ControlType.kDutyCycle;
     }
 
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("Wrist Position", wristEncoder.getPosition());
+        SmartDashboard.putNumber("Wrist Velocity", wristEncoder.getVelocity());
+    }
+
     public void set(double speed) {
         wristMotor.set(speed);
         currentControlType = ControlType.kDutyCycle;

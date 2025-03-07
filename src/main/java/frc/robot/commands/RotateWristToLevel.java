@@ -20,7 +20,7 @@ public class RotateWristToLevel extends Command {
     }
 
     @Override
-    public void execute(){
+    public void initialize(){
         if(level == 0){
             wrist.setPosition(WristConstants.IntakeAngle);
         } else if(level == 1){
@@ -34,6 +34,6 @@ public class RotateWristToLevel extends Command {
 
     @Override
     public boolean isFinished() {
-        return (wrist.atTarget(0.1));
+        return (wrist.atTarget(0.5));
     }
 }
