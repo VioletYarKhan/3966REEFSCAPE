@@ -17,16 +17,7 @@ public class MoveCoalToL4Position extends Command {
 
     @Override
     public void initialize(){
-        reqPos = hand.getPosition()-0.95;
-    }
-
-    @Override
-    public void execute(){
-        if(level == 4){
-            hand.setPosition(reqPos);
-        } else {
-            hand.setPosition(hand.getPosition());
-        }
+        hand.goToPosition(level);
     }
 
     @Override

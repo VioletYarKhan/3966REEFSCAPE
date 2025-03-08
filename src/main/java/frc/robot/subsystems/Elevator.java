@@ -36,6 +36,7 @@ public class Elevator extends SubsystemBase {
     @Override
     public void periodic() {
         SmartDashboard.putNumber("Elevator Position", getPosition());
+        SmartDashboard.putString("Elevator Control TYpe", currentControlType.toString());
     }
 
     public void set(double speed) {
