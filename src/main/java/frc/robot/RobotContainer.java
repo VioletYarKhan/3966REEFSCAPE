@@ -87,13 +87,13 @@ public class RobotContainer {
           if (m_elevator.getPosition() > 175){
             m_elevator.setPosition(175);
           } else if (m_driverController.getAButtonPressed()){
-            new MoveToScoringPosition(1, m_wrist, m_elevator, m_coralHand).schedule(); 
+            new MoveToScoringPosition(1, m_wrist, m_elevator).schedule(); 
           } else if (m_driverController.getXButtonPressed()){
-            new MoveToScoringPosition(2, m_wrist, m_elevator, m_coralHand).schedule();
+            new MoveToScoringPosition(2, m_wrist, m_elevator).schedule();
           } else if (m_driverController.getBButtonPressed()){
-            new MoveToScoringPosition(3, m_wrist, m_elevator, m_coralHand).schedule(); 
+            new MoveToScoringPosition(3, m_wrist, m_elevator).schedule(); 
           } else if (m_driverController.getYButtonPressed()){
-            new MoveToScoringPosition(4, m_wrist, m_elevator, m_coralHand).schedule();
+            new MoveToScoringPosition(4, m_wrist, m_elevator).schedule();
           }
         }, m_elevator)
     );
@@ -105,7 +105,6 @@ public class RobotContainer {
             m_coralHand.outtake();
           } else if (m_driverController.getLeftTriggerAxis() > 0.5){
             m_coralHand.intake();
-            SmartDashboard.putString("Moving to Intake", "True");
             new MoveToIntakePositions(m_wrist, m_elevator, m_funnel).schedule();
           } else{
            if(m_wrist.getVelocity() > 900){
@@ -166,7 +165,7 @@ public class RobotContainer {
     m_operatorController.povRight().whileTrue(new InstantCommand(()->m_funnel.set(-0.3), m_funnel)).onFalse(new InstantCommand(()->m_funnel.setPosition(m_funnel.getPosition()), m_funnel));
     m_operatorController.x().onTrue(new InstantCommand(()->m_wrist.setEncoderPosition(0), m_wrist));
     m_operatorController.a().onTrue(new InstantCommand(()->m_robotDrive.stop(), m_robotDrive));
-    m_operatorController.b().onTrue(new InstantCommand(() -> m_elevator.setEncoderPosition(0)));
+    m_operatorController.b().onTrue(new InstantCommand(() -> m_elevator.setEncoderPosition(0), m_elevator));
     m_operatorController.y().onTrue(new InstantCommand(() -> m_robotDrive.setX(), m_robotDrive));
   }
   

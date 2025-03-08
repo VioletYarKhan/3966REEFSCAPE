@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.subsystems.Elevator;
@@ -18,6 +19,7 @@ public class MoveElevatorToLevel extends Command {
 
     @Override
     public void initialize(){
+        SmartDashboard.putBoolean("Elevator Command", true);
         if (level == 0){
             elevator.setPosition(ElevatorConstants.IntakeHeight);
         } else if(level == 1){
@@ -38,5 +40,6 @@ public class MoveElevatorToLevel extends Command {
 
     @Override
     public void end(boolean interrupt){
+        SmartDashboard.putBoolean("Elevator Command", false);
     }
 }
