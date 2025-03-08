@@ -31,6 +31,7 @@ public class MoveTowardsTagGoal extends Command {
     this.distancesFromTarget = distancesFromTarget;
     this.rotateTowards = rotateTowards;
     
+    addRequirements(driveSubsystem);
   }
   @Override
   public void execute() {
