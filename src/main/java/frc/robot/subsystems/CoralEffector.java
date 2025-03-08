@@ -34,6 +34,7 @@ public class CoralEffector extends SubsystemBase {
     @Override
     public void periodic() {
         SmartDashboard.putNumber("Wheel Position", getPosition());
+        SmartDashboard.putString("Wheel Control Type", currentControlType.toString());
     }
 
     public void set(double speed) {
@@ -98,7 +99,7 @@ public class CoralEffector extends SubsystemBase {
 
     public void goToPosition(int level){
         if (level == 4){
-            setPosition(getPosition()-0.95);
+            setPosition(getPosition()-0.6);
         } else {
             setPosition(getPosition());
         }

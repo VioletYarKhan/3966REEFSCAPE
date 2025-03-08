@@ -11,17 +11,19 @@ public class MoveToScoringPosition extends SequentialCommandGroup {
     public Elevator elevator;
     public int level;
     public EffectorWrist wrist;
+    public CoralEffector hand;
 
     public MoveToScoringPosition(
         int level,
         EffectorWrist wrist,
-        Elevator elevator
+        Elevator elevator,
+        CoralEffector hand
        ){
 
         super(
             new RotateWristToLevel(level, wrist),
-            new MoveElevatorToLevel(level, elevator)
-            // new MoveCoalToL4Position(level, hand)
+            new MoveElevatorToLevel(level, elevator),
+            new MoveCoalToL4Position(level, hand)
         );
     }
 }
