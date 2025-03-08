@@ -51,6 +51,7 @@ public class CoralEffector extends SubsystemBase {
     public void setPosition(double position){
         SmartDashboard.putNumber("Requested Wheel Position", position);
         effectorWheel.setControl(new PositionDutyCycle(position));
+        
         targetReference = position;
         currentControlType = ControlType.kPosition;
     }

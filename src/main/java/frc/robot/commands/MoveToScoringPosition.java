@@ -1,7 +1,5 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.CoralEffector;
 import frc.robot.subsystems.EffectorWrist;
@@ -11,19 +9,16 @@ public class MoveToScoringPosition extends SequentialCommandGroup {
     public Elevator elevator;
     public int level;
     public EffectorWrist wrist;
-    public CoralEffector hand;
 
     public MoveToScoringPosition(
         int level,
         EffectorWrist wrist,
-        Elevator elevator,
-        CoralEffector hand
+        Elevator elevator
        ){
 
         super(
             new RotateWristToLevel(level, wrist),
-            new MoveElevatorToLevel(level, elevator),
-            new MoveCoalToL4Position(level, hand)
+            new MoveElevatorToLevel(level, elevator)
         );
     }
 }
