@@ -6,6 +6,8 @@ package frc.robot.subsystems;
 
 import java.util.Optional;
 
+import org.photonvision.PhotonUtils;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -26,6 +28,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -33,6 +37,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.Vision;
 import frc.robot.Constants.AutoConstants;
@@ -71,14 +76,18 @@ public class DriveSubsystem extends SubsystemBase {
   private final SwerveDrivePoseEstimator poseEstimator;
   private final Field2d field2d = new Field2d();
   private double previousPipelineTimestamp = 0;
+  private final StructArrayPublisher<SwerveModuleState> publisher;
 
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
+    publisher = NetworkTableInstance.getDefault()
+      .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
     var alliance = DriverStation.getAlliance();
     layout.setOrigin(alliance.get() == Alliance.Blue ?
         OriginPosition.kBlueAllianceWallRightSide : OriginPosition.kRedAllianceWallRightSide);
     ShuffleboardTab tab = Shuffleboard.getTab("Vision");
+    SmartDashboard.putNumber("Vision Reading Maximum Difference", 1);
 
     poseEstimator =  new SwerveDrivePoseEstimator(
         DriveConstants.kDriveKinematics,
@@ -225,9 +234,20 @@ public class DriveSubsystem extends SubsystemBase {
   public SwerveModulePosition[] getPositions(){
     SwerveModulePosition[] modules = {
     m_frontLeft.getPosition(),
-    m_rearLeft.getPosition(),
     m_frontRight.getPosition(),
+    m_rearLeft.getPosition(),
     m_rearRight.getPosition()};
+
+    return modules;
+  }
+
+
+  public SwerveModuleState[] getStates(){
+    SwerveModuleState[] modules = {
+    m_frontLeft.getState(),
+    m_frontRight.getState(),
+    m_rearLeft.getState(),
+    m_rearRight.getState()};
 
     return modules;
   }
@@ -267,9 +287,9 @@ public class DriveSubsystem extends SubsystemBase {
           Pose3d camPose = targetPose.transformBy(camToTarget.inverse());
 
           var visionMeasurement = camPose.transformBy(Constants.VisionConstants.kCamToRobot);
-          //if (PhotonUtils.getDistanceToPose(getCurrentPose(), visionMeasurement.toPose2d()) < 1){
+          if (PhotonUtils.getDistanceToPose(getCurrentPose(), visionMeasurement.toPose2d()) < SmartDashboard.getNumber("Vision Reading Maximum Difference", 1)){
             poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), resultTimestamp);
-          //}
+          }
         }
       }
     } catch(NullPointerException e){}
@@ -277,8 +297,9 @@ public class DriveSubsystem extends SubsystemBase {
     poseEstimator.update(
       getRotation(),
       getPositions());
-   
-    field2d.setRobotPose(getCurrentPose());
+
+      field2d.setRobotPose(getCurrentPose());
+      publisher.set(getStates());
   }
   private String getFomattedPose() {
     var pose = getCurrentPose();
