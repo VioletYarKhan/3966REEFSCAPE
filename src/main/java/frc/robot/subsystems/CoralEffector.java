@@ -7,6 +7,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.SparkBase.ControlType;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class CoralEffector extends SubsystemBase {
@@ -21,13 +22,18 @@ public class CoralEffector extends SubsystemBase {
         effectorConfig.MotorOutput.withNeutralMode(NeutralModeValue.Brake);
         effectorConfig.ClosedLoopRamps.withDutyCycleClosedLoopRampPeriod(0).withTorqueClosedLoopRampPeriod(0).withVoltageClosedLoopRampPeriod(0);
         effectorConfig.OpenLoopRamps.withDutyCycleOpenLoopRampPeriod(0).withTorqueOpenLoopRampPeriod(0).withVoltageOpenLoopRampPeriod(0);
-        effectorConfig.Slot0.withKP(0.05);
+        effectorConfig.Slot0.withKP(0.5);
                     
         effectorWheel.getConfigurator().apply(effectorConfig);
 
 
         targetReference = 0;
         currentControlType = ControlType.kDutyCycle;
+    }
+
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("Wheel Position", getPosition());
     }
 
     public void set(double speed) {
@@ -41,7 +47,8 @@ public class CoralEffector extends SubsystemBase {
         currentControlType = ControlType.kVelocity;
     }
 
-    public void setPosition(double position) {
+    public void setPosition(double position){
+        SmartDashboard.putNumber("Requested Wheel Position", position);
         effectorWheel.setControl(new PositionDutyCycle(position));
         targetReference = position;
         currentControlType = ControlType.kPosition;
@@ -64,6 +71,10 @@ public class CoralEffector extends SubsystemBase {
         return effectorWheel.getPosition().getValueAsDouble();
     }
 
+    public ControlType getControlType() {
+        return currentControlType;
+    }
+
     public boolean atTarget(double threshold) {
         if (currentControlType == ControlType.kVelocity) {
             return Math.abs(getVelocity() - targetReference) < threshold;
@@ -76,12 +87,20 @@ public class CoralEffector extends SubsystemBase {
 
 
     public void outtake(){
-        effectorWheel.set(-0.15);
+        set(-0.15);
     }
     public void intake(){
-        effectorWheel.set(0.15);
+        set(0.15);
     }
     public void stop(){
-        effectorWheel.set(0);
+        set(0);
+    }
+
+    public void goToPosition(int level){
+        if (level == 4){
+            setPosition(getPosition()-0.95);
+        } else {
+            setPosition(getPosition());
+        }
     }
 }

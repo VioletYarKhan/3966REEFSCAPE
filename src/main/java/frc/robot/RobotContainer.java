@@ -10,6 +10,7 @@ import frc.GryphonLib.PositionCalculations;
 
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.revrobotics.spark.SparkBase.ControlType;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.XboxController;
@@ -17,6 +18,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.FunnelConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.MoveCoalToL4Position;
 import frc.robot.commands.MoveToIntakePositions;
 import frc.robot.commands.MoveToScoringPosition;
 import frc.robot.commands.RotateFunnel;
@@ -85,13 +87,13 @@ public class RobotContainer {
           if (m_elevator.getPosition() > 175){
             m_elevator.setPosition(175);
           } else if (m_driverController.getAButtonPressed()){
-            new MoveToScoringPosition(1, m_wrist, m_elevator).schedule(); 
+            new MoveToScoringPosition(1, m_wrist, m_elevator, m_coralHand).schedule(); 
           } else if (m_driverController.getXButtonPressed()){
-            new MoveToScoringPosition(2, m_wrist, m_elevator).schedule();
+            new MoveToScoringPosition(2, m_wrist, m_elevator, m_coralHand).schedule();
           } else if (m_driverController.getBButtonPressed()){
-            new MoveToScoringPosition(3, m_wrist, m_elevator).schedule(); 
+            new MoveToScoringPosition(3, m_wrist, m_elevator, m_coralHand).schedule(); 
           } else if (m_driverController.getYButtonPressed()){
-            new MoveToScoringPosition(4, m_wrist, m_elevator).schedule();
+            new MoveToScoringPosition(4, m_wrist, m_elevator, m_coralHand).schedule();
           }
         }, m_elevator)
     );
@@ -106,10 +108,12 @@ public class RobotContainer {
             SmartDashboard.putString("Moving to Intake", "True");
             new MoveToIntakePositions(m_wrist, m_elevator, m_funnel).schedule();
           } else{
-            if(m_wrist.getVelocity() > 900){
+           if(m_wrist.getVelocity() > 900){
               m_coralHand.intake();
-            } else { 
-              m_coralHand.stop();
+            } else {
+              if(m_coralHand.getControlType() != ControlType.kPosition){
+                m_coralHand.stop();
+              }
             }
           }
         }, m_coralHand)
@@ -152,11 +156,11 @@ public class RobotContainer {
 
   private void configureButtonBindings() {
     m_operatorController.start().onTrue(new InstantCommand(()->m_robotDrive.zeroHeading(), m_robotDrive));
-    // m_operatorController.povUp().whileTrue(new InstantCommand(()->m_elevator.set(0.3), m_elevator)).onFalse(new InstantCommand(()->m_elevator.setPosition(m_elevator.getPosition()), m_elevator));
+    m_operatorController.povUp().whileTrue(new InstantCommand(()->m_elevator.set(0.3), m_elevator)).onFalse(new InstantCommand(()->m_elevator.setPosition(m_elevator.getPosition()), m_elevator));
     m_operatorController.povDown().whileTrue(new InstantCommand(()->m_elevator.set(-0.3), m_elevator)).onFalse(new InstantCommand(()->m_elevator.setPosition(m_elevator.getPosition()), m_elevator));
     m_operatorController.leftBumper().whileTrue(new InstantCommand(()->m_wrist.set(-0.15), m_wrist)).onFalse(new InstantCommand(()->m_wrist.setPosition(m_wrist.getPosition()), m_wrist));
     m_operatorController.rightBumper().whileTrue(new InstantCommand(()->m_wrist.set(0.15), m_wrist)).onFalse(new InstantCommand(()->m_wrist.setPosition(m_wrist.getPosition()), m_wrist));
-    m_operatorController.rightTrigger().whileTrue(new InstantCommand(()->m_coralHand.outtake(), m_coralHand)).onFalse(new InstantCommand(()->m_coralHand.stop()));
+    m_operatorController.rightTrigger().onTrue(new InstantCommand(()->m_coralHand.setPosition(m_coralHand.getPosition()-0.6), m_coralHand));
     m_operatorController.leftTrigger().whileTrue(new InstantCommand(()->m_coralHand.intake(), m_coralHand)).onFalse(new InstantCommand(()->m_coralHand.stop()));
     m_operatorController.povLeft().whileTrue(new InstantCommand(()->m_funnel.set(0.3), m_funnel)).onFalse(new InstantCommand(()->m_funnel.setPosition(m_funnel.getPosition()), m_funnel));
     m_operatorController.povRight().whileTrue(new InstantCommand(()->m_funnel.set(-0.3), m_funnel)).onFalse(new InstantCommand(()->m_funnel.setPosition(m_funnel.getPosition()), m_funnel));

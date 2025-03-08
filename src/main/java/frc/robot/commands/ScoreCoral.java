@@ -16,8 +16,7 @@ public class ScoreCoral extends SequentialCommandGroup{
         CoralFunnel funnel){
 
         super(
-            new MoveToScoringPosition(level, wrist, elevator),
-            level == 4 ? new RunCommand(()->hand.setPosition(hand.getPosition() + 0.15), hand).until(()->hand.atTarget(0.1)) : new RunCommand(()->hand.outtake(), hand).withTimeout(3),
+            new MoveToScoringPosition(level, wrist, elevator, hand),
             new MoveToIntakePositions(wrist, elevator, funnel)
         );
     }

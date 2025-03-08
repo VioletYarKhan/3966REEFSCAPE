@@ -33,7 +33,7 @@ public class MoveElevatorToLevel extends Command {
 
     @Override
     public boolean isFinished() {
-        return (elevator.atTarget(0.5));
+        return (elevator.atTarget(1));
     }
 
     @Override

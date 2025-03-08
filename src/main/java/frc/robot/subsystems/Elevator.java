@@ -33,6 +33,11 @@ public class Elevator extends SubsystemBase {
         currentControlType = ControlType.kDutyCycle;
     }
 
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("Elevator Position", getPosition());
+    }
+
     public void set(double speed) {
         elevatorL.set(speed);
         currentControlType = ControlType.kDutyCycle;
