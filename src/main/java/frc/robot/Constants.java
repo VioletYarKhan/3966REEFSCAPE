@@ -150,7 +150,7 @@ public final class Constants {
     public static final String kCameraName = "gccamera";
     // Cam mounted facing forward, half a meter forward of center, half a meter up from center,
     // pitched upward.
-    private static final double camPitch = Units.degreesToRadians(-30);
+    private static final double camPitch = Units.degreesToRadians(-20);
     public static final Transform3d kRobotToCam =
             new Transform3d(new Translation3d(-Units.inchesToMeters(13), 0, Units.inchesToMeters(6)), new Rotation3d(0, camPitch, 0));
     public static final Transform3d kCamToRobot = kRobotToCam.inverse();

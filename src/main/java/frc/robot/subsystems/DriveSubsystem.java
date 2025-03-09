@@ -6,8 +6,6 @@ package frc.robot.subsystems;
 
 import java.util.Optional;
 
-import org.photonvision.PhotonUtils;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -70,9 +68,9 @@ public class DriveSubsystem extends SubsystemBase {
   // The gyro sensor
   private final ADIS16470_IMU m_gyro = new ADIS16470_IMU();
 
-  private final AprilTagFieldLayout layout = Constants.VisionConstants.kTagLayout;;
+  private final AprilTagFieldLayout layout = Constants.VisionConstants.kTagLayout;
   private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
-  private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(10));
+  private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30));
   private final SwerveDrivePoseEstimator poseEstimator;
   private final Field2d field2d = new Field2d();
   private double previousPipelineTimestamp = 0;
@@ -287,9 +285,8 @@ public class DriveSubsystem extends SubsystemBase {
           Pose3d camPose = targetPose.transformBy(camToTarget.inverse());
 
           var visionMeasurement = camPose.transformBy(Constants.VisionConstants.kCamToRobot);
-          if (PhotonUtils.getDistanceToPose(getCurrentPose(), visionMeasurement.toPose2d()) < SmartDashboard.getNumber("Vision Reading Maximum Difference", 1)){
-            poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), resultTimestamp);
-          }
+          poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), resultTimestamp);
+          
         }
       }
     } catch(NullPointerException e){}
