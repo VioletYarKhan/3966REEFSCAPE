@@ -13,17 +13,14 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.revrobotics.spark.SparkBase.ControlType;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.FunnelConstants;
 import frc.robot.Constants.OIConstants;
-import frc.robot.Constants.VisionConstants;
-import frc.robot.commands.MoveCoalToL4Position;
+import frc.robot.commands.MoveCoralToL4Position;
 import frc.robot.commands.MoveToIntakePositions;
 import frc.robot.commands.MoveToScoringPosition;
-import frc.robot.commands.MoveTowardsTagGoal;
 import frc.robot.commands.RotateFunnel;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Elevator;
@@ -34,7 +31,6 @@ import frc.robot.subsystems.EffectorWrist;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 /*
@@ -58,8 +54,8 @@ public class RobotContainer {
   CommandXboxController m_operatorController = new CommandXboxController(1);
 
     private SendableChooser<Command> autoChooser;
+    private boolean coralNeedsMovement = false;
 
-  private boolean coralNeedsMovement = false;
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -95,7 +91,10 @@ public class RobotContainer {
     m_coralHand.setDefaultCommand(
       new RunCommand(
         ()-> {
-          if(m_wrist.getVelocity() > 900){
+          if (coralNeedsMovement && m_wrist.atTarget(1) && Math.abs(m_elevator.getPosition() - ElevatorConstants.L4Height) < 5){
+            new MoveCoralToL4Position(4, m_coralHand).schedule();
+            coralNeedsMovement = false;
+          } else if(m_wrist.getVelocity() > 900){
               m_coralHand.intake();
             } else {
               if(m_coralHand.getControlType() != ControlType.kPosition){
@@ -132,16 +131,14 @@ public class RobotContainer {
   private void configureButtonBindings() {
     // m_driverController.leftBumper().onTrue(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.middleReef, false).andThen(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.leftBranch, false)));
     // m_driverController.rightBumper().onTrue(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.middleReef, false).andThen(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.rightBranch, false)));
-    m_driverController.a().onTrue(new MoveToScoringPosition(1, m_wrist, m_elevator, m_coralHand));
-    m_driverController.x().onTrue(new MoveToScoringPosition(2, m_wrist, m_elevator, m_coralHand));
-    m_driverController.b().onTrue(new MoveToScoringPosition(3, m_wrist, m_elevator, m_coralHand));
-    m_driverController.y().onTrue(new MoveToScoringPosition(4, m_wrist, m_elevator, m_coralHand));
-    m_driverController.rightTrigger().onTrue(new SequentialCommandGroup(new InstantCommand(() -> {
-      m_coralHand.intake();
-      SmartDashboard.putString("Moving to Intake", "True");
-    }, m_coralHand), new MoveToIntakePositions(m_wrist, m_elevator, m_funnel)));
-    m_driverController.povUp().onTrue(new InstantCommand(m_climber::climbCCW));
-    m_driverController.povDown().onTrue(new InstantCommand(m_climber::climbCW));
+    m_driverController.a().onTrue(new MoveToScoringPosition(1, m_wrist, m_elevator));
+    m_driverController.x().onTrue(new MoveToScoringPosition(2, m_wrist, m_elevator));
+    m_driverController.b().onTrue(new MoveToScoringPosition(3, m_wrist, m_elevator));
+    m_driverController.y().onTrue(new MoveToScoringPosition(4, m_wrist, m_elevator).andThen(new MoveCoralToL4Position(4, m_coralHand)));
+    m_driverController.leftTrigger().whileTrue(new RunCommand(()->m_coralHand.intake(), m_coralHand)).onTrue(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel));
+    m_driverController.rightTrigger().whileTrue(new RunCommand(()->m_coralHand.outtake(), m_coralHand));
+    m_driverController.povUp().onTrue(new InstantCommand(m_climber::climbCCW)).onFalse(new InstantCommand(m_climber::stop));
+    m_driverController.povDown().onTrue(new InstantCommand(m_climber::climbCW)).onFalse(new InstantCommand(m_climber::stop));
     m_driverController.povRight().onTrue(new RotateFunnel(m_funnel, FunnelConstants.IntakeAngle));
     m_driverController.povLeft().onTrue(new RotateFunnel(m_funnel, FunnelConstants.ClimbAngle));
 
