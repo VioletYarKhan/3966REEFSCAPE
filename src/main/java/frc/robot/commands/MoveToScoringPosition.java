@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.subsystems.CoralEffector;
 import frc.robot.subsystems.EffectorWrist;
 import frc.robot.subsystems.Elevator;
 
