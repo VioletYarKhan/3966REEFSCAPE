@@ -2,9 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.ElevatorConstants;
 import frc.robot.subsystems.CoralEffector;
-import frc.robot.subsystems.Elevator;
 
 public class MoveCoralToL4Position extends Command {
     public int level;
