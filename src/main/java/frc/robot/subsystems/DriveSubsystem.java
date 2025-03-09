@@ -70,8 +70,8 @@ public class DriveSubsystem extends SubsystemBase {
   // The gyro sensor
   private final ADIS16470_IMU m_gyro = new ADIS16470_IMU();
 
-  private final AprilTagFieldLayout layout = Constants.VisionConstants.kTagLayout;;
-  private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
+  private final AprilTagFieldLayout layout = Constants.VisionConstants.kTagLayout;
+  private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(30));
   private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(10));
   private final SwerveDrivePoseEstimator poseEstimator;
   private final Field2d field2d = new Field2d();
