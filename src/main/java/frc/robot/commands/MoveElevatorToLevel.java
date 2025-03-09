@@ -19,7 +19,6 @@ public class MoveElevatorToLevel extends Command {
 
     @Override
     public void initialize(){
-        SmartDashboard.putBoolean("Elevator Command", true);
         if (level == 0){
             elevator.setPosition(ElevatorConstants.IntakeHeight);
         } else if(level == 1){
@@ -35,11 +34,10 @@ public class MoveElevatorToLevel extends Command {
 
     @Override
     public boolean isFinished() {
-        return (elevator.atTarget(1));
+        return (elevator.atTarget(2));
     }
 
     @Override
     public void end(boolean interrupt){
-        SmartDashboard.putBoolean("Elevator Command", false);
     }
 }

@@ -1,14 +1,17 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.subsystems.CoralEffector;
+import frc.robot.subsystems.Elevator;
 
-public class MoveCoalToL4Position extends Command {
-    public CoralEffector hand;
+public class MoveCoralToL4Position extends Command {
     public int level;
-    public double reqPos;
+    public CoralEffector hand;
 
-    public MoveCoalToL4Position(int level, CoralEffector hand){
+    public MoveCoralToL4Position(int level, CoralEffector hand){
+
         this.level = level;
         this.hand = hand;
 
@@ -17,6 +20,7 @@ public class MoveCoalToL4Position extends Command {
 
     @Override
     public void initialize(){
+        SmartDashboard.putBoolean(getName(), true);
         hand.goToPosition(level);
     }
 
@@ -27,5 +31,6 @@ public class MoveCoalToL4Position extends Command {
 
     @Override
     public void end(boolean interrupt){
+        SmartDashboard.putBoolean(getName(), false);
     }
 }

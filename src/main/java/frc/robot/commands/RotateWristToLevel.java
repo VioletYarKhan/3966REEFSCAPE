@@ -22,7 +22,6 @@ public class RotateWristToLevel extends Command {
 
     @Override
     public void initialize(){
-        SmartDashboard.putBoolean("Wrist Command", true);
         if(level == 0){
             wrist.setPosition(WristConstants.IntakeAngle);
         } else if(level == 1){
@@ -41,6 +40,5 @@ public class RotateWristToLevel extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        SmartDashboard.putBoolean("Wrist Command", false);
     }
 }
