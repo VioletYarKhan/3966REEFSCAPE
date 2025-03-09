@@ -19,9 +19,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.FunnelConstants;
 import frc.robot.Constants.OIConstants;
-import frc.robot.commands.MoveCoralToL4Position;
+import frc.robot.Constants.VisionConstants;
+import frc.robot.commands.MoveCoalToL4Position;
 import frc.robot.commands.MoveToIntakePositions;
 import frc.robot.commands.MoveToScoringPosition;
+import frc.robot.commands.MoveTowardsTagGoal;
 import frc.robot.commands.RotateFunnel;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Elevator;
@@ -52,7 +54,7 @@ public class RobotContainer {
   private final Climber m_climber = new Climber();
 
   // The driver's controller
-  XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
+  CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
   CommandXboxController m_operatorController = new CommandXboxController(1);
 
     private SendableChooser<Command> autoChooser;
@@ -74,31 +76,18 @@ public class RobotContainer {
                 double strafe = m_driverController.getLeftX();
                 double turn = m_driverController.getRightX();
 
-                if (m_driverController.getLeftBumperButton()){
-                  // new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.middleReef, false).andThen(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.leftBranch, false)).schedule();
-                } else if (m_driverController.getRightBumperButton()){
-                  // new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.middleReef, false).andThen(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.rightBranch, false)).schedule();
-                } else{
-                  m_robotDrive.drive(
-                  -MathUtil.applyDeadband(forward, OIConstants.kDriveDeadband),
-                  -MathUtil.applyDeadband(strafe, OIConstants.kDriveDeadband),
-                  -MathUtil.applyDeadband(turn, OIConstants.kDriveDeadband), true);}},
+                m_robotDrive.drive(
+                -MathUtil.applyDeadband(forward, OIConstants.kDriveDeadband),
+                -MathUtil.applyDeadband(strafe, OIConstants.kDriveDeadband),
+                -MathUtil.applyDeadband(turn, OIConstants.kDriveDeadband), true);
+            },
           m_robotDrive));
     
     m_elevator.setDefaultCommand(
       new RunCommand(
         ()-> {  
-          if (m_elevator.getPosition() > 177){
+          if (m_elevator.getPosition() > 175) {
             m_elevator.setPosition(175);
-          } else if (m_driverController.getAButtonPressed()){
-            new MoveToScoringPosition(1, m_wrist, m_elevator).schedule();
-          } else if (m_driverController.getXButtonPressed()){
-            new MoveToScoringPosition(2, m_wrist, m_elevator).schedule();
-          } else if (m_driverController.getBButtonPressed()){
-            new MoveToScoringPosition(3, m_wrist, m_elevator).schedule(); 
-          } else if (m_driverController.getYButtonPressed()){
-            new MoveToScoringPosition(4, m_wrist, m_elevator).schedule();
-            coralNeedsMovement = true;
           }
         }, m_elevator)
     );
@@ -106,23 +95,13 @@ public class RobotContainer {
     m_coralHand.setDefaultCommand(
       new RunCommand(
         ()-> {
-          if (m_driverController.getRightTriggerAxis() > 0.5){
-            m_coralHand.outtake();
-          } else if (m_driverController.getLeftTriggerAxis() > 0.5){
-            m_coralHand.intake();
-            new MoveToIntakePositions(m_wrist, m_elevator, m_funnel).schedule();
-          }else if (coralNeedsMovement && m_wrist.atTarget(1) && Math.abs(m_elevator.getPosition() - ElevatorConstants.L4Height) < 5){
-            new MoveCoralToL4Position(4, m_coralHand).schedule();
-            coralNeedsMovement = false;
-          } else{
-           if(m_wrist.getVelocity() > 900){
+          if(m_wrist.getVelocity() > 900){
               m_coralHand.intake();
             } else {
               if(m_coralHand.getControlType() != ControlType.kPosition){
                 m_coralHand.stop();
               }
             }
-          }
         }, m_coralHand)
     );
 
@@ -135,24 +114,13 @@ public class RobotContainer {
       new RunCommand(
         ()-> {
           SmartDashboard.putNumber("Funnel Position", m_funnel.getPosition());
-          if (m_driverController.getPOV() == 90) {
-            new RotateFunnel(m_funnel, FunnelConstants.IntakeAngle).schedule();
-          } else if (m_driverController.getPOV() == 270) {
-            new RotateFunnel(m_funnel, FunnelConstants.ClimbAngle).schedule();
-          }
         }, m_funnel)
     );
 
     m_climber.setDefaultCommand(
       new RunCommand(
         ()-> {
-          if (m_driverController.getPOV() == 0) {
-            m_climber.climbCCW();
-          } else if (m_driverController.getPOV() == 180) {
-            m_climber.climbCW();
-          } else {
-            m_climber.stop();
-          }
+          m_climber.stop();
         }, m_climber)
     );
 
@@ -162,6 +130,21 @@ public class RobotContainer {
   }
 
   private void configureButtonBindings() {
+    // m_driverController.leftBumper().onTrue(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.middleReef, false).andThen(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.leftBranch, false)));
+    // m_driverController.rightBumper().onTrue(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.middleReef, false).andThen(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.rightBranch, false)));
+    m_driverController.a().onTrue(new MoveToScoringPosition(1, m_wrist, m_elevator, m_coralHand));
+    m_driverController.x().onTrue(new MoveToScoringPosition(2, m_wrist, m_elevator, m_coralHand));
+    m_driverController.b().onTrue(new MoveToScoringPosition(3, m_wrist, m_elevator, m_coralHand));
+    m_driverController.y().onTrue(new MoveToScoringPosition(4, m_wrist, m_elevator, m_coralHand));
+    m_driverController.rightTrigger().onTrue(new SequentialCommandGroup(new InstantCommand(() -> {
+      m_coralHand.intake();
+      SmartDashboard.putString("Moving to Intake", "True");
+    }, m_coralHand), new MoveToIntakePositions(m_wrist, m_elevator, m_funnel)));
+    m_driverController.povUp().onTrue(new InstantCommand(m_climber::climbCCW));
+    m_driverController.povDown().onTrue(new InstantCommand(m_climber::climbCW));
+    m_driverController.povRight().onTrue(new RotateFunnel(m_funnel, FunnelConstants.IntakeAngle));
+    m_driverController.povLeft().onTrue(new RotateFunnel(m_funnel, FunnelConstants.ClimbAngle));
+
     m_operatorController.start().onTrue(new InstantCommand(()->m_robotDrive.zeroHeading(), m_robotDrive));
     m_operatorController.povUp().whileTrue(new InstantCommand(()->m_elevator.set(0.3), m_elevator)).onFalse(new InstantCommand(()->m_elevator.setPosition(m_elevator.getPosition()), m_elevator));
     m_operatorController.povDown().whileTrue(new InstantCommand(()->m_elevator.set(-0.3), m_elevator)).onFalse(new InstantCommand(()->m_elevator.setPosition(m_elevator.getPosition()), m_elevator));
