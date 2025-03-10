@@ -131,6 +131,7 @@ public class RobotContainer {
     m_driverController.b().onTrue(new MoveToScoringPosition(3, m_wrist, m_elevator));
     m_driverController.y().onTrue(new MoveToScoringPosition(4, m_wrist, m_elevator).andThen(new MoveCoralToL4Position(4, m_coralHand)));
     m_driverController.leftBumper().whileTrue(new AlignToReefTagRelative(false, m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop));
+    m_driverController.rightBumper().whileTrue(new AlignToReefTagRelative(true, m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop));
     m_driverController.leftTrigger().whileTrue(new RunCommand(()->m_coralHand.intake(), m_coralHand)).onTrue(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel));
     m_driverController.rightTrigger().whileTrue(new RunCommand(()->m_coralHand.outtake(), m_coralHand));
     m_driverController.povUp().whileTrue(new RunCommand(()->m_climber.climbCCW(), m_climber));

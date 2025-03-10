@@ -23,9 +23,9 @@ public class AlignToReefTagRelative extends Command {
   private int tagID = -1;
 
   public AlignToReefTagRelative(boolean isRightScore, DriveSubsystem drivebase) {
-    xController = new PIDController(1.0, 0.0, 0);  // Vertical movement
-    yController = new PIDController(1.0, 0.0, 0);  // Horitontal movement
-    rotController = new PIDController(1.0, 0, 0);  // Rotation
+    xController = new PIDController(1.5, 0.0, 0);  // Vertical movement
+    yController = new PIDController(1.5, 0.0, 0);  // Horitontal movement
+    rotController = new PIDController(2, 0, 0);  // Rotation
     this.isRightScore = isRightScore;
     this.drivebase = drivebase;
     addRequirements(drivebase);
@@ -62,7 +62,7 @@ public class AlignToReefTagRelative extends Command {
       double xSpeed = -xController.calculate(robotToTag.getX());
       SmartDashboard.putNumber("xspeed", xSpeed);
       double ySpeed = -yController.calculate(robotToTag.getY());
-      double rotValue = 0;// -rotController.calculate(robotToTag.getRotation().getAngle());
+      double rotValue = rotController.calculate(robotToTag.getRotation().getAngle());
 
       drivebase.driveRobotRelativeChassis(new ChassisSpeeds(xSpeed, ySpeed, rotValue));
 

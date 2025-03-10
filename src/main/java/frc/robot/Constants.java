@@ -128,7 +128,7 @@ public final class Constants {
   public static final class ElevatorConstants {
     public static final double L1Height = 7;
     public static final double L2Height = 88;
-    public static final double L3Height = 143;
+    public static final double L3Height = 148;
     public static final double L4Height = 173;
     public static final double IntakeHeight = 0.5;
   }
@@ -152,7 +152,7 @@ public final class Constants {
     // pitched upward.
     private static final double camPitch = Units.degreesToRadians(-20);
     public static final Transform3d kRobotToCam =
-            new Transform3d(new Translation3d(-Units.inchesToMeters(13), 0, Units.inchesToMeters(6)), new Rotation3d(0, camPitch, 0));
+            new Transform3d(new Translation3d(Units.inchesToMeters(11), -Units.inchesToMeters(1), Units.inchesToMeters(7.5)), new Rotation3d(0, camPitch, 0));
     public static final Transform3d kCamToRobot = kRobotToCam.inverse();
 
     // The layout of the AprilTags on the field
@@ -171,8 +171,8 @@ public final class Constants {
 
   public static class AlignmentConstants {
     public static final double X_SETPOINT_REEF_ALIGNMENT = 0.5;
-    public static final double Y_SETPOINT_REEF_ALIGNMENT = 0.3;
-    public static final double ROT_SETPOINT_REEF_ALIGNMENT = 0;
+    public static final double Y_SETPOINT_REEF_ALIGNMENT = 0.2;
+    public static final double ROT_SETPOINT_REEF_ALIGNMENT = Math.PI;
     
     public static final double X_TOLERANCE_REEF_ALIGNMENT = 0;
     public static final double Y_TOLERANCE_REEF_ALIGNMENT = 0;
