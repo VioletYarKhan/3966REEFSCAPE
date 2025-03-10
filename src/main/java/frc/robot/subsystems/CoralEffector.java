@@ -100,7 +100,7 @@ public class CoralEffector extends SubsystemBase {
 
     public void goToPosition(int level){
         if (level == 4){
-            setPosition(getPosition()-0.6);
+            setPosition(getPosition()-0.55);
         } else {
             setPosition(getPosition());
         }

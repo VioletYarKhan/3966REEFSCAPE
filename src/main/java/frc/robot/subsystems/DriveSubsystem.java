@@ -286,7 +286,6 @@ public class DriveSubsystem extends SubsystemBase {
 
           var visionMeasurement = camPose.transformBy(Constants.VisionConstants.kCamToRobot);
           poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), resultTimestamp);
-          
         }
       }
     } catch(NullPointerException e){}
