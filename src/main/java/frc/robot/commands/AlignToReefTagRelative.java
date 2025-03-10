@@ -5,12 +5,14 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.AlignmentConstants;
 import frc.robot.Constants.VisionConstants;
-import frc.robot.LimelightHelpers;
+import frc.robot.Vision;
 import frc.robot.subsystems.DriveSubsystem;
 
 public class AlignToReefTagRelative extends Command {
@@ -18,7 +20,7 @@ public class AlignToReefTagRelative extends Command {
   private boolean isRightScore;
   private Timer dontSeeTagTimer, stopTimer;
   private DriveSubsystem drivebase;
-  private double tagID = -1;
+  private int tagID = -1;
 
   public AlignToReefTagRelative(boolean isRightScore, DriveSubsystem drivebase) {
     xController = new PIDController(1.0, 0.0, 0);  // Vertical movement
@@ -46,23 +48,23 @@ public class AlignToReefTagRelative extends Command {
     yController.setSetpoint(isRightScore ? AlignmentConstants.Y_SETPOINT_REEF_ALIGNMENT : -AlignmentConstants.Y_SETPOINT_REEF_ALIGNMENT);
     yController.setTolerance(AlignmentConstants.Y_TOLERANCE_REEF_ALIGNMENT);
 
-    tagID = LimelightHelpers.getFiducialID(VisionConstants.kCameraName);
+    tagID = Vision.getBestTag();
   }
 
   @Override
   public void execute() {
-    if (LimelightHelpers.getTV(VisionConstants.kCameraName) && LimelightHelpers.getFiducialID(VisionConstants.kCameraName) == tagID) {
+    if (Vision.resultHasTargets()) {
       this.dontSeeTagTimer.reset();
+      Transform3d cameraToTag = Vision.targetTransform(tagID);
+      Transform3d robotToTag = cameraToTag.plus(VisionConstants.kCamToRobot);
+      SmartDashboard.putNumber("x", robotToTag.getX());
 
-      double[] postions = LimelightHelpers.getBotPose_TargetSpace(VisionConstants.kCameraName);
-      SmartDashboard.putNumber("x", postions[2]);
-
-      double xSpeed = xController.calculate(postions[2]);
+      double xSpeed = -xController.calculate(robotToTag.getX());
       SmartDashboard.putNumber("xspeed", xSpeed);
-      double ySpeed = -yController.calculate(postions[0]);
-      double rotValue = -rotController.calculate(postions[4]);
+      double ySpeed = -yController.calculate(robotToTag.getY());
+      double rotValue = 0;// -rotController.calculate(robotToTag.getRotation().getAngle());
 
-      drivebase.drive(xSpeed, ySpeed, rotValue, false);
+      drivebase.driveRobotRelativeChassis(new ChassisSpeeds(xSpeed, ySpeed, rotValue));
 
       if (!rotController.atSetpoint() ||
           !yController.atSetpoint() ||

@@ -170,8 +170,8 @@ public final class Constants {
   }
 
   public static class AlignmentConstants {
-    public static final double X_SETPOINT_REEF_ALIGNMENT = 1;
-    public static final double Y_SETPOINT_REEF_ALIGNMENT = 1;
+    public static final double X_SETPOINT_REEF_ALIGNMENT = 0.5;
+    public static final double Y_SETPOINT_REEF_ALIGNMENT = 0.3;
     public static final double ROT_SETPOINT_REEF_ALIGNMENT = 0;
     
     public static final double X_TOLERANCE_REEF_ALIGNMENT = 0;
