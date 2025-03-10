@@ -114,8 +114,8 @@ public final class Constants {
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
     
     public static final PathConstraints constraints = new PathConstraints(
-        3.0, 4.0,
-        Units.degreesToRadians(540), Units.degreesToRadians(720));
+        1.0, 2.0,
+        Units.degreesToRadians(360), Units.degreesToRadians(720));
 
     public static final Transform3d leftBranchCoral = new Transform3d(0.381, 0.381, 0, new Rotation3d());
     public static final Transform3d rightBranchCoral = new Transform3d(0.381, -0.381, 0, new Rotation3d());
@@ -174,9 +174,9 @@ public final class Constants {
     public static final double Y_SETPOINT_REEF_ALIGNMENT = 0.2;
     public static final double ROT_SETPOINT_REEF_ALIGNMENT = Math.PI;
     
-    public static final double X_TOLERANCE_REEF_ALIGNMENT = 0;
-    public static final double Y_TOLERANCE_REEF_ALIGNMENT = 0;
-    public static final double ROT_TOLERANCE_REEF_ALIGNMENT = 0;
+    public static final double X_TOLERANCE_REEF_ALIGNMENT = 0.1;
+    public static final double Y_TOLERANCE_REEF_ALIGNMENT = 0.1;
+    public static final double ROT_TOLERANCE_REEF_ALIGNMENT = 0.1;
     
     public static final double DONT_SEE_TAG_WAIT_TIME = 1;
     public static final double POSE_VALIDATION_TIME = 1;

@@ -166,8 +166,9 @@ public class RobotContainer {
     // temp
     try {
       return new SequentialCommandGroup(
-        AutoBuilder.followPath(PathPlannerPath.fromPathFile("1S-6")),
-        new ScoreCoral(3, false, m_coralHand, m_wrist, m_elevator, m_funnel, m_robotDrive)
+        AutoBuilder.followPath(PathPlannerPath.fromPathFile("1S-1")),
+        new ScoreCoral(3, false, m_coralHand, m_wrist, m_elevator, m_funnel, m_robotDrive),
+        AutoBuilder.followPath(PathPlannerPath.fromPathFile("1-1C"))
       );
     } catch (FileVersionException | IOException | ParseException e) {
       return new RunCommand(() -> System.out.println("Uh-oh! not good"));
