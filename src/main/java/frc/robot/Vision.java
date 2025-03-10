@@ -1,5 +1,6 @@
 package frc.robot;
 
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -17,7 +18,6 @@ public class Vision extends SubsystemBase {
     private static PhotonCamera camera = new PhotonCamera(VisionConstants.kCameraName);
     private static PhotonPipelineResult result;
     private static PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(VisionConstants.kTagLayout, PoseStrategy.CLOSEST_TO_REFERENCE_POSE, VisionConstants.kRobotToCam);
-    private static int[] tags;
 
     public void periodic() {
         result = camera.getLatestResult();
@@ -46,7 +46,7 @@ public class Vision extends SubsystemBase {
     }
 
     public static int[] tagsInFrame(){
-        tags = new int[0];
+        int[] tags = new int[0];
         if (result.hasTargets()) {
             // At least one AprilTag was seen by the camera
             tags = new int[result.getTargets().toArray().length];
@@ -59,15 +59,13 @@ public class Vision extends SubsystemBase {
         return tags;
     }
 
-    public static Pose2d getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
-        Pose2d botPose = prevEstimatedRobotPose;
-        if (result.hasTargets()) {
-            var update = photonPoseEstimator.update(result);
-            Pose3d currentPose3d = update.get().estimatedPose;
-            botPose = currentPose3d.toPose2d();
-            // double photonTimestamp = update.get().timestampSeconds;
-        }
-        return botPose;
+    public static EstimatedRobotPose getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose, PhotonPipelineResult result) {
+        photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
+        var update = photonPoseEstimator.update(result);
+        Pose3d currentPose3d = update.get().estimatedPose;
+        double photonTimestamp = update.get().timestampSeconds;
+        
+        return new EstimatedRobotPose(currentPose3d, photonTimestamp, result.getTargets(), PoseStrategy.CLOSEST_TO_REFERENCE_POSE);
     }
 
 

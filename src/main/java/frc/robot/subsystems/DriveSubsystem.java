@@ -4,9 +4,7 @@
 
 package frc.robot.subsystems;
 
-import java.util.Optional;
-
-import org.photonvision.PhotonUtils;
+import org.photonvision.EstimatedRobotPose;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
@@ -19,9 +17,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -37,7 +33,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.Vision;
 import frc.robot.Constants.AutoConstants;
@@ -87,7 +82,6 @@ public class DriveSubsystem extends SubsystemBase {
     layout.setOrigin(alliance.get() == Alliance.Blue ?
         OriginPosition.kBlueAllianceWallRightSide : OriginPosition.kRedAllianceWallRightSide);
     ShuffleboardTab tab = Shuffleboard.getTab("Vision");
-    SmartDashboard.putNumber("Vision Reading Maximum Difference", 1);
 
     poseEstimator =  new SwerveDrivePoseEstimator(
         DriveConstants.kDriveKinematics,
@@ -276,21 +270,8 @@ public class DriveSubsystem extends SubsystemBase {
     try{
       var resultTimestamp = pipelineResult.getTimestampSeconds();
       if (resultTimestamp != previousPipelineTimestamp && pipelineResult.hasTargets()) {
-        previousPipelineTimestamp = resultTimestamp;
-        var target = pipelineResult.getBestTarget();
-        var fiducialId = target.getFiducialId();
-        // Get the tag pose from field layout - consider that the layout will be null if it failed to load
-        Optional<Pose3d> tagPose = layout == null ? Optional.empty() : layout.getTagPose(fiducialId);
-        if (target.getPoseAmbiguity() <= .2 && fiducialId >= 0 && tagPose.isPresent()) {
-          var targetPose = tagPose.get();
-          Transform3d camToTarget = target.getBestCameraToTarget();
-          Pose3d camPose = targetPose.transformBy(camToTarget.inverse());
-
-          var visionMeasurement = camPose.transformBy(Constants.VisionConstants.kCamToRobot);
-          if (PhotonUtils.getDistanceToPose(getCurrentPose(), visionMeasurement.toPose2d()) < SmartDashboard.getNumber("Vision Reading Maximum Difference", 1)){
-            poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), resultTimestamp);
-          }
-        }
+        EstimatedRobotPose botPose = Vision.getEstimatedGlobalPose(getCurrentPose(), pipelineResult);
+        poseEstimator.addVisionMeasurement(botPose.estimatedPose.toPose2d(), botPose.timestampSeconds);
       }
     } catch(NullPointerException e){}
     // Update pose estimator with drivetrain sensors
