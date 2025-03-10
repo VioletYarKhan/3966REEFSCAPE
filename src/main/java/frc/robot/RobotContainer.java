@@ -8,8 +8,13 @@ package frc.robot;
 
 import frc.GryphonLib.PositionCalculations;
 
+import java.io.IOException;
+
+import org.json.simple.parser.ParseException;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.FileVersionException;
 import com.revrobotics.spark.SparkBase.ControlType;
 
 import edu.wpi.first.math.MathUtil;
@@ -22,6 +27,7 @@ import frc.robot.commands.MoveCoralToL4Position;
 import frc.robot.commands.MoveToIntakePositions;
 import frc.robot.commands.MoveToScoringPosition;
 import frc.robot.commands.RotateFunnel;
+import frc.robot.commands.ScoreCoral;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Climber;
@@ -31,6 +37,7 @@ import frc.robot.subsystems.EffectorWrist;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 /*
@@ -156,6 +163,14 @@ public class RobotContainer {
   
 
   public Command getAutonomousCommand() {
-    return Parser.parse(SmartDashboard.getString("Auto Code", ""));
+    // temp
+    try {
+      return new SequentialCommandGroup(
+        AutoBuilder.followPath(PathPlannerPath.fromPathFile("1S-6")),
+        new ScoreCoral(3, false, m_coralHand, m_wrist, m_elevator, m_funnel, m_robotDrive)
+      );
+    } catch (FileVersionException | IOException | ParseException e) {
+      return new RunCommand(() -> System.out.println("Uh-oh! not good"));
+    }
   }
 }
