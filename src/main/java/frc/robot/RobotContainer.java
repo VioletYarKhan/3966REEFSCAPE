@@ -15,7 +15,6 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.FunnelConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.MoveCoralToL4Position;
@@ -54,8 +53,6 @@ public class RobotContainer {
   CommandXboxController m_operatorController = new CommandXboxController(1);
 
     private SendableChooser<Command> autoChooser;
-    private boolean coralNeedsMovement = false;
-
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -91,10 +88,7 @@ public class RobotContainer {
     m_coralHand.setDefaultCommand(
       new RunCommand(
         ()-> {
-          if (coralNeedsMovement && m_wrist.atTarget(1) && Math.abs(m_elevator.getPosition() - ElevatorConstants.L4Height) < 5){
-            new MoveCoralToL4Position(4, m_coralHand).schedule();
-            coralNeedsMovement = false;
-          } else if(m_wrist.getVelocity() > 900){
+            if(m_wrist.getVelocity() > 900){
               m_coralHand.intake();
             } else {
               if(m_coralHand.getControlType() != ControlType.kPosition){
