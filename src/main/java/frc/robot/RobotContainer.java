@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.FunnelConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.AlignToReefTagRelative;
 import frc.robot.commands.MoveCoralToL4Position;
 import frc.robot.commands.MoveToIntakePositions;
 import frc.robot.commands.MoveToScoringPosition;
@@ -129,6 +130,7 @@ public class RobotContainer {
     m_driverController.x().onTrue(new MoveToScoringPosition(2, m_wrist, m_elevator));
     m_driverController.b().onTrue(new MoveToScoringPosition(3, m_wrist, m_elevator));
     m_driverController.y().onTrue(new MoveToScoringPosition(4, m_wrist, m_elevator).andThen(new MoveCoralToL4Position(4, m_coralHand)));
+    m_driverController.leftBumper().onTrue(new AlignToReefTagRelative(false, m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop));
     m_driverController.leftTrigger().whileTrue(new RunCommand(()->m_coralHand.intake(), m_coralHand)).onTrue(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel));
     m_driverController.rightTrigger().whileTrue(new RunCommand(()->m_coralHand.outtake(), m_coralHand));
     m_driverController.povUp().onTrue(new InstantCommand(m_climber::climbCCW)).onFalse(new InstantCommand(m_climber::stop));
