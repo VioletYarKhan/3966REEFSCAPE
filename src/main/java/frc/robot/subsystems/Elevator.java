@@ -8,18 +8,15 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkBase.ResetMode;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Configs;
 
 public class Elevator extends SubsystemBase {
     SparkMax elevatorL = new SparkMax(10, MotorType.kBrushless);
-    SparkMax elevatorR = new SparkMax(11, MotorType.kBrushless);
-    SparkMaxConfig configL = new SparkMaxConfig();
-    SparkMaxConfig configR = new SparkMaxConfig();
+    SparkMax elevatorR = new SparkMax(9, MotorType.kBrushless);
     RelativeEncoder encoderL = elevatorL.getEncoder();
     RelativeEncoder encoderR = elevatorL.getEncoder();
     SparkClosedLoopController pid;
@@ -28,15 +25,18 @@ public class Elevator extends SubsystemBase {
     ControlType currentControlType;
 
     public Elevator() {
-        configL.idleMode(IdleMode.kBrake).inverted(false).openLoopRampRate(0).closedLoopRampRate(0).closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder).pid(0.05, 0, 0).minOutput(-0.2).maxOutput(1);
-        configL.encoder.positionConversionFactor(1).velocityConversionFactor(1);
-        configR.follow(10).idleMode(IdleMode.kBrake);
-        elevatorL.configure(configL, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-        elevatorR.configure(configR, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        elevatorL.configure(Configs.Elevator.elevatorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        elevatorR.configure(Configs.Elevator.elevatorFollowerConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
         pid = elevatorL.getClosedLoopController();
 
         targetReference = 0;
         currentControlType = ControlType.kDutyCycle;
+    }
+
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("Elevator Position", getPosition());
+        SmartDashboard.putString("Elevator Control TYpe", currentControlType.toString());
     }
 
     public void set(double speed) {
@@ -52,6 +52,7 @@ public class Elevator extends SubsystemBase {
     }
 
     public void setPosition(double position) {
+        SmartDashboard.putNumber("Requested Elevator Position", position);
         pid.setReference(position, ControlType.kPosition);
 
         targetReference = position;

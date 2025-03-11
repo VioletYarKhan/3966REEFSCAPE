@@ -53,4 +53,79 @@ public final class Configs {
                     .positionWrappingInputRange(0, turningFactor);
         }
     }
+
+    public static final class Elevator {
+        public static final SparkMaxConfig elevatorConfig = new SparkMaxConfig();
+        public static final SparkMaxConfig elevatorFollowerConfig = new SparkMaxConfig();
+
+        static {
+                elevatorConfig
+                        .idleMode(IdleMode.kBrake)
+                        .smartCurrentLimit(80)
+                        .inverted(true)
+                        .openLoopRampRate(0)
+                        .closedLoopRampRate(0);
+                elevatorConfig.encoder
+                    .positionConversionFactor(1)
+                    .velocityConversionFactor(1);
+                elevatorConfig.closedLoop
+                    .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+                    // These are example gains you may need to them for your own robot!
+                    .pid(0.05, 0, 0)
+                    .velocityFF(0)
+                    .outputRange(-0.7, 0.8);
+                        
+
+                elevatorFollowerConfig
+                    .idleMode(IdleMode.kBrake)
+                    .smartCurrentLimit(80);
+                elevatorFollowerConfig
+                        .follow(10, true);
+
+        }
+    }
+
+    public static final class Wrist {
+        public static final SparkMaxConfig wristConfig = new SparkMaxConfig();
+
+        static {
+                wristConfig
+                        .idleMode(IdleMode.kBrake)
+                        .smartCurrentLimit(80)
+                        .inverted(false)
+                        .openLoopRampRate(0)
+                        .closedLoopRampRate(0);
+                wristConfig.encoder
+                        .positionConversionFactor(1)
+                        .velocityConversionFactor(1);
+                wristConfig.closedLoop
+                        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+                        // These are example gains you may need to them for your own robot!
+                        .pid(0.1, 0, 0)
+                        .velocityFF(0)
+                        .outputRange(-0.35, 0.2);
+                }
+        }
+
+        public static final class Funnel {
+                public static final SparkMaxConfig funnelConfig = new SparkMaxConfig();
+
+                static {
+                        funnelConfig
+                                .idleMode(IdleMode.kBrake)
+                                .smartCurrentLimit(80)
+                                .inverted(false)
+                                .openLoopRampRate(0)
+                                .closedLoopRampRate(0);
+                        funnelConfig.encoder
+                                .positionConversionFactor(1)
+                                .velocityConversionFactor(1);
+                        funnelConfig.closedLoop
+                                .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+                                // These are example gains you may need to them for your own robot!
+                                .pid(0.05, 0, 0)
+                                .velocityFF(0)
+                                .outputRange(-0.2, 0.2);
+                }
+        }
 }

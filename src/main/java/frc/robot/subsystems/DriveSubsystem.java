@@ -4,7 +4,7 @@
 
 package frc.robot.subsystems;
 
-import java.util.Optional;
+import org.photonvision.EstimatedRobotPose;
 
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -18,15 +18,15 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -66,16 +66,19 @@ public class DriveSubsystem extends SubsystemBase {
   // The gyro sensor
   private final ADIS16470_IMU m_gyro = new ADIS16470_IMU();
 
-  private final AprilTagFieldLayout layout = Constants.VisionConstants.kTagLayout;;
+  private final AprilTagFieldLayout layout = Constants.VisionConstants.kTagLayout;
   private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
-  private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(10));
+  private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30));
   private final SwerveDrivePoseEstimator poseEstimator;
   private final Field2d field2d = new Field2d();
   private double previousPipelineTimestamp = 0;
+  private final StructArrayPublisher<SwerveModuleState> publisher;
 
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
+    publisher = NetworkTableInstance.getDefault()
+      .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
     var alliance = DriverStation.getAlliance();
     layout.setOrigin(alliance.get() == Alliance.Blue ?
         OriginPosition.kBlueAllianceWallRightSide : OriginPosition.kRedAllianceWallRightSide);
@@ -226,9 +229,20 @@ public class DriveSubsystem extends SubsystemBase {
   public SwerveModulePosition[] getPositions(){
     SwerveModulePosition[] modules = {
     m_frontLeft.getPosition(),
-    m_rearLeft.getPosition(),
     m_frontRight.getPosition(),
+    m_rearLeft.getPosition(),
     m_rearRight.getPosition()};
+
+    return modules;
+  }
+
+
+  public SwerveModuleState[] getStates(){
+    SwerveModuleState[] modules = {
+    m_frontLeft.getState(),
+    m_frontRight.getState(),
+    m_rearLeft.getState(),
+    m_rearRight.getState()};
 
     return modules;
   }
@@ -254,28 +268,20 @@ public class DriveSubsystem extends SubsystemBase {
   public void periodic() {
     // Update pose estimator with the best visible target
     var pipelineResult = Vision.getResult();
-    var resultTimestamp = pipelineResult.getTimestampSeconds();
-    if (resultTimestamp != previousPipelineTimestamp && pipelineResult.hasTargets()) {
-      previousPipelineTimestamp = resultTimestamp;
-      var target = pipelineResult.getBestTarget();
-      var fiducialId = target.getFiducialId();
-      // Get the tag pose from field layout - consider that the layout will be null if it failed to load
-      Optional<Pose3d> tagPose = layout == null ? Optional.empty() : layout.getTagPose(fiducialId);
-      if (target.getPoseAmbiguity() <= .2 && fiducialId >= 0 && tagPose.isPresent()) {
-        var targetPose = tagPose.get();
-        Transform3d camToTarget = target.getBestCameraToTarget();
-        Pose3d camPose = targetPose.transformBy(camToTarget.inverse());
-
-        var visionMeasurement = camPose.transformBy(Constants.VisionConstants.kCamToRobot);
-        poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), resultTimestamp);
+    try{
+      var resultTimestamp = pipelineResult.getTimestampSeconds();
+      if (resultTimestamp != previousPipelineTimestamp && pipelineResult.hasTargets()) {
+        EstimatedRobotPose botPose = Vision.getEstimatedGlobalPose(getCurrentPose(), pipelineResult);
+        poseEstimator.addVisionMeasurement(botPose.estimatedPose.toPose2d(), botPose.timestampSeconds);
       }
-    }
+    } catch(NullPointerException e){}
     // Update pose estimator with drivetrain sensors
     poseEstimator.update(
       getRotation(),
       getPositions());
-   
-    field2d.setRobotPose(getCurrentPose());
+
+      field2d.setRobotPose(getCurrentPose());
+      publisher.set(getStates());
   }
   private String getFomattedPose() {
     var pose = getCurrentPose();
