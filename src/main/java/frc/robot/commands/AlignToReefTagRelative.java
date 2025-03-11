@@ -17,16 +17,16 @@ import frc.robot.subsystems.DriveSubsystem;
 
 public class AlignToReefTagRelative extends Command {
   private PIDController xController, yController, rotController;
-  private boolean isRightScore;
+  private boolean isLeftScore;
   private Timer dontSeeTagTimer, stopTimer;
   private DriveSubsystem drivebase;
   private int tagID = -1;
 
-  public AlignToReefTagRelative(boolean isRightScore, DriveSubsystem drivebase) {
+  public AlignToReefTagRelative(boolean isLeftScore, DriveSubsystem drivebase) {
     xController = new PIDController(1.5, 0.0, 0);  // Vertical movement
     yController = new PIDController(1.5, 0.0, 0);  // Horitontal movement
     rotController = new PIDController(2, 0, 0);  // Rotation
-    this.isRightScore = isRightScore;
+    this.isLeftScore = isLeftScore;
     this.drivebase = drivebase;
     addRequirements(drivebase);
     drivebase.getStates();
@@ -45,7 +45,7 @@ public class AlignToReefTagRelative extends Command {
     xController.setSetpoint(AlignmentConstants.X_SETPOINT_REEF_ALIGNMENT);
     xController.setTolerance(AlignmentConstants.X_TOLERANCE_REEF_ALIGNMENT);
 
-    yController.setSetpoint(isRightScore ? AlignmentConstants.Y_SETPOINT_REEF_ALIGNMENT : -AlignmentConstants.Y_SETPOINT_REEF_ALIGNMENT);
+    yController.setSetpoint(isLeftScore ? -AlignmentConstants.Y_SETPOINT_REEF_ALIGNMENT : AlignmentConstants.Y_SETPOINT_REEF_ALIGNMENT);
     yController.setTolerance(AlignmentConstants.Y_TOLERANCE_REEF_ALIGNMENT);
 
     tagID = Vision.getBestTag();

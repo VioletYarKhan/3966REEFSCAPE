@@ -65,6 +65,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   // The gyro sensor
   private final ADIS16470_IMU m_gyro = new ADIS16470_IMU();
+  private double gyroOffset = 0.0;
 
   private final AprilTagFieldLayout layout = Constants.VisionConstants.kTagLayout;
   private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
@@ -197,7 +198,11 @@ public class DriveSubsystem extends SubsystemBase {
 
   /** Zeroes the heading of the robot. */
   public void zeroHeading() {
-    m_gyro.reset();
+    gyroOffset = -m_gyro.getAngle(); // Set current yaw as zero
+  }
+
+  public void setHeading(double angle) {
+    gyroOffset = (angle - m_gyro.getAngle()); 
   }
 
   /**
@@ -206,7 +211,7 @@ public class DriveSubsystem extends SubsystemBase {
    * @return the robot's heading in degrees, from -180 to 180
    */
   public double getHeading() {
-    return Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ)).getDegrees();
+    return Rotation2d.fromDegrees(m_gyro.getAngle(IMUAxis.kZ) + gyroOffset).getDegrees();
   }
 
   /**
