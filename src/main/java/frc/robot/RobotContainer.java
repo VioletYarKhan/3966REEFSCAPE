@@ -163,7 +163,7 @@ public class RobotContainer {
 
   public SequentialCommandGroup getAutonomousCommand() {
     SequentialCommandGroup autoRoutine = new SequentialCommandGroup();
-    autoRoutine.addCommands(new InstantCommand(()->m_robotDrive.zeroHeading(), m_robotDrive));
+    autoRoutine.addCommands(new InstantCommand(()->m_robotDrive.setHeading(180), m_robotDrive));
     // Default is placeholder
     ArrayList<Command> commands = Parser.parse(SmartDashboard.getString("Auto String", "1S-53L-1C"));
     ArrayList<Command> convertedCommands = new ArrayList<>();
