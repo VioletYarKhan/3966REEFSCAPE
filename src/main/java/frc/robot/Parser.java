@@ -13,11 +13,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public class Parser {
     
-    private static final ArrayList<Command> defaultCommand = new ArrayList<Command>();
+    private static final ArrayList<Command> defaultCommand = new ArrayList<>();
     // (1/2S)-(1-6)(1-4)(L/R)-(1/2C)-(1-6)(1-4)(L/R)-(1/2C)-(1-6)(1-4)(L/R)
     // (Start location)-(Side)(Level)(Pole)-(Coral station)-(Side)(Level)(Pole)-(Coral station)-(Side)(Level)(Pole)
     public static ArrayList<Command> parse(String input) {
-        ArrayList<Command> commands = new ArrayList<Command>();
+        ArrayList<Command> commands = new ArrayList<>();
         String[] steps = input.split("-");
         try {
             for (int i = 0; i < 5; i += 2) {
@@ -43,13 +43,10 @@ public class Parser {
         public int side;
         public int level;
         public boolean left;
-        public PutCoralCommand(int side, int level, boolean left) {
-            this.side = side;
-            this.level = level;
-            this.left = left;
-        }
         public PutCoralCommand(String[] code) {
-            this(Integer.parseInt(code[0]), Integer.parseInt(code[1]), code[2].equalsIgnoreCase("L"));
+            this.side = Integer.parseInt(code[0]);
+            this.level = Integer.parseInt(code[1]);
+            this.left = code[2].equalsIgnoreCase("L");
         }
         public int getLevel(){
             return level;

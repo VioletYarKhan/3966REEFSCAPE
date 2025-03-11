@@ -7,6 +7,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.SparkBase.ControlType;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -14,6 +15,7 @@ public class CoralEffector extends SubsystemBase {
     
     TalonFX effectorWheel = new TalonFX(12);
     TalonFXConfiguration effectorConfig = new TalonFXConfiguration();
+    DigitalInput coralSwitch = new DigitalInput(0);
 
     double targetReference;
     ControlType currentControlType;
@@ -104,5 +106,9 @@ public class CoralEffector extends SubsystemBase {
         } else {
             setPosition(getPosition());
         }
+    }
+
+    public boolean hasCoral(){
+        return coralSwitch.get();
     }
 }

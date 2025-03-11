@@ -27,8 +27,7 @@ public class ScoreCoral extends SequentialCommandGroup{
                     new MoveCoralToL4Position(level, hand),
                     new WaitUntilCommand(Vision::resultHasTargets),
                     new AlignToReefTagRelative(left, drivetrain),
-                    new RunCommand(()->drivetrain.driveRobotRelativeChassis(new ChassisSpeeds(0.2, 0, 0)), drivetrain).withTimeout(0.2),
-                    new MoveToIntakePositions(wrist, elevator, funnel)
+                    new RunCommand(()->drivetrain.driveRobotRelativeChassis(new ChassisSpeeds(0.2, 0, 0)), drivetrain).withTimeout(0.2)
                 );
             } else {
                 addCommands(
@@ -37,8 +36,7 @@ public class ScoreCoral extends SequentialCommandGroup{
                     new AlignToReefTagRelative(left, drivetrain),
                     new RunCommand(()->hand.outtake(), hand).withTimeout(1),
                     new RunCommand(()->hand.stop(), hand).withTimeout(0.1),
-                    new RotateWristToLevel(4, wrist),
-                    new MoveToIntakePositions(wrist, elevator, funnel)
+                    new RotateWristToLevel(4, wrist)
                 );
             }
     }

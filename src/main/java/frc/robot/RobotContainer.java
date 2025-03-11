@@ -32,6 +32,7 @@ import frc.robot.subsystems.CoralFunnel;
 import frc.robot.subsystems.EffectorWrist;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -161,41 +162,75 @@ public class RobotContainer {
   
 
   public SequentialCommandGroup getAutonomousCommand() {
-    // temp
-    /*try {
-      return new SequentialCommandGroup(
-        AutoBuilder.followPath(PathPlannerPath.fromPathFile("1S-1")),
-        new ScoreCoral(3, false, m_coralHand, m_wrist, m_elevator, m_funnel, m_robotDrive),
-        AutoBuilder.followPath(PathPlannerPath.fromPathFile("1-1C"))
-      );
-    } catch (FileVersionException | IOException | ParseException e) {
-      return new RunCommand(() -> System.out.println("Uh-oh! not good"));
-    }*/
     SequentialCommandGroup autoRoutine = new SequentialCommandGroup();
+    autoRoutine.addCommands(new InstantCommand(()->m_robotDrive.zeroHeading(), m_robotDrive));
     // Default is placeholder
     ArrayList<Command> commands = Parser.parse(SmartDashboard.getString("Auto String", "1S-53L-1C"));
     ArrayList<Command> convertedCommands = new ArrayList<>();
-    for (Command command : commands){
-      if(command instanceof Parser.PutCoralCommand){
-        // Score Coral Command
-        Parser.PutCoralCommand coralCmd = (Parser.PutCoralCommand) command;
-                convertedCommands.add(new ScoreCoral(
-                    coralCmd.getLevel(),
-                    coralCmd.getLeft(),
-                    m_coralHand,
-                    m_wrist,
-                    m_elevator,
-                    m_funnel,
-                    m_robotDrive
-                ));
-      } else if (command instanceof Parser.PutCoralCommand){
-        // Intake Command
-        convertedCommands.add(new RunCommand(()->m_coralHand.intake(), m_coralHand).withTimeout(3));
-      } else {
-        // Path Command
-        convertedCommands.add(command);
+    for (int i = 0; i < commands.size(); i += 2) {
+    // Get the path command (even index)
+    Command pathCommand = commands.get(i);
+    // Get the subsystem movement command (odd index)
+    Command subsystemCommand = commands.get(i + 1);
+
+    if (subsystemCommand instanceof Parser.PutCoralCommand) {
+        Parser.PutCoralCommand putCmd = (Parser.PutCoralCommand) subsystemCommand;
+        // Build the scoring sequence that will run concurrently with the path command.
+        Command subsystemMovement = new MoveToScoringPosition(putCmd.getLevel(), m_wrist, m_elevator)
+            .andThen(new MoveCoralToL4Position(putCmd.getLevel(), m_coralHand));
+        // Create a sequential group:
+        // 1. Run the path command and scoringSequence in parallel.
+        // 2. Then run ScoreCoral.
+        Command fullSequence = new SequentialCommandGroup(
+            new ParallelCommandGroup(pathCommand, subsystemMovement),
+            new ScoreCoral(
+                putCmd.getLevel(),
+                putCmd.getLeft(),
+                m_coralHand,
+                m_wrist,
+                m_elevator,
+                m_funnel,
+                m_robotDrive
+            )
+        );
+        convertedCommands.add(fullSequence);
+      } else if (subsystemCommand instanceof Parser.GetCoralCommand) {
+          // For GetCoralCommand, run your intake sequence in parallel with the path command.
+          Command intakeSequence = new ParallelCommandGroup(
+              new MoveToIntakePositions(m_wrist, m_elevator, m_funnel),
+              new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral())
+          );
+          SequentialCommandGroup fullSequence = new SequentialCommandGroup(
+            new ParallelCommandGroup(pathCommand, intakeSequence),
+            new RunCommand(() -> m_coralHand.intake(), m_coralHand).withTimeout(0.3)
+          );
+          
+          convertedCommands.add(fullSequence);
       }
+    }
+    for (Command command : convertedCommands){
+      autoRoutine.addCommands(command);
     }
     return autoRoutine;
   }
+
+
+  /*private Command convertCommand(Command command) {
+    if (command instanceof Parser.PutCoralCommand) {
+        Parser.PutCoralCommand coralCmd = (Parser.PutCoralCommand) command;
+        return new ScoreCoral(
+            coralCmd.getLevel(),
+            coralCmd.getLeft(),
+            m_coralHand,
+            m_wrist,
+            m_elevator,
+            m_funnel,
+            m_robotDrive
+        );
+    } else if (command instanceof Parser.GetCoralCommand) {
+        return new MoveToIntakePositions(m_wrist, m_elevator, m_funnel);
+    }
+    // Otherwise, assume it's a path-following command
+    return command;
+  }*/
 }

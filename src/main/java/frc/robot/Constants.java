@@ -179,6 +179,6 @@ public final class Constants {
     public static final double ROT_TOLERANCE_REEF_ALIGNMENT = 0.1;
     
     public static final double DONT_SEE_TAG_WAIT_TIME = 1;
-    public static final double POSE_VALIDATION_TIME = 1;
+    public static final double POSE_VALIDATION_TIME = 0.3;
   }
 }
