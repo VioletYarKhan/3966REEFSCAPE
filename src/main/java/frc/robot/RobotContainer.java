@@ -8,13 +8,9 @@ package frc.robot;
 
 import frc.GryphonLib.PositionCalculations;
 
-import java.io.IOException;
-
-import org.json.simple.parser.ParseException;
+import java.util.ArrayList;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.FileVersionException;
 import com.revrobotics.spark.SparkBase.ControlType;
 
 import edu.wpi.first.math.MathUtil;
@@ -128,7 +124,9 @@ public class RobotContainer {
 
   autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
+    SmartDashboard.putString("Auto String", "");
   }
+  
 
   private void configureButtonBindings() {
     // m_driverController.leftBumper().onTrue(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.middleReef, false).andThen(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.leftBranch, false)));
@@ -162,9 +160,9 @@ public class RobotContainer {
   }
   
 
-  public Command getAutonomousCommand() {
+  public SequentialCommandGroup getAutonomousCommand() {
     // temp
-    try {
+    /*try {
       return new SequentialCommandGroup(
         AutoBuilder.followPath(PathPlannerPath.fromPathFile("1S-1")),
         new ScoreCoral(3, false, m_coralHand, m_wrist, m_elevator, m_funnel, m_robotDrive),
@@ -172,6 +170,32 @@ public class RobotContainer {
       );
     } catch (FileVersionException | IOException | ParseException e) {
       return new RunCommand(() -> System.out.println("Uh-oh! not good"));
+    }*/
+    SequentialCommandGroup autoRoutine = new SequentialCommandGroup();
+    // Default is placeholder
+    ArrayList<Command> commands = Parser.parse(SmartDashboard.getString("Auto String", "1S-53L-1C"));
+    ArrayList<Command> convertedCommands = new ArrayList<>();
+    for (Command command : commands){
+      if(command instanceof Parser.PutCoralCommand){
+        // Score Coral Command
+        Parser.PutCoralCommand coralCmd = (Parser.PutCoralCommand) command;
+                convertedCommands.add(new ScoreCoral(
+                    coralCmd.getLevel(),
+                    coralCmd.getLeft(),
+                    m_coralHand,
+                    m_wrist,
+                    m_elevator,
+                    m_funnel,
+                    m_robotDrive
+                ));
+      } else if (command instanceof Parser.PutCoralCommand){
+        // Intake Command
+        convertedCommands.add(new RunCommand(()->m_coralHand.intake(), m_coralHand).withTimeout(3));
+      } else {
+        // Path Command
+        convertedCommands.add(command);
+      }
     }
+    return autoRoutine;
   }
 }
