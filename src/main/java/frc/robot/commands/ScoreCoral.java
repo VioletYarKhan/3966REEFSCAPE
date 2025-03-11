@@ -25,7 +25,7 @@ public class ScoreCoral extends SequentialCommandGroup{
                     new MoveToScoringPosition(level, wrist, elevator),
                     new MoveCoralToL4Position(level, hand),
                     new RunCommand(()->drivetrain.driveRobotRelativeChassis(new ChassisSpeeds(0.2, 0, 0)), drivetrain).withTimeout(0.2),
-                    new MoveElevatorToLevel(0, elevator)
+                    new MoveToIntakePositions(wrist, elevator, funnel)
                 );
             } else {
                 addCommands(
