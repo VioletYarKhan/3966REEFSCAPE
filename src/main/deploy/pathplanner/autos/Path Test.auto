@@ -31,7 +31,43 @@
         {
           "type": "path",
           "data": {
-            "pathName": "1C-6"
+            "pathName": "1C-5"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5-2C"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2C-4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "4-2C"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2C-3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "3-2C"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2C-2"
           }
         }
       ]
