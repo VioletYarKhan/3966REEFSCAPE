@@ -165,7 +165,7 @@ public class RobotContainer {
     SequentialCommandGroup autoRoutine = new SequentialCommandGroup();
     autoRoutine.addCommands(new InstantCommand(()->m_robotDrive.setHeading(180), m_robotDrive));
     // Default is placeholder
-    ArrayList<Command> commands = Parser.parse(SmartDashboard.getString("Auto String", "1S-53L-1C"));
+    ArrayList<Command> commands = Parser.parse(SmartDashboard.getString("Auto String", "1S-13L-1C-63L-1C-63R"));
     ArrayList<Command> convertedCommands = new ArrayList<>();
     for (int i = 0; i < commands.size(); i += 2) {
       // Get the path command (even index)
@@ -182,7 +182,7 @@ public class RobotContainer {
           // 1. Run the path command and scoringSequence in parallel.
           // 2. Then run ScoreCoral.
           Command fullSequence = new SequentialCommandGroup(
-              new ParallelCommandGroup(pathCommand, subsystemMovement),
+              new ParallelCommandGroup(pathCommand, new SequentialCommandGroup(new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()), subsystemMovement)),
               new ScoreCoral(
                   putCmd.getLevel(),
                   putCmd.getLeft(),
@@ -198,7 +198,7 @@ public class RobotContainer {
             // For GetCoralCommand, run your intake sequence in parallel with the path command.
             Command intakeSequence = new ParallelCommandGroup(
                 new MoveToIntakePositions(m_wrist, m_elevator, m_funnel),
-                new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral())
+                new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()).withTimeout(3)
             );
             SequentialCommandGroup fullSequence = new SequentialCommandGroup(
               new ParallelCommandGroup(pathCommand, intakeSequence),
@@ -211,6 +211,7 @@ public class RobotContainer {
     for (Command command : convertedCommands){
       autoRoutine.addCommands(command);
     }
+    SmartDashboard.putString("Auto Command", convertedCommands.toString());
     return autoRoutine;
   }
 }
