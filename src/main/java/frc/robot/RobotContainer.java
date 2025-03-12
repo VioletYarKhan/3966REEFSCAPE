@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import com.revrobotics.spark.SparkBase.ControlType;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.FunnelConstants;
 import frc.robot.Constants.OIConstants;
@@ -62,7 +60,6 @@ public class RobotContainer {
    */
   public RobotContainer() {
     PositionCalculations.CreateGhostField();
-    PositionCalculations.setGhostPose(new Pose2d( 7.299441964285713, 1.8834821428571422, new Rotation2d(Math.PI)));
     configureButtonBindings();
     // Configure default commands
     m_robotDrive.setDefaultCommand(
@@ -133,7 +130,7 @@ public class RobotContainer {
     m_driverController.rightBumper().whileTrue(new AlignToReefTagRelative(true, m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop));
     m_driverController.leftTrigger().whileTrue(new RunCommand(()->m_coralHand.intake(), m_coralHand)).onTrue(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel));
     m_driverController.rightTrigger().whileTrue(new RunCommand(()->m_coralHand.outtake(), m_coralHand));
-    m_driverController.povUp().whileTrue(new RunCommand(()->m_climber.climbCCW(), m_climber));
+    m_driverController.povUp().whileTrue(new RunCommand(()->m_climber.climbCCW(), m_climber)).onFalse(new RunCommand(()->m_climber.setPosition(m_climber.getPosition()), m_climber));
     m_driverController.povDown().whileTrue(new RunCommand(()->m_climber.climbCW(), m_climber));
     m_driverController.povRight().onTrue(new RotateFunnel(m_funnel, FunnelConstants.IntakeAngle));
     m_driverController.povLeft().onTrue(new RotateFunnel(m_funnel, FunnelConstants.ClimbAngle));
