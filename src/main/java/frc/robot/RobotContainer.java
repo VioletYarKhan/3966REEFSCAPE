@@ -10,11 +10,11 @@ import frc.GryphonLib.PositionCalculations;
 
 import java.util.ArrayList;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.revrobotics.spark.SparkBase.ControlType;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.FunnelConstants;
 import frc.robot.Constants.OIConstants;
@@ -57,12 +57,12 @@ public class RobotContainer {
   CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
   CommandXboxController m_operatorController = new CommandXboxController(1);
 
-    private SendableChooser<Command> autoChooser;
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
     PositionCalculations.CreateGhostField();
+    PositionCalculations.setGhostPose(new Pose2d( 7.299441964285713, 1.8834821428571422, new Rotation2d(Math.PI)));
     configureButtonBindings();
     // Configure default commands
     m_robotDrive.setDefaultCommand(
@@ -121,17 +121,10 @@ public class RobotContainer {
           m_climber.stop();
         }, m_climber)
     );
-
-
-  autoChooser = AutoBuilder.buildAutoChooser();
-    SmartDashboard.putData("Auto Chooser", autoChooser);
-    SmartDashboard.putString("Auto String", "");
   }
   
 
   private void configureButtonBindings() {
-    // m_driverController.leftBumper().onTrue(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.middleReef, false).andThen(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.leftBranch, false)));
-    // m_driverController.rightBumper().onTrue(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.middleReef, false).andThen(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.rightBranch, false)));
     m_driverController.a().onTrue(new MoveToScoringPosition(1, m_wrist, m_elevator));
     m_driverController.x().onTrue(new MoveToScoringPosition(2, m_wrist, m_elevator));
     m_driverController.b().onTrue(new MoveToScoringPosition(3, m_wrist, m_elevator));
@@ -160,12 +153,11 @@ public class RobotContainer {
     m_operatorController.y().onTrue(new InstantCommand(() -> m_robotDrive.setX(), m_robotDrive));
   }
   
-
   public SequentialCommandGroup getAutonomousCommand() {
     SequentialCommandGroup autoRoutine = new SequentialCommandGroup();
     autoRoutine.addCommands(new InstantCommand(()->m_robotDrive.setHeading(180), m_robotDrive));
     // Default is placeholder
-    ArrayList<Command> commands = Parser.parse(SmartDashboard.getString("Auto String", "1S-13L-1C-63L-1C-63R"));
+    ArrayList<Command> commands = Parser.parse(SmartDashboard.getString("Auto Code", "1S-13L-1C-63L-1C-63R"));
     ArrayList<Command> convertedCommands = new ArrayList<>();
     for (int i = 0; i < commands.size(); i += 2) {
       // Get the path command (even index)
