@@ -14,18 +14,18 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class Parser {
     
     private static final ArrayList<Command> defaultCommand = new ArrayList<>();
-    // (1/2S)-(1-6)(1-4)(L/R)-(1/2C)-(1-6)(1-4)(L/R)-(1/2C)-(1-6)(1-4)(L/R)
-    // (Start location)-(Side)(Level)(Pole)-(Coral station)-(Side)(Level)(Pole)-(Coral station)-(Side)(Level)(Pole)
     public static ArrayList<Command> parse(String input) {
         ArrayList<Command> commands = new ArrayList<>();
-        String[] steps = input.split("-");
+        String[] steps = input.toUpperCase().split("-");
         try {
-            for (int i = 0; i < 5; i += 2) {
-                commands.add(pathFromCode(steps[i], steps[i + 1].substring(0, 1)));
-                commands.add(new PutCoralCommand(steps[i + 1].split("")));
-                if (i < 4) {
-                    commands.add(pathFromCode(steps[i + 1].substring(0, 1), steps[i + 2]));
+            if (steps.length < 2) return defaultCommand;
+            
+            for (int i = 1; i < steps.length; i++) {
+                commands.add(pathFromCode(steps[i - 1], steps[i]));
+                if (steps[i].matches("[1-2]C")) {
                     commands.add(new GetCoralCommand());
+                } else if (steps[i].matches("[1-6][1-4][LR]")) {
+                    commands.add(new PutCoralCommand(steps[i].split("")));
                 }
             }
         } catch (Exception e) {
@@ -35,7 +35,9 @@ public class Parser {
     }
 
     public static Command pathFromCode(String start, String end) throws FileVersionException, IOException, ParseException {
-        return AutoBuilder.followPath(PathPlannerPath.fromPathFile(start + "-" + end));
+        String startLoc = start.matches("[LR]") ? start.substring(0, 1) : start;
+        String endLoc = end.matches("[LR]") ? end.substring(0, 1) : end;
+        return AutoBuilder.followPath(PathPlannerPath.fromPathFile(startLoc + "-" + endLoc));
     }
 
     // Placeholder
@@ -46,7 +48,7 @@ public class Parser {
         public PutCoralCommand(String[] code) {
             this.side = Integer.parseInt(code[0]);
             this.level = Integer.parseInt(code[1]);
-            this.left = code[2].equalsIgnoreCase("L");
+            this.left = code[2].equals("L");
         }
         public int getLevel(){
             return level;
