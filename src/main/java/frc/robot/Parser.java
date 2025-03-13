@@ -29,14 +29,15 @@ public class Parser {
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             return defaultCommand;
         }
         return commands;
     }
 
     public static Command pathFromCode(String start, String end) throws FileVersionException, IOException, ParseException {
-        String startLoc = start.matches("[LR]") ? start.substring(0, 1) : start;
-        String endLoc = end.matches("[LR]") ? end.substring(0, 1) : end;
+        String startLoc = start.matches("\\d\\d[LR]") ? start.substring(0, 1) : start;
+        String endLoc = end.matches("\\d\\d[LR]") ? end.substring(0, 1) : end;
         return AutoBuilder.followPath(PathPlannerPath.fromPathFile(startLoc + "-" + endLoc));
     }
 
