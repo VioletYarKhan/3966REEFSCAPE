@@ -14,6 +14,7 @@ import com.revrobotics.spark.SparkBase.ControlType;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.FunnelConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.AlignToReefTagRelative;
@@ -152,9 +153,14 @@ public class RobotContainer {
   
   public SequentialCommandGroup getAutonomousCommand() {
     SequentialCommandGroup autoRoutine = new SequentialCommandGroup();
-    autoRoutine.addCommands(new InstantCommand(()->m_robotDrive.setHeading(180), m_robotDrive));
-    // Default is placeholder
     ArrayList<Command> commands = Parser.parse(SmartDashboard.getString("Auto Code", "1S-13L-1C-63L-1C-63R"));
+    Parser.SetPositionCommand setPositionCommand = (Parser.SetPositionCommand) commands.get(0);
+    autoRoutine.addCommands(
+      new InstantCommand(()->m_robotDrive.setHeading(180), m_robotDrive),
+      new InstantCommand(()->m_robotDrive.setCurrentPose(AutoConstants.startPositions[setPositionCommand.getPosition()]), m_robotDrive)
+    );
+    commands.remove(0);
+    // Default is placeholder
     ArrayList<Command> convertedCommands = new ArrayList<>();
     for (int i = 0; i < commands.size(); i += 2) {
       // Get the path command (even index)
@@ -200,7 +206,6 @@ public class RobotContainer {
     for (Command command : convertedCommands){
       autoRoutine.addCommands(command);
     }
-    SmartDashboard.putString("Auto Command", convertedCommands.toString());
     return autoRoutine;
   }
 }

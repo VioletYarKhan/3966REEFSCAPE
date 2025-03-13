@@ -9,6 +9,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FileVersionException;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class Parser {
@@ -18,6 +19,17 @@ public class Parser {
     // (Start location)-(Side)(Level)(Pole)-(Coral station)-(Side)(Level)(Pole)-(Coral station)-(Side)(Level)(Pole)
     public static ArrayList<Command> parse(String input) {
         ArrayList<Command> commands = new ArrayList<>();
+        int startPos;
+        try {
+            startPos = Integer.parseInt(input.substring(0, 1));
+            SmartDashboard.putBoolean("Auto Parser Empty", false);
+         }
+         catch (NumberFormatException | IndexOutOfBoundsException e) {
+            SmartDashboard.putBoolean("Auto Parser Empty", true);
+            startPos = 1;
+            input = "1S-13L-1C-63L-1C-63R";
+         }
+        commands.add(new SetPositionCommand(startPos));
         String[] steps = input.split("-");
         try {
             for (int i = 0; i < 5; i += 2) {
@@ -56,4 +68,13 @@ public class Parser {
         }
     }
     public static class GetCoralCommand extends Command {}
+    public static class SetPositionCommand extends Command {
+        public int position;
+        public SetPositionCommand(int position) {
+            this.position = position;
+        }
+        public int getPosition(){
+            return position - 1;
+        }
+    }
 }
