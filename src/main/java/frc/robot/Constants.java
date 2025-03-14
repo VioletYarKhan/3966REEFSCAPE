@@ -9,6 +9,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -119,6 +120,12 @@ public final class Constants {
 
     public static final Transform3d leftBranchCoral = new Transform3d(0.381, 0.381, 0, new Rotation3d());
     public static final Transform3d rightBranchCoral = new Transform3d(0.381, -0.381, 0, new Rotation3d());
+
+    public static final Pose2d[] startPositions = new Pose2d[]{
+      new Pose2d(7.286383928571428, 6.21875, new Rotation2d(Math.PI)), // S1
+      new Pose2d(7.260267857142857, 4.06417, new Rotation2d(Math.PI)), // S2
+      new Pose2d(7.299441964285713, 1.88348, new Rotation2d(Math.PI))  // S3 
+    };
   }
 
   public static final class NeoMotorConstants {
@@ -141,7 +148,7 @@ public final class Constants {
   }
 
   public static final class FunnelConstants {
-    public static final double IntakeAngle = 0.355;
+    public static final double IntakeAngle = 0.3532;
     public static final double ClimbAngle = 0.7;
   }
 
@@ -151,8 +158,9 @@ public final class Constants {
     // Cam mounted facing forward, half a meter forward of center, half a meter up from center,
     // pitched upward.
     private static final double camPitch = Units.degreesToRadians(-20);
+    private static final double camYaw = Units.degreesToRadians(-2);
     public static final Transform3d kRobotToCam =
-            new Transform3d(new Translation3d(Units.inchesToMeters(11), -Units.inchesToMeters(1), Units.inchesToMeters(7.5)), new Rotation3d(0, camPitch, 0));
+            new Transform3d(new Translation3d(Units.inchesToMeters(11), -Units.inchesToMeters(0), Units.inchesToMeters(7.5)), new Rotation3d(0, camPitch, camYaw));
     public static final Transform3d kCamToRobot = kRobotToCam.inverse();
 
     // The layout of the AprilTags on the field
@@ -170,8 +178,8 @@ public final class Constants {
   }
 
   public static class AlignmentConstants {
-    public static final double X_SETPOINT_REEF_ALIGNMENT = 0.5;
-    public static final double Y_SETPOINT_REEF_ALIGNMENT = 0.2;
+    public static final double X_SETPOINT_REEF_ALIGNMENT = 0.6;
+    public static final double Y_SETPOINT_REEF_ALIGNMENT = -0.2;
     public static final double ROT_SETPOINT_REEF_ALIGNMENT = Math.PI;
     
     public static final double X_TOLERANCE_REEF_ALIGNMENT = 0.1;
@@ -179,6 +187,6 @@ public final class Constants {
     public static final double ROT_TOLERANCE_REEF_ALIGNMENT = 0.1;
     
     public static final double DONT_SEE_TAG_WAIT_TIME = 1;
-    public static final double POSE_VALIDATION_TIME = 0.3;
+    public static final double POSE_VALIDATION_TIME = 1;
   }
 }

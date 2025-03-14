@@ -9,29 +9,36 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FileVersionException;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class Parser {
     
-    private static final ArrayList<Command> defaultCommand = new ArrayList<>();
+    private static final ArrayList<Command> defaultCommand = parse("1S-13L-1C-63L-1C-63R");
     public static ArrayList<Command> parse(String input) {
         ArrayList<Command> commands = new ArrayList<>();
+        int startPos;
         String[] steps = input.toUpperCase().split("-");
         try {
-            if (steps.length < 2) return defaultCommand;
-            
-            for (int i = 1; i < steps.length; i++) {
-                commands.add(pathFromCode(steps[i - 1], steps[i]));
-                if (steps[i].matches("[1-2]C")) {
+            startPos = Integer.parseInt(input.substring(0, 1));
+            SmartDashboard.putBoolean("Auto Parser Empty", false);
+            commands.add(new SetPositionCommand(startPos));
+            for (int i = 0; i < 5; i += 2) {
+                commands.add(pathFromCode(steps[i], steps[i + 1].substring(0, 1)));
+                commands.add(new PutCoralCommand(steps[i + 1].split("")));
+                if (i < 4) {
+                    commands.add(pathFromCode(steps[i + 1].substring(0, 1), steps[i + 2]));
                     commands.add(new GetCoralCommand());
-                } else if (steps[i].matches("[1-6][1-4][LR]")) {
-                    commands.add(new PutCoralCommand(steps[i].split("")));
                 }
             }
+        } catch (NumberFormatException | IndexOutOfBoundsException e) {
+            SmartDashboard.putBoolean("Auto Parser Empty", true);
+            return defaultCommand;
         } catch (Exception e) {
             e.printStackTrace();
             return defaultCommand;
         }
+        System.out.println(commands.size());
         return commands;
     }
 
@@ -59,4 +66,13 @@ public class Parser {
         }
     }
     public static class GetCoralCommand extends Command {}
+    public static class SetPositionCommand extends Command {
+        public int position;
+        public SetPositionCommand(int position) {
+            this.position = position;
+        }
+        public int getPosition(){
+            return position - 1;
+        }
+    }
 }

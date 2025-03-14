@@ -21,15 +21,21 @@ public class AlignToReefTagRelative extends Command {
   private Timer dontSeeTagTimer, stopTimer;
   private DriveSubsystem drivebase;
   private int tagID = -1;
+  private final int level;
 
-  public AlignToReefTagRelative(boolean isLeftScore, DriveSubsystem drivebase) {
+  public AlignToReefTagRelative(boolean isLeftScore, DriveSubsystem drivebase, int level) {
     xController = new PIDController(1.5, 0.0, 0);  // Vertical movement
     yController = new PIDController(1.5, 0.0, 0);  // Horitontal movement
     rotController = new PIDController(2, 0, 0);  // Rotation
     this.isLeftScore = isLeftScore;
     this.drivebase = drivebase;
+    this.level = level;
     addRequirements(drivebase);
     drivebase.getStates();
+  }
+
+  public AlignToReefTagRelative(boolean isLeftScore, DriveSubsystem drivebase){
+    this(isLeftScore, drivebase, 4);
   }
 
   @Override
@@ -80,7 +86,12 @@ public class AlignToReefTagRelative extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    drivebase.drive(0, 0, 0, false);
+    if (level == 4 && !interrupted){
+      // new RunCommand(()->drivebase.driveRobotRelativeChassis(new ChassisSpeeds(0.2, 0, 0)), drivebase).withTimeout(2).schedule();
+    } else {
+      drivebase.drive(0, 0, 0, false);
+    }
+    
   }
 
   @Override

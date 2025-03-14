@@ -6,16 +6,16 @@ package frc.robot;
 
 
 
+import frc.GryphonLib.AllianceFlipUtil;
 import frc.GryphonLib.PositionCalculations;
 
 import java.util.ArrayList;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.revrobotics.spark.SparkBase.ControlType;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.FunnelConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.commands.AlignToReefTagRelative;
@@ -57,7 +57,6 @@ public class RobotContainer {
   CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
   CommandXboxController m_operatorController = new CommandXboxController(1);
 
-    private SendableChooser<Command> autoChooser;
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -121,17 +120,10 @@ public class RobotContainer {
           m_climber.stop();
         }, m_climber)
     );
-
-
-  autoChooser = AutoBuilder.buildAutoChooser();
-    SmartDashboard.putData("Auto Chooser", autoChooser);
-    SmartDashboard.putString("Auto String", "");
   }
   
 
   private void configureButtonBindings() {
-    // m_driverController.leftBumper().onTrue(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.middleReef, false).andThen(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.leftBranch, false)));
-    // m_driverController.rightBumper().onTrue(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.middleReef, false).andThen(new MoveTowardsTagGoal(Vision.targetTransform(Vision.getBestTag()), new double[]{0.05, 0.05, 0.05}, m_robotDrive, VisionConstants.rightBranch, false)));
     m_driverController.a().onTrue(new MoveToScoringPosition(1, m_wrist, m_elevator));
     m_driverController.x().onTrue(new MoveToScoringPosition(2, m_wrist, m_elevator));
     m_driverController.b().onTrue(new MoveToScoringPosition(3, m_wrist, m_elevator));
@@ -140,7 +132,7 @@ public class RobotContainer {
     m_driverController.rightBumper().whileTrue(new AlignToReefTagRelative(true, m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop));
     m_driverController.leftTrigger().whileTrue(new RunCommand(()->m_coralHand.intake(), m_coralHand)).onTrue(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel));
     m_driverController.rightTrigger().whileTrue(new RunCommand(()->m_coralHand.outtake(), m_coralHand));
-    m_driverController.povUp().whileTrue(new RunCommand(()->m_climber.climbCCW(), m_climber));
+    m_driverController.povUp().whileTrue(new RunCommand(()->m_climber.climbCCW(), m_climber)).onFalse(new RunCommand(()->m_climber.setPosition(m_climber.getPosition()), m_climber));
     m_driverController.povDown().whileTrue(new RunCommand(()->m_climber.climbCW(), m_climber));
     m_driverController.povRight().onTrue(new RotateFunnel(m_funnel, FunnelConstants.IntakeAngle));
     m_driverController.povLeft().onTrue(new RotateFunnel(m_funnel, FunnelConstants.ClimbAngle));
@@ -160,13 +152,18 @@ public class RobotContainer {
     m_operatorController.y().onTrue(new InstantCommand(() -> m_robotDrive.setX(), m_robotDrive));
   }
   
-
   public SequentialCommandGroup getAutonomousCommand() {
     SequentialCommandGroup autoRoutine = new SequentialCommandGroup();
-    // TODO: Set pose to robot starting point so it knows where it is
-    autoRoutine.addCommands(new InstantCommand(()->m_robotDrive.setHeading(180), m_robotDrive));
+    ArrayList<Command> commands = Parser.parse(SmartDashboard.getString("Auto Code", "1S-13L-1C-63L-1C-63R"));
+    Parser.SetPositionCommand setPositionCommand = (Parser.SetPositionCommand) commands.get(0);
+    autoRoutine.addCommands(
+      new InstantCommand(()->m_robotDrive.setHeading(180), m_robotDrive),
+      new InstantCommand(()->m_robotDrive.setCurrentPose(
+
+        AllianceFlipUtil.apply(AutoConstants.startPositions[setPositionCommand.getPosition()])), m_robotDrive)
+    );
+    commands.remove(0);
     // Default is placeholder
-    ArrayList<Command> commands = Parser.parse(SmartDashboard.getString("Auto String", "1S-53L-1C"));
     ArrayList<Command> convertedCommands = new ArrayList<>();
     for (int i = 0; i < commands.size(); i += 2) {
       // Get the path command (even index)
@@ -183,7 +180,10 @@ public class RobotContainer {
           // 1. Run the path command and scoringSequence in parallel.
           // 2. Then run ScoreCoral.
           Command fullSequence = new SequentialCommandGroup(
-              new ParallelCommandGroup(pathCommand, subsystemMovement),
+              new ParallelCommandGroup(pathCommand, new SequentialCommandGroup(
+                new SequentialCommandGroup(
+                  (new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral())),
+                  new RunCommand(() -> m_coralHand.intake(), m_coralHand).withTimeout(0.3)), subsystemMovement)),
               new ScoreCoral(
                   putCmd.getLevel(),
                   putCmd.getLeft(),
@@ -199,7 +199,7 @@ public class RobotContainer {
             // For GetCoralCommand, run your intake sequence in parallel with the path command.
             Command intakeSequence = new ParallelCommandGroup(
                 new MoveToIntakePositions(m_wrist, m_elevator, m_funnel),
-                new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral())
+                new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()).withTimeout(2.7)
             );
             SequentialCommandGroup fullSequence = new SequentialCommandGroup(
               new ParallelCommandGroup(pathCommand, intakeSequence),

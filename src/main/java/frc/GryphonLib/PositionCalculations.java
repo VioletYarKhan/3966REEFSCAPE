@@ -75,4 +75,8 @@ public class PositionCalculations {
         goalPose = robotPose.transformBy(Goal).toPose2d();
         ghostField.setRobotPose(goalPose);
     }
+
+    public static void setGhostPose (Pose2d ghostPose){
+        ghostField.setRobotPose(ghostPose);
+    }
 }
