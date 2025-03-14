@@ -6,6 +6,7 @@ package frc.robot;
 
 
 
+import frc.GryphonLib.AllianceFlipUtil;
 import frc.GryphonLib.PositionCalculations;
 
 import java.util.ArrayList;
@@ -157,7 +158,9 @@ public class RobotContainer {
     Parser.SetPositionCommand setPositionCommand = (Parser.SetPositionCommand) commands.get(0);
     autoRoutine.addCommands(
       new InstantCommand(()->m_robotDrive.setHeading(180), m_robotDrive),
-      new InstantCommand(()->m_robotDrive.setCurrentPose(AutoConstants.startPositions[setPositionCommand.getPosition()]), m_robotDrive)
+      new InstantCommand(()->m_robotDrive.setCurrentPose(
+
+        AllianceFlipUtil.apply(AutoConstants.startPositions[setPositionCommand.getPosition()])), m_robotDrive)
     );
     commands.remove(0);
     // Default is placeholder
@@ -177,7 +180,10 @@ public class RobotContainer {
           // 1. Run the path command and scoringSequence in parallel.
           // 2. Then run ScoreCoral.
           Command fullSequence = new SequentialCommandGroup(
-              new ParallelCommandGroup(pathCommand, new SequentialCommandGroup(new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()), subsystemMovement)),
+              new ParallelCommandGroup(pathCommand, new SequentialCommandGroup(
+                new SequentialCommandGroup(
+                  (new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral())),
+                  new RunCommand(() -> m_coralHand.intake(), m_coralHand).withTimeout(0.3)), subsystemMovement)),
               new ScoreCoral(
                   putCmd.getLevel(),
                   putCmd.getLeft(),
@@ -193,7 +199,7 @@ public class RobotContainer {
             // For GetCoralCommand, run your intake sequence in parallel with the path command.
             Command intakeSequence = new ParallelCommandGroup(
                 new MoveToIntakePositions(m_wrist, m_elevator, m_funnel),
-                new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()).withTimeout(3)
+                new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()).withTimeout(2.7)
             );
             SequentialCommandGroup fullSequence = new SequentialCommandGroup(
               new ParallelCommandGroup(pathCommand, intakeSequence),

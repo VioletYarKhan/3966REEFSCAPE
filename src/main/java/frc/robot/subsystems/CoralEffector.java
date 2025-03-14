@@ -15,7 +15,7 @@ public class CoralEffector extends SubsystemBase {
     
     TalonFX effectorWheel = new TalonFX(12);
     TalonFXConfiguration effectorConfig = new TalonFXConfiguration();
-    DigitalInput coralSwitch = new DigitalInput(0);
+    DigitalInput coralSwitch = new DigitalInput(2);
 
     double targetReference;
     ControlType currentControlType;
@@ -36,7 +36,7 @@ public class CoralEffector extends SubsystemBase {
     @Override
     public void periodic() {
         SmartDashboard.putNumber("Wheel Position", getPosition());
-        SmartDashboard.putString("Wheel Control Type", currentControlType.toString());
+        SmartDashboard.putBoolean("Has Coral", hasCoral());
     }
 
     public void set(double speed) {
@@ -109,6 +109,7 @@ public class CoralEffector extends SubsystemBase {
     }
 
     public boolean hasCoral(){
-        return coralSwitch.get();
+        // return false;
+        return !coralSwitch.get();
     }
 }

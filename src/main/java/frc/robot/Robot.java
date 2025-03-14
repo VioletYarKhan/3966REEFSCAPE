@@ -33,9 +33,9 @@ public class Robot extends TimedRobot {
     m_robotContainer = new RobotContainer();
     PathfindingCommand.warmupCommand();
     String[] commonAutos = new String[]{
-      "1S-13L-1C-63L-1C-63R",
-      "2S-23L-2C-43L-2C-43R",
-      "3S-33L-2C-43L-2C-43R"
+      "1S-12R-1C-63R-1C-63L",
+      "2S-22R-2C-43R-2C-43L",
+      "3S-32R-2C-43R-2C-43L"
     };
     for (String auto : commonAutos){
       SmartDashboard.putString("Common Auto From " + auto.substring(0, 2), auto);

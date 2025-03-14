@@ -10,7 +10,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.Constants.AlignmentConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.Vision;
@@ -88,7 +87,7 @@ public class AlignToReefTagRelative extends Command {
   @Override
   public void end(boolean interrupted) {
     if (level == 4 && !interrupted){
-      new RunCommand(()->drivebase.driveRobotRelativeChassis(new ChassisSpeeds(0.2, 0, 0)), drivebase).withTimeout(2).schedule();
+      // new RunCommand(()->drivebase.driveRobotRelativeChassis(new ChassisSpeeds(0.2, 0, 0)), drivebase).withTimeout(2).schedule();
     } else {
       drivebase.drive(0, 0, 0, false);
     }
