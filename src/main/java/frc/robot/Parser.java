@@ -1,5 +1,6 @@
 package frc.robot;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -15,36 +16,51 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class Parser {
     
     private static final ArrayList<Command> defaultCommand = parse("1S-13L-1C-63L-1C-63R");
+
     public static ArrayList<Command> parse(String input) {
+        SmartDashboard.putString("Auto Parser Status", "Parsing Started");
         ArrayList<Command> commands = new ArrayList<>();
         int startPos;
         String[] steps = input.toUpperCase().split("-");
         try {
-            startPos = Integer.parseInt(input.substring(0, 1));
-            SmartDashboard.putBoolean("Auto Parser Empty", false);
+            if (steps.length < 2) return defaultCommand;
+            startPos = Integer.parseInt(steps[0].substring(0, 1));
             commands.add(new SetPositionCommand(startPos));
-            for (int i = 0; i < 5; i += 2) {
-                commands.add(pathFromCode(steps[i], steps[i + 1].substring(0, 1)));
-                commands.add(new PutCoralCommand(steps[i + 1].split("")));
-                if (i < 4) {
-                    commands.add(pathFromCode(steps[i + 1].substring(0, 1), steps[i + 2]));
+            for (int i = 1; i < steps.length; i++) {
+                commands.add(pathFromCode(steps[i - 1], steps[i]));
+                if (steps[i].matches("[1-2]C")) {
                     commands.add(new GetCoralCommand());
+                } else if (steps[i].matches("[1-6][1-4][LR]")) {
+                    commands.add(new PutCoralCommand(steps[i].split("")));
                 }
             }
-        } catch (NumberFormatException | IndexOutOfBoundsException e) {
-            SmartDashboard.putBoolean("Auto Parser Empty", true);
+        } catch (IndexOutOfBoundsException e) {
+            SmartDashboard.putString("Auto Parser Status", "No Code Input");
+            e.printStackTrace();
+            return defaultCommand;
+        } catch (IllegalArgumentException e) {
+            SmartDashboard.putString("Auto Parser Status", "Invalid Code");
+            e.printStackTrace();
+            return defaultCommand;
+        } catch (FileNotFoundException e) {
+            SmartDashboard.putString("Auto Parser Status", "Path File Missing");
+            e.printStackTrace();
             return defaultCommand;
         } catch (Exception e) {
+            SmartDashboard.putString("Auto Parser Status", "Error");
             e.printStackTrace();
             return defaultCommand;
         }
-        System.out.println(commands.size());
+        SmartDashboard.putString("Auto Parser Status", "Parsing Complete");
         return commands;
     }
 
-    public static Command pathFromCode(String start, String end) throws FileVersionException, IOException, ParseException {
-        String startLoc = start.matches("\\d\\d[LR]") ? start.substring(0, 1) : start;
-        String endLoc = end.matches("\\d\\d[LR]") ? end.substring(0, 1) : end;
+    public static Command pathFromCode(String start, String end) throws FileVersionException, IllegalArgumentException, IOException, ParseException {
+        if (!start.matches("[1-6][1-4][LR]|[1-2][CS]|3S") || !end.matches("[1-6][1-4][LR]|[1-2][CS]|3S")) {
+            throw new IllegalArgumentException("Invalid auto code");
+        }
+        String startLoc = start.matches("[1-6][1-4][LR]") ? start.substring(0, 1) : start;
+        String endLoc = end.matches("[1-6][1-4][LR]") ? end.substring(0, 1) : end;
         return AutoBuilder.followPath(PathPlannerPath.fromPathFile(startLoc + "-" + endLoc));
     }
 
