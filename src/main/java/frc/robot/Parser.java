@@ -32,17 +32,19 @@ public class Parser {
         commands.add(new SetPositionCommand(startPos));
         String[] steps = input.split("-");
         try {
-            for (int i = 0; i < 5; i += 2) {
-                commands.add(pathFromCode(steps[i], steps[i + 1].substring(0, 1)));
-                commands.add(new PutCoralCommand(steps[i + 1].split("")));
-                if (i < 4) {
-                    commands.add(pathFromCode(steps[i + 1].substring(0, 1), steps[i + 2]));
+            for(int i = 0; i < steps.length; i++){
+                if(i%2 == 0){
+                    commands.add(pathFromCode(steps[i], steps[i + 1].substring(0, 1)));
+                    commands.add(new PutCoralCommand(steps[i + 1].split("")));
+                } else {
+                    commands.add(pathFromCode(steps[i].substring(0, 1), steps[i+1]));
                     commands.add(new GetCoralCommand());
-                }
-            }
+                }      
+            }      
         } catch (Exception e) {
             return defaultCommand;
         }
+        System.out.println(commands.size());
         return commands;
     }
 
