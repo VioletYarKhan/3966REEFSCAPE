@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
-
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
@@ -18,7 +17,9 @@ public class Elevator extends SubsystemBase {
     SparkMax elevatorL = new SparkMax(10, MotorType.kBrushless);
     SparkMax elevatorR = new SparkMax(9, MotorType.kBrushless);
     RelativeEncoder encoderL = elevatorL.getEncoder();
-    RelativeEncoder encoderR = elevatorL.getEncoder();
+    RelativeEncoder encoderR = elevatorR.getEncoder();
+
+    RelativeEncoder absoluteEncoderR;
     SparkClosedLoopController pid;
 
     double targetReference;
@@ -31,12 +32,17 @@ public class Elevator extends SubsystemBase {
 
         targetReference = 0;
         currentControlType = ControlType.kDutyCycle;
+
+        absoluteEncoderR = elevatorR.getAlternateEncoder();
+        setEncoderPosition(absoluteEncoderR.getPosition()*20);
     }
 
     @Override
     public void periodic() {
         SmartDashboard.putNumber("Elevator Position", getPosition());
         SmartDashboard.putString("Elevator Control Type", currentControlType.toString());
+        SmartDashboard.putNumber("elevator absolute encoder", absoluteEncoderR.getPosition());
+        SmartDashboard.putNumber("Elevator Speed", getVelocity()/6000); 
     }
 
     public void set(double speed) {

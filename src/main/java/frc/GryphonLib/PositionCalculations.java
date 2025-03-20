@@ -1,29 +1,22 @@
 package frc.GryphonLib;
 
 import static frc.robot.Constants.VisionConstants.kRobotToCam;
+import static frc.robot.Constants.VisionConstants.kTagLayout;
 
 import org.photonvision.PhotonCamera;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
 public class PositionCalculations {
-    public static ShuffleboardTab tab = Shuffleboard.getTab("Ghosts");
-
     public static Pose2d goalPose;
-
-    private static Field2d ghostField = new Field2d();
     
 
 
-    public static void CreateGhostField(){
-        tab.add("Ghost Field", ghostField).withPosition(2, 0).withSize(6, 4);
-    }
     /**
      * @param photonCamera
      * @param robotPose2d
@@ -57,26 +50,27 @@ public class PositionCalculations {
                 
                 // Transform the tag's pose to set our goal
                 goalPose = targetPose.transformBy(tagToGoal).toPose2d();
-                ghostField.setRobotPose(goalPose);
                 return goalPose;
             }
         }
         return robotPose2d;
     }
 
+    public static Pose2d translateCoordinates(
+        Pose2d originalPose, double degreesRotate, double distance
+    ){
+        double newXCoord = originalPose.getX() + (Math.cos(Math.toRadians(degreesRotate)) * distance);
+        double newYCoord = originalPose.getY() + (Math.sin(Math.toRadians(degreesRotate)) * distance);
 
-    public static void addGhostPose(Pose2d robotPose2d, Transform3d Goal){
-        var robotPose =
-            new Pose3d(
-                robotPose2d.getX(),
-                robotPose2d.getY(),
-                0.0, 
-                new Rotation3d(0.0, 0.0, robotPose2d.getRotation().getRadians()));
-        goalPose = robotPose.transformBy(Goal).toPose2d();
-        ghostField.setRobotPose(goalPose);
+        return new Pose2d(newXCoord, newYCoord, originalPose.getRotation());
     }
 
-    public static void setGhostPose (Pose2d ghostPose){
-        ghostField.setRobotPose(ghostPose);
+
+    public static Pose2d getAlignmentReefPose(int tag, boolean left){
+        Pose2d tagPose = kTagLayout.getTagPose(tag).get().toPose2d();
+        Pose2d goalPose = translateCoordinates(tagPose, tagPose.getRotation().getDegrees(), 0.5);
+        goalPose = left ? translateCoordinates(goalPose, tagPose.getRotation().getDegrees() + 90, 0.2) : translateCoordinates(goalPose, tagPose.getRotation().getDegrees() - 90, 0.2);
+
+        return goalPose.transformBy(new Transform2d(0, 0, new Rotation2d(Math.PI)));
     }
 }

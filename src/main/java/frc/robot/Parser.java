@@ -27,12 +27,12 @@ public class Parser {
          catch (NumberFormatException | IndexOutOfBoundsException e) {
             SmartDashboard.putBoolean("Auto Parser Empty", true);
             startPos = 1;
-            input = "1S-13L-1C-63L-1C-63R";
+            return defaultCommand;
          }
         commands.add(new SetPositionCommand(startPos));
         String[] steps = input.split("-");
         try {
-            for(int i = 0; i < steps.length; i++){
+            for(int i = 0; i < steps.length - 1; i++){
                 if(i%2 == 0){
                     commands.add(pathFromCode(steps[i], steps[i + 1].substring(0, 1)));
                     commands.add(new PutCoralCommand(steps[i + 1].split("")));
@@ -40,9 +40,12 @@ public class Parser {
                     commands.add(pathFromCode(steps[i].substring(0, 1), steps[i+1]));
                     commands.add(new GetCoralCommand());
                 }      
-            }      
-        } catch (Exception e) {
-            return defaultCommand;
+            }     
+            SmartDashboard.putBoolean("Auto Loaded", true); 
+        } catch (IndexOutOfBoundsException | IOException | ParseException e) {
+            SmartDashboard.putBoolean("Auto Loaded", false); 
+            e.printStackTrace();
+            return commands;
         }
         System.out.println(commands.size());
         return commands;

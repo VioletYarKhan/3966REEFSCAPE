@@ -12,7 +12,6 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.GryphonLib.AllianceFlipUtil;
 import frc.robot.Constants.VisionConstants;
 
 public class Vision extends SubsystemBase {
@@ -63,7 +62,7 @@ public class Vision extends SubsystemBase {
     public static EstimatedRobotPose getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose, PhotonPipelineResult result) {
         photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
         var update = photonPoseEstimator.update(result);
-        Pose3d currentPose3d = AllianceFlipUtil.apply(update.get().estimatedPose);
+        Pose3d currentPose3d = update.get().estimatedPose;
         double photonTimestamp = update.get().timestampSeconds;
         
         return new EstimatedRobotPose(currentPose3d, photonTimestamp, result.getTargets(), PoseStrategy.LOWEST_AMBIGUITY);
