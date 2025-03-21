@@ -19,7 +19,6 @@ public class Elevator extends SubsystemBase {
     RelativeEncoder encoderL = elevatorL.getEncoder();
     RelativeEncoder encoderR = elevatorR.getEncoder();
 
-    RelativeEncoder absoluteEncoderR;
     SparkClosedLoopController pid;
 
     double targetReference;
@@ -32,16 +31,12 @@ public class Elevator extends SubsystemBase {
 
         targetReference = 0;
         currentControlType = ControlType.kDutyCycle;
-
-        absoluteEncoderR = elevatorR.getAlternateEncoder();
-        setEncoderPosition(absoluteEncoderR.getPosition()*20);
     }
 
     @Override
     public void periodic() {
         SmartDashboard.putNumber("Elevator Position", getPosition());
         SmartDashboard.putString("Elevator Control Type", currentControlType.toString());
-        SmartDashboard.putNumber("elevator absolute encoder", absoluteEncoderR.getPosition());
         SmartDashboard.putNumber("Elevator Speed", getVelocity()/6000); 
     }
 
