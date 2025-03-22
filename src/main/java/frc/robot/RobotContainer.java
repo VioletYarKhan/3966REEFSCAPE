@@ -7,7 +7,6 @@ package frc.robot;
 
 
 import frc.GryphonLib.AllianceFlipUtil;
-import frc.GryphonLib.PositionCalculations;
 
 import java.util.ArrayList;
 
@@ -61,7 +60,6 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    PositionCalculations.CreateGhostField();
     configureButtonBindings();
     // Configure default commands
     m_robotDrive.setDefaultCommand(

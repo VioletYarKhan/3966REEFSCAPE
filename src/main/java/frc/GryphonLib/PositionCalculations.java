@@ -20,10 +20,6 @@ public class PositionCalculations {
     private static Field2d ghostField = new Field2d();
     
 
-
-    public static void CreateGhostField(){
-        tab.add("Ghost Field", ghostField).withPosition(2, 0).withSize(6, 4);
-    }
     /**
      * @param photonCamera
      * @param robotPose2d
@@ -62,21 +58,5 @@ public class PositionCalculations {
             }
         }
         return robotPose2d;
-    }
-
-
-    public static void addGhostPose(Pose2d robotPose2d, Transform3d Goal){
-        var robotPose =
-            new Pose3d(
-                robotPose2d.getX(),
-                robotPose2d.getY(),
-                0.0, 
-                new Rotation3d(0.0, 0.0, robotPose2d.getRotation().getRadians()));
-        goalPose = robotPose.transformBy(Goal).toPose2d();
-        ghostField.setRobotPose(goalPose);
-    }
-
-    public static void setGhostPose (Pose2d ghostPose){
-        ghostField.setRobotPose(ghostPose);
     }
 }

@@ -179,7 +179,8 @@ public final class Constants {
 
   public static class AlignmentConstants {
     public static final double X_SETPOINT_REEF_ALIGNMENT = 0.6;
-    public static final double Y_SETPOINT_REEF_ALIGNMENT = -0.2;
+    public static final double LEFT_SETPOINT_REEF_ALIGNMENT = -0.2;
+    public static final double RIGHT_SETPOINT_REEF_ALIGNMENT = 0.2;
     public static final double ROT_SETPOINT_REEF_ALIGNMENT = Math.PI;
     
     public static final double X_TOLERANCE_REEF_ALIGNMENT = 0.1;
