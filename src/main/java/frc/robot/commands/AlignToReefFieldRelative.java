@@ -4,13 +4,10 @@
 
 package frc.robot.commands;
 
-import org.photonvision.PhotonUtils;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.GryphonLib.PositionCalculations;
-import frc.robot.Vision;
 import frc.robot.subsystems.DriveSubsystem;
 
 public class AlignToReefFieldRelative extends Command {
@@ -25,31 +22,21 @@ public class AlignToReefFieldRelative extends Command {
     this.drivebase = drivebase;
     addRequirements(drivebase);
     drivebase.getStates();
-    tagID = Vision.getBestTag();
-  }
-
-  public AlignToReefFieldRelative(boolean isLeftScore, DriveSubsystem drivebase, int side) {
-    this.isLeftScore = isLeftScore;
-    this.drivebase = drivebase;
-    addRequirements(drivebase);
-    drivebase.getStates();
-    tagID
   }
 
   @Override
   public void initialize() {
-    
+    tagID = PositionCalculations.closestReefTag(drivebase.getCurrentPose());
     goalPose = PositionCalculations.getAlignmentReefPose(tagID, isLeftScore);
     pathCommand = drivebase.PathToPose(goalPose);
     pathCommand.schedule();
   }
 
   @Override
-  public void execute() {
-  }
+  public void execute() {}
 
   @Override
   public boolean isFinished() {
-    return drivebase.getDistanceToGoal() < 1;
+    return drivebase.getDistanceToGoal() < 0.1;
   }
 }

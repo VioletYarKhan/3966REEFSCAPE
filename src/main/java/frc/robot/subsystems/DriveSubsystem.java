@@ -5,12 +5,9 @@
 package frc.robot.subsystems;
 
 import java.util.ArrayList;
-import java.util.function.IntSupplier;
-import java.util.function.Supplier;
 
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonUtils;
-import org.photonvision.targeting.PhotonPipelineResult;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
@@ -36,7 +33,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Vision;
 import frc.GryphonLib.PositionCalculations;
 import frc.robot.Constants.AutoConstants;
@@ -272,7 +268,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     Command pathfindingCommand = AutoBuilder.pathfindToPose(
         goalPose,
-        AutoConstants.constraints,
+        AutoConstants.teleopConstraints,
         0.0 // Goal end velocity in meters/sec
     );
 
@@ -295,7 +291,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     Command pathfindingCommand = AutoBuilder.pathfindToPose(
         goalPose,
-        AutoConstants.constraints,
+        AutoConstants.teleopConstraints,
         0.0 // Goal end velocity in meters/sec
     );
 

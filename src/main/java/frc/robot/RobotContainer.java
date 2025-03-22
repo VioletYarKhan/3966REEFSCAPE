@@ -57,7 +57,6 @@ public class RobotContainer {
   // The driver's controller
   CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
   CommandXboxController m_operatorController = new CommandXboxController(1);
-  private boolean fieldRelative = true;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -77,7 +76,7 @@ public class RobotContainer {
                 m_robotDrive.drive(
                 -MathUtil.applyDeadband(forward, OIConstants.kDriveDeadband),
                 -MathUtil.applyDeadband(strafe, OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(turn, OIConstants.kDriveDeadband), fieldRelative);
+                -MathUtil.applyDeadband(turn, OIConstants.kDriveDeadband), true);
             },
           m_robotDrive));
     
@@ -131,8 +130,8 @@ public class RobotContainer {
     m_driverController.y().onTrue(new MoveToScoringPosition(4, m_wrist, m_elevator).andThen(new MoveCoralToL4Position(4, m_coralHand)));
     // m_driverController.leftBumper().whileTrue(new AlignToReefTagRelative(false, m_robotDrive).andThen(new RunCommand(()->m_robotDrive.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), m_robotDrive).withTimeout(1))).onFalse(new InstantCommand(m_robotDrive::stop));
     // m_driverController.rightBumper().whileTrue(new AlignToReefTagRelative(true, m_robotDrive).andThen(new RunCommand(()->m_robotDrive.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), m_robotDrive).withTimeout(1))).onFalse(new InstantCommand(m_robotDrive::stop));
-    m_driverController.leftBumper().whileTrue(new AlignToReefFieldRelative(true, m_robotDrive)).onFalse(new InstantCommand(()->{m_robotDrive.stop(); fieldRelative = true;})).onTrue(new InstantCommand(()->{fieldRelative = false;}));
-    m_driverController.rightBumper().whileTrue(new AlignToReefFieldRelative(false, m_robotDrive)).onFalse(new InstantCommand(()->{m_robotDrive.stop(); fieldRelative = true;})).onTrue(new InstantCommand(()->{fieldRelative = false;}));
+    m_driverController.leftBumper().whileTrue(new AlignToReefFieldRelative(true, m_robotDrive).andThen(new RunCommand(()->m_robotDrive.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), m_robotDrive).withTimeout(2))).onFalse(new InstantCommand(m_robotDrive::stop));
+    m_driverController.rightBumper().whileTrue(new AlignToReefFieldRelative(false, m_robotDrive).andThen(new RunCommand(()->m_robotDrive.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), m_robotDrive).withTimeout(2))).onFalse(new InstantCommand(m_robotDrive::stop));
     m_driverController.leftTrigger().whileTrue(new RunCommand(()->m_coralHand.intake(), m_coralHand)).onTrue(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel));
     m_driverController.rightTrigger().whileTrue(new RunCommand(()->m_coralHand.outtake(), m_coralHand));
     m_driverController.povUp().whileTrue(new RunCommand(()->m_climber.climbCCW(), m_climber)).onFalse(new RunCommand(()->m_climber.setPosition(m_climber.getPosition()), m_climber));

@@ -35,6 +35,7 @@ public class ScoreCoral extends SequentialCommandGroup{
                     new MoveToScoringPosition(level, wrist, elevator),
                     new WaitUntilCommand(Vision::resultHasTargets),
                     new AlignToReefFieldRelative(left, drivetrain),
+                    new RunCommand(()->drivetrain.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), drivetrain).withTimeout(0.5),
                     new RunCommand(()->hand.outtake(), hand).withTimeout(1),
                     new RunCommand(()->hand.stop(), hand).withTimeout(0.1),
                     new RotateWristToLevel(4, wrist)

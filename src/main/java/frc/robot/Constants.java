@@ -194,6 +194,7 @@ public final class Constants {
     public static final double DONT_SEE_TAG_WAIT_TIME = 1;
     public static final double POSE_VALIDATION_TIME = 1;
 
-    
+    public static final int[] BLUE_REEF = {17, 18, 19, 20, 21, 22};
+    public static final int[] RED_REEF = {6, 7, 8, 9, 10, 11};
   }
 }

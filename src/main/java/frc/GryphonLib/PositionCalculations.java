@@ -4,6 +4,7 @@ import static frc.robot.Constants.VisionConstants.kRobotToCam;
 import static frc.robot.Constants.VisionConstants.kTagLayout;
 
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonUtils;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -11,6 +12,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.Constants.AlignmentConstants;
 
 public class PositionCalculations {
     public static Pose2d goalPose;
@@ -72,5 +76,19 @@ public class PositionCalculations {
         goalPose = left ? translateCoordinates(goalPose, tagPose.getRotation().getDegrees() - 90, 0.2) : translateCoordinates(goalPose, tagPose.getRotation().getDegrees() + 90, 0.2);
 
         return goalPose.transformBy(new Transform2d(0, 0, new Rotation2d(Math.PI)));
+    }
+
+    public static int closestReefTag(Pose2d currPose){
+        int[] reefTags = DriverStation.getAlliance().get() == Alliance.Blue ? AlignmentConstants.BLUE_REEF : AlignmentConstants.RED_REEF;
+        double closestDistance = Double.MAX_VALUE;
+        int closestTag = 0;
+        for (int tag : reefTags){
+            double distance = PhotonUtils.getDistanceToPose(currPose, kTagLayout.getTagPose(tag).get().toPose2d());
+            if (distance < closestDistance){
+                closestTag = tag;
+                closestDistance = distance;
+            }
+        }
+        return closestTag;
     }
 }
