@@ -118,6 +118,10 @@ public final class Constants {
         3.0, 4.0,
         Units.degreesToRadians(360), Units.degreesToRadians(720));
 
+    public static final PathConstraints teleopConstraints = new PathConstraints(
+        1, 1,
+        Units.degreesToRadians(360), Units.degreesToRadians(720));
+
     public static final Transform3d leftBranchCoral = new Transform3d(0.381, 0.381, 0, new Rotation3d());
     public static final Transform3d rightBranchCoral = new Transform3d(0.381, -0.381, 0, new Rotation3d());
 

@@ -19,21 +19,22 @@ public class ScoreCoral extends SequentialCommandGroup{
         EffectorWrist wrist,
         Elevator elevator,
         CoralFunnel funnel,
-        DriveSubsystem drivetrain){
+        DriveSubsystem drivetrain,
+        int side){
 
             if (level == 4) {
                 addCommands(
                     new MoveToScoringPosition(level, wrist, elevator),
                     new MoveCoralToL4Position(level, hand),
                     new WaitUntilCommand(Vision::resultHasTargets),
-                    drivetrain.AlignToTag(Vision.getBestTag(), left),
+                    new AlignToReefFieldRelative(left, drivetrain),
                     new RunCommand(()->drivetrain.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), drivetrain).withTimeout(2)
                 );
             } else {
                 addCommands(
                     new MoveToScoringPosition(level, wrist, elevator),
                     new WaitUntilCommand(Vision::resultHasTargets),
-                    drivetrain.AlignToTag(Vision.getBestTag(), left),
+                    new AlignToReefFieldRelative(left, drivetrain),
                     new RunCommand(()->hand.outtake(), hand).withTimeout(1),
                     new RunCommand(()->hand.stop(), hand).withTimeout(0.1),
                     new RotateWristToLevel(4, wrist)

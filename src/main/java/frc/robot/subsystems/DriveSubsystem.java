@@ -5,9 +5,12 @@
 package frc.robot.subsystems;
 
 import java.util.ArrayList;
+import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 import org.photonvision.EstimatedRobotPose;
-
+import org.photonvision.PhotonUtils;
+import org.photonvision.targeting.PhotonPipelineResult;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
@@ -33,6 +36,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Vision;
 import frc.GryphonLib.PositionCalculations;
 import frc.robot.Constants.AutoConstants;
@@ -277,7 +281,11 @@ public class DriveSubsystem extends SubsystemBase {
 
   public Command AlignToTag(int goalTag, boolean isLeftScore){
     Pose2d goalPose;
-    goalPose = (goalTag == 0 ? getCurrentPose() : PositionCalculations.getAlignmentReefPose(goalTag, isLeftScore));
+    if (goalTag == 0){
+      goalPose = getCurrentPose();
+    } else {
+      goalPose = PositionCalculations.getAlignmentReefPose(goalTag, isLeftScore);
+    }
     field2d.getObject("Goal Pose").setPose(goalPose);
     ArrayList<Pose2d> waypoints = new ArrayList<Pose2d>();
     waypoints.add(getCurrentPose());
@@ -323,6 +331,10 @@ public class DriveSubsystem extends SubsystemBase {
 
   public Pose2d getCurrentPose() {
     return poseEstimator.getEstimatedPosition();
+  }
+
+  public double getDistanceToGoal(){
+    return PhotonUtils.getDistanceToPose(getCurrentPose(), field2d.getObject("Goal Pose").getPose());
   }
 
   /**

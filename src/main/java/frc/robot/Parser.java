@@ -68,6 +68,9 @@ public class Parser {
         public int getLevel(){
             return level;
         }
+        public int getSide(){
+            return side;
+        }
         public boolean getLeft(){
             return left;
         }
