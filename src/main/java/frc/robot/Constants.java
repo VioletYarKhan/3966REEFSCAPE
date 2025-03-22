@@ -90,7 +90,8 @@ public final class Constants {
     public static final double kWheelCircumferenceMeters = kWheelDiameterMeters * Math.PI;
     // 45 teeth on the wheel's bevel gear, 22 teeth on the first-stage spur gear, 15
     // teeth on the bevel pinion
-    public static final double kDrivingMotorReduction = (45.0 * 22) / (kDrivingMotorPinionTeeth * 15);
+    // Correction Multiplies
+    public static final double kDrivingMotorReduction = ((45.0 * 22) / (kDrivingMotorPinionTeeth * 15)) * 0.93;
     public static final double kDriveWheelFreeSpeedRps = (kDrivingMotorFreeSpeedRps * kWheelCircumferenceMeters)
         / kDrivingMotorReduction;
   }
@@ -134,7 +135,7 @@ public final class Constants {
 
   public static final class ElevatorConstants {
     public static final double L1Height = 7;
-    public static final double L2Height = 88;
+    public static final double L2Height = 91;
     public static final double L3Height = 148;
     public static final double L4Height = 173;
     public static final double IntakeHeight = 0.5;
@@ -179,8 +180,8 @@ public final class Constants {
 
   public static class AlignmentConstants {
     public static final double X_SETPOINT_REEF_ALIGNMENT = 0.6;
-    public static final double LEFT_SETPOINT_REEF_ALIGNMENT = -0.2;
-    public static final double RIGHT_SETPOINT_REEF_ALIGNMENT = 0.2;
+    public static final double LEFT_SETPOINT_REEF_ALIGNMENT = 0.2;
+    public static final double RIGHT_SETPOINT_REEF_ALIGNMENT = -0.2;
     public static final double ROT_SETPOINT_REEF_ALIGNMENT = Math.PI;
     
     public static final double X_TOLERANCE_REEF_ALIGNMENT = 0.1;

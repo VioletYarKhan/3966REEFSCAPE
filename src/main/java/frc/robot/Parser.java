@@ -32,7 +32,7 @@ public class Parser {
         commands.add(new SetPositionCommand(startPos));
         String[] steps = input.split("-");
         try {
-            for(int i = 0; i < steps.length; i++){
+            for(int i = 0; i < steps.length - 1; i++){
                 if(i%2 == 0){
                     commands.add(pathFromCode(steps[i], steps[i + 1].substring(0, 1)));
                     commands.add(new PutCoralCommand(steps[i + 1].split("")));
@@ -42,6 +42,7 @@ public class Parser {
                 }      
             }      
         } catch (Exception e) {
+            e.printStackTrace();
             return defaultCommand;
         }
         System.out.println(commands.size());

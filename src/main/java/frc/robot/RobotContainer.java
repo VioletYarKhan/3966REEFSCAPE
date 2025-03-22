@@ -128,7 +128,7 @@ public class RobotContainer {
     m_driverController.y().onTrue(new MoveToScoringPosition(4, m_wrist, m_elevator).andThen(new MoveCoralToL4Position(4, m_coralHand)));
     m_driverController.leftBumper().whileTrue(new AlignToReefTagRelative(false, m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop));
     m_driverController.rightBumper().whileTrue(new AlignToReefTagRelative(true, m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop));
-    m_driverController.leftTrigger().whileTrue(new RunCommand(()->m_coralHand.intake(), m_coralHand)).onTrue(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel));
+    m_driverController.leftTrigger().whileTrue(new RunCommand(()->m_coralHand.intake(), m_coralHand)).onTrue(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand::hasCoral));
     m_driverController.rightTrigger().whileTrue(new RunCommand(()->m_coralHand.outtake(), m_coralHand));
     m_driverController.povUp().whileTrue(new RunCommand(()->m_climber.climbCCW(), m_climber)).onFalse(new RunCommand(()->m_climber.setPosition(m_climber.getPosition()), m_climber));
     m_driverController.povDown().whileTrue(new RunCommand(()->m_climber.climbCW(), m_climber));
@@ -153,7 +153,13 @@ public class RobotContainer {
   public SequentialCommandGroup getAutonomousCommand() {
     SequentialCommandGroup autoRoutine = new SequentialCommandGroup();
     ArrayList<Command> commands = Parser.parse(SmartDashboard.getString("Auto Code", "1S-13L-1C-63L-1C-63R"));
-    Parser.SetPositionCommand setPositionCommand = (Parser.SetPositionCommand) commands.get(0);
+    Parser.SetPositionCommand setPositionCommand;
+    try {
+      setPositionCommand = (Parser.SetPositionCommand) commands.get(0);
+    } catch (IndexOutOfBoundsException e){
+      return new SequentialCommandGroup();
+    }
+    
     autoRoutine.addCommands(
       new InstantCommand(()->m_robotDrive.setHeading(180), m_robotDrive),
       new InstantCommand(()->m_robotDrive.setCurrentPose(
@@ -196,7 +202,7 @@ public class RobotContainer {
         } else if (subsystemCommand instanceof Parser.GetCoralCommand) {
             // For GetCoralCommand, run your intake sequence in parallel with the path command.
             Command intakeSequence = new ParallelCommandGroup(
-                new MoveToIntakePositions(m_wrist, m_elevator, m_funnel),
+                new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand::hasCoral),
                 new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()).withTimeout(2.7)
             );
             SequentialCommandGroup fullSequence = new SequentialCommandGroup(
