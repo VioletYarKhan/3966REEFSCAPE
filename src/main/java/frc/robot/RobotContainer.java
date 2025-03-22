@@ -193,8 +193,7 @@ public class RobotContainer {
                   m_wrist,
                   m_elevator,
                   m_funnel,
-                  m_robotDrive,
-                  putCmd.getSide()
+                  m_robotDrive
               )
           );
           convertedCommands.add(fullSequence);

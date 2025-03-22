@@ -317,6 +317,7 @@ public class DriveSubsystem extends SubsystemBase {
       field2d.setRobotPose(getCurrentPose());
       publisher.set(getStates());
   }
+
   private String getFomattedPose() {
     var pose = getCurrentPose();
     return String.format("(%.2f, %.2f) %.2f degrees", 

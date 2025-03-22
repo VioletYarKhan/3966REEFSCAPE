@@ -19,8 +19,7 @@ public class ScoreCoral extends SequentialCommandGroup{
         EffectorWrist wrist,
         Elevator elevator,
         CoralFunnel funnel,
-        DriveSubsystem drivetrain,
-        int side){
+        DriveSubsystem drivetrain){
 
             if (level == 4) {
                 addCommands(
