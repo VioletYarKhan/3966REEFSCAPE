@@ -20,7 +20,6 @@ public class PositionCalculations {
     public static Pose2d goalPose;
     
 
-
     /**
      * @param photonCamera
      * @param robotPose2d
@@ -59,7 +58,7 @@ public class PositionCalculations {
         }
         return robotPose2d;
     }
-
+  
     public static Pose2d translateCoordinates(
         Pose2d originalPose, double degreesRotate, double distance
     ){

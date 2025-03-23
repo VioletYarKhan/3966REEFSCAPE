@@ -45,7 +45,7 @@ public class AlignToReefTagRelative extends Command {
     xController.setSetpoint(AlignmentConstants.X_SETPOINT_REEF_ALIGNMENT);
     xController.setTolerance(AlignmentConstants.X_TOLERANCE_REEF_ALIGNMENT);
 
-    yController.setSetpoint(isLeftScore ? -AlignmentConstants.Y_SETPOINT_REEF_ALIGNMENT : AlignmentConstants.Y_SETPOINT_REEF_ALIGNMENT);
+    yController.setSetpoint(isLeftScore ? AlignmentConstants.LEFT_SETPOINT_REEF_ALIGNMENT : AlignmentConstants.RIGHT_SETPOINT_REEF_ALIGNMENT);
     yController.setTolerance(AlignmentConstants.Y_TOLERANCE_REEF_ALIGNMENT);
 
     tagID = Vision.getBestTag();
