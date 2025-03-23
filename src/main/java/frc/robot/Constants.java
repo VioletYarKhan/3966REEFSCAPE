@@ -119,7 +119,7 @@ public final class Constants {
         Units.degreesToRadians(360), Units.degreesToRadians(720));
 
     public static final PathConstraints teleopConstraints = new PathConstraints(
-        1, 1,
+        3, 1,
         Units.degreesToRadians(360), Units.degreesToRadians(720));
 
     public static final Transform3d leftBranchCoral = new Transform3d(0.381, 0.381, 0, new Rotation3d());
@@ -138,7 +138,7 @@ public final class Constants {
 
   public static final class ElevatorConstants {
     public static final double L1Height = 7;
-    public static final double L2Height = 88;
+    public static final double L2Height = 93;
     public static final double L3Height = 148;
     public static final double L4Height = 173;
     public static final double IntakeHeight = 1;
@@ -182,7 +182,7 @@ public final class Constants {
   }
 
   public static class AlignmentConstants {
-    public static final double X_SETPOINT_REEF_ALIGNMENT = 0.8;
+    public static final double X_SETPOINT_REEF_ALIGNMENT = 0.6;
     public static final double Y_SETPOINT_REEF_ALIGNMENT = -0.2;
     public static final double ROT_SETPOINT_REEF_ALIGNMENT = Math.PI;
     public static final double ROT_SETPOINT_REEF_ALIGNMENT_OFFSET = Units.degreesToRadians(0);
@@ -194,7 +194,10 @@ public final class Constants {
     public static final double DONT_SEE_TAG_WAIT_TIME = 1;
     public static final double POSE_VALIDATION_TIME = 1;
 
-    public static final int[] BLUE_REEF = {17, 18, 19, 20, 21, 22};
-    public static final int[] RED_REEF = {6, 7, 8, 9, 10, 11};
+    public static final int[] BLUE_REEF = {20, 21, 22, 17, 18, 19};
+    public static final int[] RED_REEF = {11, 10, 9, 8, 7, 6};
+
+    public static final int[] BLUE_HUMAN = {13, 12};
+    public static final int[] RED_HUMAN = {1, 2};
   }
 }

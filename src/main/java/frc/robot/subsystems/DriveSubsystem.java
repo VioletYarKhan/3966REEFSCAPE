@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Vision;
 import frc.GryphonLib.PositionCalculations;
 import frc.robot.Constants.AutoConstants;
@@ -316,6 +317,7 @@ public class DriveSubsystem extends SubsystemBase {
 
       field2d.setRobotPose(getCurrentPose());
       publisher.set(getStates());
+    SmartDashboard.putNumber("Distance to Goal", getDistanceToGoal());
   }
 
   private String getFomattedPose() {

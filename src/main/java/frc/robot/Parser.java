@@ -38,7 +38,7 @@ public class Parser {
                     commands.add(new PutCoralCommand(steps[i + 1].split("")));
                 } else {
                     commands.add(pathFromCode(steps[i].substring(0, 1), steps[i+1]));
-                    commands.add(new GetCoralCommand());
+                    commands.add(new GetCoralCommand(steps[i + 1].split("")));
                 }      
             }     
             SmartDashboard.putBoolean("Auto Loaded", true); 
@@ -75,7 +75,19 @@ public class Parser {
             return left;
         }
     }
-    public static class GetCoralCommand extends Command {}
+
+    public static class GetCoralCommand extends Command {
+        public int station;
+
+        public GetCoralCommand(String[] code){
+            this.station = Integer.parseInt(code[0]);
+        }
+
+        public int getStation(){
+            return station;
+        }
+    }
+
     public static class SetPositionCommand extends Command {
         public int position;
         public SetPositionCommand(int position) {

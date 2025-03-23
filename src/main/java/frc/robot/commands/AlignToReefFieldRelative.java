@@ -5,8 +5,12 @@
 package frc.robot.commands;
 
 
+import org.photonvision.PhotonUtils;
+
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.GryphonLib.PositionCalculations;
 import frc.robot.subsystems.DriveSubsystem;
 
@@ -33,10 +37,13 @@ public class AlignToReefFieldRelative extends Command {
   }
 
   @Override
-  public void execute() {}
+  public void end(boolean interrupted) {
+    pathCommand.cancel();
+    new RunCommand(()->drivebase.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), drivebase).withTimeout(0.5).schedule();
+  }
 
   @Override
   public boolean isFinished() {
-    return drivebase.getDistanceToGoal() < 0.1;
+    return (PhotonUtils.getDistanceToPose(drivebase.getCurrentPose(), goalPose) < 0.1);
   }
 }

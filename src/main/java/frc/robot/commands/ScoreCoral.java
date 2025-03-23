@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.Elevator;
+import frc.GryphonLib.PositionCalculations;
 import frc.robot.Vision;
 import frc.robot.subsystems.CoralEffector;
 import frc.robot.subsystems.CoralFunnel;
@@ -24,10 +25,10 @@ public class ScoreCoral extends SequentialCommandGroup{
             if (level == 4) {
                 addCommands(
                     new MoveToScoringPosition(level, wrist, elevator),
-                    new MoveCoralToL4Position(level, hand),
-                    new WaitUntilCommand(Vision::resultHasTargets),
-                    new AlignToReefFieldRelative(left, drivetrain),
-                    new RunCommand(()->drivetrain.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), drivetrain).withTimeout(2)
+                    new RunCommand(()->drivetrain.driveRobotRelativeChassis(new ChassisSpeeds(-0.4, 0, 0)), drivetrain).withTimeout(2),
+                    drivetrain.PathToPose(PositionCalculations.getAlignmentReefPose(PositionCalculations.closestReefTag(drivetrain.getCurrentPose()), left)),
+                    new RunCommand(()->drivetrain.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), drivetrain).withTimeout(1),
+                    new MoveToIntakePositions(wrist, elevator, funnel)
                 );
             } else {
                 addCommands(
