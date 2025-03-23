@@ -1,13 +1,6 @@
 package frc.robot;
 
-import java.io.IOException;
 import java.util.ArrayList;
-
-import org.json.simple.parser.ParseException;
-
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.FileVersionException;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -34,25 +27,19 @@ public class Parser {
         try {
             for(int i = 0; i < steps.length - 1; i++){
                 if(i%2 == 0){
-                    commands.add(pathFromCode(steps[i], steps[i + 1].substring(0, 1)));
                     commands.add(new PutCoralCommand(steps[i + 1].split("")));
                 } else {
-                    commands.add(pathFromCode(steps[i].substring(0, 1), steps[i+1]));
                     commands.add(new GetCoralCommand(steps[i + 1].split("")));
                 }      
             }     
             SmartDashboard.putBoolean("Auto Loaded", true); 
-        } catch (IndexOutOfBoundsException | IOException | ParseException e) {
+        } catch (IndexOutOfBoundsException e) {
             SmartDashboard.putBoolean("Auto Loaded", false); 
             e.printStackTrace();
             return commands;
         }
         System.out.println(commands.size());
         return commands;
-    }
-
-    public static Command pathFromCode(String start, String end) throws FileVersionException, IOException, ParseException {
-        return AutoBuilder.followPath(PathPlannerPath.fromPathFile(start + "-" + end));
     }
 
     // Placeholder
