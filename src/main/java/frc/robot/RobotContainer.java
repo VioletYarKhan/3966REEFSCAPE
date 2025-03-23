@@ -7,17 +7,25 @@ package frc.robot;
 
 
 import frc.GryphonLib.AllianceFlipUtil;
+import frc.GryphonLib.PositionCalculations;
+
+import static frc.robot.Constants.VisionConstants.kTagLayout;
 
 import java.util.ArrayList;
 
 import com.revrobotics.spark.SparkBase.ControlType;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants.AlignmentConstants;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.FunnelConstants;
 import frc.robot.Constants.OIConstants;
-import frc.robot.commands.AlignToReefTagRelative;
+import frc.robot.commands.AlignToReefFieldRelative;
 import frc.robot.commands.MoveCoralToL4Position;
 import frc.robot.commands.MoveToIntakePositions;
 import frc.robot.commands.MoveToScoringPosition;
@@ -90,7 +98,7 @@ public class RobotContainer {
     m_coralHand.setDefaultCommand(
       new RunCommand(
         ()-> {
-            if(m_wrist.getVelocity() > 900){
+            if(m_wrist.getVelocity() > 800){
               m_coralHand.intake();
             } else {
               if(m_coralHand.getControlType() != ControlType.kPosition){
@@ -126,8 +134,10 @@ public class RobotContainer {
     m_driverController.x().onTrue(new MoveToScoringPosition(2, m_wrist, m_elevator));
     m_driverController.b().onTrue(new MoveToScoringPosition(3, m_wrist, m_elevator));
     m_driverController.y().onTrue(new MoveToScoringPosition(4, m_wrist, m_elevator).andThen(new MoveCoralToL4Position(4, m_coralHand)));
-    m_driverController.leftBumper().whileTrue(new AlignToReefTagRelative(false, m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop));
-    m_driverController.rightBumper().whileTrue(new AlignToReefTagRelative(true, m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop));
+    // m_driverController.leftBumper().whileTrue(new AlignToReefTagRelative(false, m_robotDrive).andThen(new RunCommand(()->m_robotDrive.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), m_robotDrive).withTimeout(1))).onFalse(new InstantCommand(m_robotDrive::stop));
+    // m_driverController.rightBumper().whileTrue(new AlignToReefTagRelative(true, m_robotDrive).andThen(new RunCommand(()->m_robotDrive.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), m_robotDrive).withTimeout(1))).onFalse(new InstantCommand(m_robotDrive::stop));
+    m_driverController.leftBumper().whileTrue(new AlignToReefFieldRelative(true, m_robotDrive).andThen(new RunCommand(()->m_robotDrive.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), m_robotDrive).withTimeout(2))).onFalse(new InstantCommand(m_robotDrive::stop));
+    m_driverController.rightBumper().whileTrue(new AlignToReefFieldRelative(false, m_robotDrive).andThen(new RunCommand(()->m_robotDrive.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), m_robotDrive).withTimeout(2))).onFalse(new InstantCommand(m_robotDrive::stop));
     m_driverController.leftTrigger().whileTrue(new RunCommand(()->m_coralHand.intake(), m_coralHand)).onTrue(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel));
     m_driverController.rightTrigger().whileTrue(new RunCommand(()->m_coralHand.outtake(), m_coralHand));
     m_driverController.povUp().whileTrue(new RunCommand(()->m_climber.climbCCW(), m_climber)).onFalse(new RunCommand(()->m_climber.setPosition(m_climber.getPosition()), m_climber));
@@ -151,26 +161,28 @@ public class RobotContainer {
   }
   
   public SequentialCommandGroup getAutonomousCommand() {
+
+    int[] reefTags = DriverStation.getAlliance().get() == Alliance.Blue ? AlignmentConstants.BLUE_REEF : AlignmentConstants.RED_REEF;
+    int[] stationTags = DriverStation.getAlliance().get() == Alliance.Blue ? AlignmentConstants.BLUE_HUMAN : AlignmentConstants.RED_HUMAN;
+
     SequentialCommandGroup autoRoutine = new SequentialCommandGroup();
     ArrayList<Command> commands = Parser.parse(SmartDashboard.getString("Auto Code", "1S-13L-1C-63L-1C-63R"));
     Parser.SetPositionCommand setPositionCommand = (Parser.SetPositionCommand) commands.get(0);
     autoRoutine.addCommands(
       new InstantCommand(()->m_robotDrive.setHeading(180), m_robotDrive),
       new InstantCommand(()->m_robotDrive.setCurrentPose(
-
         AllianceFlipUtil.apply(AutoConstants.startPositions[setPositionCommand.getPosition()])), m_robotDrive)
     );
     commands.remove(0);
     // Default is placeholder
     ArrayList<Command> convertedCommands = new ArrayList<>();
-    for (int i = 0; i < commands.size(); i += 2) {
-      // Get the path command (even index)
-      Command pathCommand = commands.get(i);
-      // Get the subsystem movement command (odd index)
-      Command subsystemCommand = commands.get(i + 1);
+    for (int i = 0; i < commands.size(); i ++) {
+      Command fullCommand = commands.get(i);
 
-      if (subsystemCommand instanceof Parser.PutCoralCommand) {
-          Parser.PutCoralCommand putCmd = (Parser.PutCoralCommand) subsystemCommand;
+      if (fullCommand instanceof Parser.PutCoralCommand) {
+        Parser.PutCoralCommand putCmd = (Parser.PutCoralCommand) fullCommand;
+        Command pathCommand = m_robotDrive.AlignToTag(reefTags[putCmd.getSide() - 1], putCmd.getLeft());
+          
           // Build the scoring sequence that will run concurrently with the path command.
           Command subsystemMovement = new MoveToScoringPosition(putCmd.getLevel(), m_wrist, m_elevator)
               .andThen(new MoveCoralToL4Position(putCmd.getLevel(), m_coralHand));
@@ -180,7 +192,7 @@ public class RobotContainer {
           Command fullSequence = new SequentialCommandGroup(
               new ParallelCommandGroup(pathCommand, new SequentialCommandGroup(
                 new SequentialCommandGroup(
-                  (new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral())),
+                  (new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->CoralEffector.hasCoral())),
                   new RunCommand(() -> m_coralHand.intake(), m_coralHand).withTimeout(0.3)), subsystemMovement)),
               new ScoreCoral(
                   putCmd.getLevel(),
@@ -193,11 +205,14 @@ public class RobotContainer {
               )
           );
           convertedCommands.add(fullSequence);
-        } else if (subsystemCommand instanceof Parser.GetCoralCommand) {
+        } else if (fullCommand instanceof Parser.GetCoralCommand) {
+          Parser.GetCoralCommand getCmd = (Parser.GetCoralCommand) fullCommand;
+          Pose2d stationTagPose = kTagLayout.getTagPose(stationTags[getCmd.getStation() - 1]).get().toPose2d();
+          Command pathCommand = m_robotDrive.PathToPose(PositionCalculations.translateCoordinates(stationTagPose, stationTagPose.getRotation().getDegrees(), 0.3));
             // For GetCoralCommand, run your intake sequence in parallel with the path command.
             Command intakeSequence = new ParallelCommandGroup(
                 new MoveToIntakePositions(m_wrist, m_elevator, m_funnel),
-                new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()).withTimeout(2.7)
+                new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->CoralEffector.hasCoral())
             );
             SequentialCommandGroup fullSequence = new SequentialCommandGroup(
               new ParallelCommandGroup(pathCommand, intakeSequence),
@@ -211,5 +226,7 @@ public class RobotContainer {
       autoRoutine.addCommands(command);
     }
     return autoRoutine;
+    
+    // return new SequentialCommandGroup(new ScoreCoral(4, true, m_coralHand, m_wrist, m_elevator, m_funnel, m_robotDrive), new ParallelCommandGroup(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel), new RunCommand(()->m_robotDrive.driveRobotRelativeChassis(new ChassisSpeeds(-0.5, 0, 0)), m_robotDrive).withTimeout(0.5)));
   }
 }

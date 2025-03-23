@@ -71,9 +71,9 @@ public final class Configs {
                 elevatorConfig.closedLoop
                     .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
                     // These are example gains you may need to them for your own robot!
-                    .pid(0.05, 0, 0)
+                    .pid(0.1, 0, 0)
                     .velocityFF(0)
-                    .outputRange(-0.7, 0.8);
+                    .outputRange(-0.8, 0.9);
                         
 
                 elevatorFollowerConfig

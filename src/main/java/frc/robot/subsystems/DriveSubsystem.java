@@ -4,16 +4,16 @@
 
 package frc.robot.subsystems;
 
-import org.photonvision.EstimatedRobotPose;
+import java.util.ArrayList;
 
+import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonUtils;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -27,18 +27,20 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import frc.robot.Constants;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Vision;
+import frc.GryphonLib.PositionCalculations;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.commands.TrajectoryGeneration;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
@@ -67,7 +69,6 @@ public class DriveSubsystem extends SubsystemBase {
   private final ADIS16470_IMU m_gyro = new ADIS16470_IMU();
   private double gyroOffset = 0.0;
 
-  private final AprilTagFieldLayout layout = Constants.VisionConstants.kTagLayout;
   private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
   private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30));
   private final SwerveDrivePoseEstimator poseEstimator;
@@ -81,9 +82,6 @@ public class DriveSubsystem extends SubsystemBase {
     publisher = NetworkTableInstance.getDefault()
       .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
     var alliance = DriverStation.getAlliance();
-    layout.setOrigin(alliance.get() == Alliance.Blue ?
-        OriginPosition.kBlueAllianceWallRightSide : OriginPosition.kRedAllianceWallRightSide);
-    ShuffleboardTab tab = Shuffleboard.getTab("Vision");
 
     poseEstimator =  new SwerveDrivePoseEstimator(
         DriveConstants.kDriveKinematics,
@@ -93,8 +91,28 @@ public class DriveSubsystem extends SubsystemBase {
         stateStdDevs,
         visionMeasurementStdDevs);
     
-    tab.addString("Pose", this::getFomattedPose).withPosition(0, 0).withSize(2, 0);
-    tab.add("TrueRobotField", field2d).withPosition(2, 0).withSize(6, 4);
+    SmartDashboard.putData("TrueRobotField", field2d);
+
+    SmartDashboard.putData("Swerve Drive", new Sendable() {
+      @Override
+      public void initSendable(SendableBuilder builder) {
+          builder.setSmartDashboardType("SwerveDrive");
+
+          builder.addDoubleProperty("Front Left Angle", ()->m_frontLeft.getState().angle.getDegrees(), null);
+          builder.addDoubleProperty("Front Left Velocity", ()->m_frontLeft.getState().speedMetersPerSecond, null);
+
+          builder.addDoubleProperty("Front Right Angle", ()->m_frontRight.getState().angle.getDegrees(), null);
+          builder.addDoubleProperty("Front Right Velocity", ()->m_frontRight.getState().speedMetersPerSecond, null);
+
+          builder.addDoubleProperty("Back Left Angle", ()->m_rearLeft.getState().angle.getDegrees(), null);
+          builder.addDoubleProperty("Back Left Velocity", ()->m_rearLeft.getState().speedMetersPerSecond, null);
+
+          builder.addDoubleProperty("Back Right Angle", ()->m_rearRight.getState().angle.getDegrees(), null);
+          builder.addDoubleProperty("Back Right Velocity", ()->m_rearRight.getState().speedMetersPerSecond, null);
+
+          builder.addDoubleProperty("Robot Angle", ()->getRotation().getRadians(), null);
+      }
+    });
 
     RobotConfig config;
     try{
@@ -261,12 +279,43 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public Command PathToPose(Pose2d goalPose){
+    field2d.getObject("Goal Pose").setPose(goalPose);
+    ArrayList<Pose2d> waypoints = new ArrayList<Pose2d>();
+    waypoints.add(getCurrentPose());
+    waypoints.add(goalPose);
+    field2d.getObject("Current Trajectory").setPoses(waypoints);
+    
+
     Command pathfindingCommand = AutoBuilder.pathfindToPose(
         goalPose,
-        AutoConstants.constraints,
+        AutoConstants.teleopConstraints,
         0.0 // Goal end velocity in meters/sec
     );
-    return pathfindingCommand;
+
+    return new ParallelRaceGroup(pathfindingCommand, new TrajectoryGeneration(this, goalPose, field2d));
+  }
+
+  public Command AlignToTag(int goalTag, boolean isLeftScore){
+    Pose2d goalPose;
+    if (goalTag == 0){
+      goalPose = getCurrentPose();
+    } else {
+      goalPose = PositionCalculations.getAlignmentReefPose(goalTag, isLeftScore);
+    }
+    field2d.getObject("Goal Pose").setPose(goalPose);
+    ArrayList<Pose2d> waypoints = new ArrayList<Pose2d>();
+    waypoints.add(getCurrentPose());
+    waypoints.add(goalPose);
+    field2d.getObject("Current Trajectory").setPoses(waypoints);
+    
+
+    Command pathfindingCommand = AutoBuilder.pathfindToPose(
+        goalPose,
+        AutoConstants.teleopConstraints,
+        0.0 // Goal end velocity in meters/sec
+    );
+
+    return new ParallelRaceGroup(pathfindingCommand, new TrajectoryGeneration(this, goalPose, field2d));
   }
 
   @Override
@@ -287,17 +336,23 @@ public class DriveSubsystem extends SubsystemBase {
 
       field2d.setRobotPose(getCurrentPose());
       publisher.set(getStates());
+    SmartDashboard.putNumber("Distance to Goal", getDistanceToGoal());
   }
-  private String getFomattedPose() {
+
+  /*private String getFomattedPose() {
     var pose = getCurrentPose();
     return String.format("(%.2f, %.2f) %.2f degrees", 
         pose.getX(),
         pose.getY(),
         pose.getRotation().getDegrees());
-  }
+  }*/
 
   public Pose2d getCurrentPose() {
     return poseEstimator.getEstimatedPosition();
+  }
+
+  public double getDistanceToGoal(){
+    return PhotonUtils.getDistanceToPose(getCurrentPose(), field2d.getObject("Goal Pose").getPose());
   }
 
   /**
