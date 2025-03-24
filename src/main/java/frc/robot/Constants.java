@@ -137,11 +137,11 @@ public final class Constants {
   }
 
   public static final class ElevatorConstants {
-    public static final double L1Height = 7;
-    public static final double L2Height = 93;
-    public static final double L3Height = 148;
-    public static final double L4Height = 173;
-    public static final double IntakeHeight = 1;
+    public static final double L1Height = 0.85;
+    public static final double L2Height = 11.34;
+    public static final double L3Height = 18;
+    public static final double L4Height = 21.5;
+    public static final double IntakeHeight = 0.5;
   }
 
   public static final class WristConstants {
