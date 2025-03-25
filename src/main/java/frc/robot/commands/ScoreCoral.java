@@ -28,7 +28,7 @@ public class ScoreCoral extends SequentialCommandGroup{
                     new RunCommand(()->drivetrain.driveRobotRelativeChassis(new ChassisSpeeds(-0.4, 0, 0)), drivetrain).withTimeout(2),
                     drivetrain.AlignToTag(PositionCalculations.closestReefTag(drivetrain.getCurrentPose()), left),
                     new RunCommand(()->drivetrain.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), drivetrain).withTimeout(1),
-                    new MoveToIntakePositions(wrist, elevator, funnel, CoralEffector::hasCoral)
+                    new MoveToIntakePositions(wrist, elevator, funnel, hand)
                 );
             } else {
                 addCommands(

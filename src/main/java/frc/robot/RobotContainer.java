@@ -17,7 +17,6 @@ import com.revrobotics.spark.SparkBase.ControlType;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -96,7 +95,7 @@ public class RobotContainer {
     m_coralHand.setDefaultCommand(
       new RunCommand(
         ()-> {
-            if(m_wrist.getVelocity() > 800){
+            if(m_wrist.getVelocity() > 600){
               m_coralHand.intake();
             } else {
               if(m_coralHand.getControlType() != ControlType.kPosition){
@@ -117,9 +116,9 @@ public class RobotContainer {
     m_driverController.y().onTrue(new MoveToScoringPosition(4, m_wrist, m_elevator).andThen(new MoveCoralToL4Position(4, m_coralHand)));
     // m_driverController.leftBumper().whileTrue(new AlignToReefTagRelative(false, m_robotDrive).andThen(new RunCommand(()->m_robotDrive.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), m_robotDrive).withTimeout(1))).onFalse(new InstantCommand(m_robotDrive::stop));
     // m_driverController.rightBumper().whileTrue(new AlignToReefTagRelative(true, m_robotDrive).andThen(new RunCommand(()->m_robotDrive.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), m_robotDrive).withTimeout(1))).onFalse(new InstantCommand(m_robotDrive::stop));
-    m_driverController.leftBumper().whileTrue(new AlignToReefFieldRelative(true, m_robotDrive).andThen(new RunCommand(()->m_robotDrive.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), m_robotDrive).withTimeout(2))).onFalse(new InstantCommand(m_robotDrive::stop));
-    m_driverController.rightBumper().whileTrue(new AlignToReefFieldRelative(false, m_robotDrive).andThen(new RunCommand(()->m_robotDrive.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), m_robotDrive).withTimeout(2))).onFalse(new InstantCommand(m_robotDrive::stop));
-    m_driverController.leftTrigger().whileTrue(new RunCommand(()->m_coralHand.intake(), m_coralHand)).onTrue(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, CoralEffector::hasCoral));
+    m_driverController.leftBumper().whileTrue(new AlignToReefFieldRelative(true, m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop));
+    m_driverController.rightBumper().whileTrue(new AlignToReefFieldRelative(false, m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop));
+    m_driverController.leftTrigger().whileTrue(new RunCommand(()->m_coralHand.intake(), m_coralHand)).onTrue(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand));
     m_driverController.rightTrigger().whileTrue(new RunCommand(()->m_coralHand.outtake(), m_coralHand));
     m_driverController.povRight().onTrue(new RotateFunnel(m_funnel, FunnelConstants.IntakeAngle));
     m_driverController.povLeft().onTrue(new RotateFunnel(m_funnel, FunnelConstants.ClimbAngle));
@@ -177,7 +176,7 @@ public class RobotContainer {
           Command fullSequence = new SequentialCommandGroup(
               new ParallelCommandGroup(pathCommand, new SequentialCommandGroup(
                 new SequentialCommandGroup(
-                  (new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->CoralEffector.hasCoral())),
+                  (new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral())),
                   new RunCommand(() -> m_coralHand.intake(), m_coralHand).withTimeout(0.3)), subsystemMovement)),
               new ScoreCoral(
                   putCmd.getLevel(),
@@ -196,8 +195,8 @@ public class RobotContainer {
           Command pathCommand = m_robotDrive.PathToPose(PositionCalculations.translateCoordinates(stationTagPose, stationTagPose.getRotation().getDegrees(), 0.3));
             // For GetCoralCommand, run your intake sequence in parallel with the path command.
             Command intakeSequence = new ParallelCommandGroup(
-                new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, CoralEffector::hasCoral),
-                new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->CoralEffector.hasCoral())
+                new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand),
+                new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral())
             );
             SequentialCommandGroup fullSequence = new SequentialCommandGroup(
               new ParallelCommandGroup(pathCommand, intakeSequence),
