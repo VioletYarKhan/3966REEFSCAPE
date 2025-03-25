@@ -19,6 +19,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.AlignmentConstants;
 import frc.robot.Constants.AutoConstants;
@@ -56,6 +57,7 @@ public class RobotContainer {
   public final EffectorWrist m_wrist = new EffectorWrist();
   private final CoralEffector m_coralHand = new CoralEffector();
   private final CoralFunnel m_funnel = new CoralFunnel();
+  private final Spark m_blinkin = new Spark(1);
 
   // The driver's controller
   CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
@@ -104,6 +106,8 @@ public class RobotContainer {
             }
         }, m_coralHand)
     );
+
+    m_blinkin.set(0.01);
   }
 
 
@@ -122,6 +126,8 @@ public class RobotContainer {
     m_driverController.rightTrigger().whileTrue(new RunCommand(()->m_coralHand.outtake(), m_coralHand));
     m_driverController.povRight().onTrue(new RotateFunnel(m_funnel, FunnelConstants.IntakeAngle));
     m_driverController.povLeft().onTrue(new RotateFunnel(m_funnel, FunnelConstants.ClimbAngle));
+    m_driverController.povUp().onTrue(new InstantCommand(() -> m_blinkin.set(m_blinkin.get() + 0.02)));
+    m_driverController.povDown().onTrue(new InstantCommand(() -> m_blinkin.set(m_blinkin.get() - 0.02)));
 
     m_operatorController.start().onTrue(new InstantCommand(()->m_robotDrive.zeroHeading(), m_robotDrive));
     m_operatorController.povUp().whileTrue(new InstantCommand(()->m_elevator.set(0.15), m_elevator)).onFalse(new InstantCommand(()->m_elevator.setPosition(m_elevator.getPosition()), m_elevator));
