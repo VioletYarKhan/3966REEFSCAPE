@@ -15,7 +15,7 @@ public class CoralEffector extends SubsystemBase {
     
     TalonFX effectorWheel = new TalonFX(12);
     TalonFXConfiguration effectorConfig = new TalonFXConfiguration();
-    DigitalInput coralSwitch = new DigitalInput(2);
+    static DigitalInput coralSwitch = new DigitalInput(2);
 
     double targetReference;
     ControlType currentControlType;
@@ -108,8 +108,7 @@ public class CoralEffector extends SubsystemBase {
         }
     }
 
-    public boolean hasCoral(){
-        // return false;
+    public static boolean hasCoral(){
         return !coralSwitch.get();
     }
 }

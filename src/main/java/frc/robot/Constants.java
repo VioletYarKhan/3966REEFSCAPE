@@ -116,7 +116,11 @@ public final class Constants {
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
     
     public static final PathConstraints constraints = new PathConstraints(
-        1.0, 2.0,
+        3.0, 4.0,
+        Units.degreesToRadians(360), Units.degreesToRadians(720));
+
+    public static final PathConstraints teleopConstraints = new PathConstraints(
+        3, 1,
         Units.degreesToRadians(360), Units.degreesToRadians(720));
 
     public static final Transform3d leftBranchCoral = new Transform3d(0.381, 0.381, 0, new Rotation3d());
@@ -134,10 +138,10 @@ public final class Constants {
   }
 
   public static final class ElevatorConstants {
-    public static final double L1Height = 7;
-    public static final double L2Height = 91;
-    public static final double L3Height = 148;
-    public static final double L4Height = 173;
+    public static final double L1Height = 0.85;
+    public static final double L2Height = 11.34;
+    public static final double L3Height = 18;
+    public static final double L4Height = 21.5;
     public static final double IntakeHeight = 0.5;
   }
 
@@ -145,7 +149,7 @@ public final class Constants {
     public static final double L1Angle = 7.4;
     public static final double L2_3Angle = 10;
     public static final double L4Angle = 4.8;
-    public static final double IntakeAngle = 0.5;
+    public static final double IntakeAngle = 0;
   }
 
   public static final class FunnelConstants {
@@ -161,7 +165,7 @@ public final class Constants {
     private static final double camPitch = Units.degreesToRadians(-20);
     private static final double camYaw = Units.degreesToRadians(-2);
     public static final Transform3d kRobotToCam =
-            new Transform3d(new Translation3d(Units.inchesToMeters(11), -Units.inchesToMeters(0), Units.inchesToMeters(7.5)), new Rotation3d(0, camPitch, camYaw));
+            new Transform3d(new Translation3d(Units.inchesToMeters(11), -Units.inchesToMeters(0.5), Units.inchesToMeters(7.5)), new Rotation3d(0, camPitch, camYaw));
     public static final Transform3d kCamToRobot = kRobotToCam.inverse();
 
     // The layout of the AprilTags on the field
@@ -183,6 +187,7 @@ public final class Constants {
     public static final double LEFT_SETPOINT_REEF_ALIGNMENT = 0.2;
     public static final double RIGHT_SETPOINT_REEF_ALIGNMENT = -0.2;
     public static final double ROT_SETPOINT_REEF_ALIGNMENT = Math.PI;
+    public static final double ROT_SETPOINT_REEF_ALIGNMENT_OFFSET = Units.degreesToRadians(0);
     
     public static final double X_TOLERANCE_REEF_ALIGNMENT = 0.1;
     public static final double Y_TOLERANCE_REEF_ALIGNMENT = 0.1;
@@ -190,5 +195,11 @@ public final class Constants {
     
     public static final double DONT_SEE_TAG_WAIT_TIME = 1;
     public static final double POSE_VALIDATION_TIME = 1;
+
+    public static final int[] BLUE_REEF = {20, 21, 22, 17, 18, 19};
+    public static final int[] RED_REEF = {11, 10, 9, 8, 7, 6};
+
+    public static final int[] BLUE_HUMAN = {13, 12};
+    public static final int[] RED_HUMAN = {1, 2};
   }
 }
