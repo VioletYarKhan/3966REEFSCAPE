@@ -148,7 +148,7 @@ public final class Constants {
   public static final class WristConstants {
     public static final double L1Angle = 7.4;
     public static final double L2_3Angle = 9;
-    public static final double L4Angle = 4.3;
+    public static final double L4Angle = 4.2;
     public static final double IntakeAngle = 0;
   }
 
