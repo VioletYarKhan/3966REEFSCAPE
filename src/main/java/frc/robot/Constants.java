@@ -204,7 +204,7 @@ public final class Constants {
   }
 
   public static class BlinkinConstants{
-    public static final double black = 0.99;
-    public static final double Larson_Scanner_1 = -0.01;
+    public static final double blue = 0.92;
+    public static final double green = 0.73;
   }
 }
