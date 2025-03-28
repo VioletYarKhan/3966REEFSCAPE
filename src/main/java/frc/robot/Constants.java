@@ -116,11 +116,7 @@ public final class Constants {
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
     
     public static final PathConstraints constraints = new PathConstraints(
-        3.0, 4.0,
-        Units.degreesToRadians(360), Units.degreesToRadians(720));
-
-    public static final PathConstraints teleopConstraints = new PathConstraints(
-        3, 1,
+        3.0, 2,
         Units.degreesToRadians(360), Units.degreesToRadians(720));
 
     public static final Transform3d leftBranchCoral = new Transform3d(0.381, 0.381, 0, new Rotation3d());
