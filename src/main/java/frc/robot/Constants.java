@@ -202,4 +202,9 @@ public final class Constants {
     public static final int[] BLUE_HUMAN = {13, 12};
     public static final int[] RED_HUMAN = {1, 2};
   }
+
+  public static class BlinkinConstants{
+    public static final double blue = 0.92;
+    public static final double green = 0.73;
+  }
 }
