@@ -302,7 +302,8 @@ public class DriveSubsystem extends SubsystemBase {
     } else {
       goalPose = PositionCalculations.getAlignmentReefPose(goalTag, isLeftScore);
     }
-    
+    return PathToPose(goalPose);
+    /*
     field2d.getObject("Goal Pose").setPose(goalPose);
     ArrayList<Pose2d> waypoints = new ArrayList<Pose2d>();
     waypoints.add(getCurrentPose());
@@ -317,8 +318,7 @@ public class DriveSubsystem extends SubsystemBase {
     );
 
     return new ParallelRaceGroup(pathfindingCommand, new TrajectoryGeneration(this, goalPose, field2d));
-    
-    // return PathToPose(goalPose);
+    */
   }
 
   @Override
