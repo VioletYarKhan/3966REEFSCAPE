@@ -8,6 +8,7 @@ package frc.robot;
 
 import frc.GryphonLib.AllianceFlipUtil;
 import frc.GryphonLib.PositionCalculations;
+import frc.GryphonLib.SwerveDrive;
 
 import static frc.robot.Constants.VisionConstants.kTagLayout;
 
@@ -32,6 +33,7 @@ import frc.robot.commands.RotateFunnel;
 import frc.robot.commands.ScoreCoral;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.MapleSimSwerve;
 import frc.robot.subsystems.BlinkinLEDs;
 import frc.robot.subsystems.CoralEffector;
 import frc.robot.subsystems.CoralFunnel;
@@ -52,7 +54,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems
-  private final DriveSubsystem m_robotDrive = new DriveSubsystem();
+  private final SwerveDrive m_robotDrive = new DriveSubsystem();
   public final Elevator m_elevator = new Elevator();
   public final Vision m_vision = new Vision();
   public final EffectorWrist m_wrist = new EffectorWrist();
@@ -70,6 +72,12 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    if (Robot.isReal()) {
+        this.m_robotDrive = new DriveSubsystem(); // Real implementation
+    }
+    else {
+        this.m_robotDrive = new MapleSimSwerve(); // Simulation implementation
+    }
     configureButtonBindings();
     handHasCoral.onTrue(new InstantCommand(m_lights::setHasCoral, m_lights)).onFalse(new InstantCommand(m_lights::setReadyIntake, m_lights));
 

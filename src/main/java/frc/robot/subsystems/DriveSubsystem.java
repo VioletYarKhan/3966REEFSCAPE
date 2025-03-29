@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Vision;
 import frc.GryphonLib.PositionCalculations;
+import frc.GryphonLib.SwerveDrive;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.TrajectoryGeneration;
@@ -43,7 +44,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class DriveSubsystem extends SubsystemBase {
+public class DriveSubsystem implements SwerveDrive {
   // Create MAXSwerveModules
   private final MAXSwerveModule m_frontLeft = new MAXSwerveModule(
       DriveConstants.kFrontLeftDrivingCanId,
@@ -369,5 +370,35 @@ public class DriveSubsystem extends SubsystemBase {
       getRotation(),
       getPositions(),
       newPose);
+  }
+
+  @Override
+  public ChassisSpeeds getMeasuredSpeeds() {
+      return getCurrentSpeeds();
+  }
+
+  @Override
+  public SwerveModulePosition[] getModulePositions() {
+      return getPositions();
+  }
+
+  @Override
+  public SwerveModuleState[] getModuleStates() {
+    return getStates();
+  }
+
+  @Override
+  public Pose2d getPose() {
+    return this.getCurrentPose();
+  }
+
+  @Override
+  public void setPose(Pose2d pose) {
+      setCurrentPose(pose);
+  }
+
+  @Override
+  public Rotation2d getGyroYaw() {
+      return getRotation();
   }
 }

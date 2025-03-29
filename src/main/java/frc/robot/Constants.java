@@ -4,6 +4,11 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Inches;
+
+import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+
 import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -19,6 +24,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.math.Matrix;
@@ -202,5 +208,22 @@ public final class Constants {
   public static class BlinkinConstants{
     public static final double blue = 0.92;
     public static final double green = 0.73;
+  }
+
+  public static final class SimulationConstants{
+    // Create and configure a drivetrain simulation configuration
+    final DriveTrainSimulationConfig driveTrainSimulationConfig = DriveTrainSimulationConfig.Default()
+            // Specify gyro type (for realistic gyro drifting and error simulation)
+            .withGyro(COTS.ofPigeon2())
+            // Specify swerve module (for realistic swerve dynamics)
+            .withSwerveModule(COTS.ofMAXSwerve(
+                    DCMotor.getNEO(1), // Drive motor is a Kraken X60
+                    DCMotor.getNeo550(1), // Steer motor is a Falcon 500
+                    COTS.WHEELS.COLSONS.cof, // Use the COF for Colson Wheels
+                    3)) // L3 Gear ratio
+            // Configures the track length and track width (spacing between swerve modules)
+            .withTrackLengthTrackWidth(Inches.of(27.5), Inches.of(27.5))
+            // Configures the bumper size (dimensions of the robot bumper)
+            .withBumperSize(Inches.of(30), Inches.of(30));
   }
 }
