@@ -21,10 +21,9 @@ public class AlignToReefFieldRelative extends SequentialCommandGroup {
 
   public AlignToReefFieldRelative(boolean isLeftScore, DriveSubsystem drivebase) {
     addRequirements(drivebase);
-    drivebase.getStates();
-    tagID = PositionCalculations.closestReefTag(drivebase.getCurrentPose());
+    tagID = PositionCalculations.closestReefTag(drivebase::getCurrentPose);
     goalPose = PositionCalculations.getAlignmentReefPose(tagID, isLeftScore);
-    pathCommand = drivebase.PathToPose(goalPose);
+    pathCommand = drivebase.PathToPose(goalPose, 0.0);
     addCommands(pathCommand, new RunCommand(()->drivebase.driveRobotRelativeChassis(new ChassisSpeeds(0.7, 0, 0)), drivebase).withTimeout(0.5));
   }
 }

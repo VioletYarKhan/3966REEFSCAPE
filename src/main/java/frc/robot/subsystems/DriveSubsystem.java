@@ -278,7 +278,7 @@ public class DriveSubsystem extends SubsystemBase {
     driveRobotRelativeChassis(new ChassisSpeeds());
   }
 
-  public Command PathToPose(Pose2d goalPose){
+  public Command PathToPose(Pose2d goalPose, double endSpeed){
     field2d.getObject("Goal Pose").setPose(goalPose);
     ArrayList<Pose2d> waypoints = new ArrayList<Pose2d>();
     waypoints.add(getCurrentPose());
@@ -289,7 +289,7 @@ public class DriveSubsystem extends SubsystemBase {
     Command pathfindingCommand = AutoBuilder.pathfindToPose(
         goalPose,
         AutoConstants.constraints,
-        0.0 // Goal end velocity in meters/sec
+        endSpeed // Goal end velocity in meters/sec
     );
 
     return new ParallelRaceGroup(pathfindingCommand, new TrajectoryGeneration(this, goalPose, field2d));
@@ -302,8 +302,7 @@ public class DriveSubsystem extends SubsystemBase {
     } else {
       goalPose = PositionCalculations.getAlignmentReefPose(goalTag, isLeftScore);
     }
-    return PathToPose(goalPose);
-    /*
+
     field2d.getObject("Goal Pose").setPose(goalPose);
     ArrayList<Pose2d> waypoints = new ArrayList<Pose2d>();
     waypoints.add(getCurrentPose());
@@ -318,7 +317,16 @@ public class DriveSubsystem extends SubsystemBase {
     );
 
     return new ParallelRaceGroup(pathfindingCommand, new TrajectoryGeneration(this, goalPose, field2d));
-    */
+  }
+
+  public Command AlignToTagFar(int goalTag){
+    Pose2d goalPose;
+    if (goalTag == 0){
+      goalPose = getCurrentPose();
+    } else {
+      goalPose = PositionCalculations.getStraightOutPose(goalTag);
+    }
+    return PathToPose(goalPose, 0.0);
   }
 
   @Override
@@ -331,7 +339,7 @@ public class DriveSubsystem extends SubsystemBase {
         EstimatedRobotPose botPose = Vision.getEstimatedGlobalPose(getCurrentPose(), pipelineResult);
         poseEstimator.addVisionMeasurement(botPose.estimatedPose.toPose2d(), botPose.timestampSeconds);
       }
-    } catch(NullPointerException e){}
+    } catch(Exception e){}
     // Update pose estimator with drivetrain sensors
     poseEstimator.update(
       getRotation(),

@@ -3,6 +3,8 @@ package frc.GryphonLib;
 import static frc.robot.Constants.VisionConstants.kRobotToCam;
 import static frc.robot.Constants.VisionConstants.kTagLayout;
 
+import java.util.function.Supplier;
+
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
 
@@ -72,12 +74,20 @@ public class PositionCalculations {
     public static Pose2d getAlignmentReefPose(int tag, boolean left){
         Pose2d tagPose = kTagLayout.getTagPose(tag).get().toPose2d();
         Pose2d goalPose = translateCoordinates(tagPose, tagPose.getRotation().getDegrees(), 0.6);
-        goalPose = left ? translateCoordinates(goalPose, tagPose.getRotation().getDegrees() - 90, 0.2) : translateCoordinates(goalPose, tagPose.getRotation().getDegrees() + 90, 0.15);
+        goalPose = left ? translateCoordinates(goalPose, tagPose.getRotation().getDegrees() - 90, 0.2) : translateCoordinates(goalPose, tagPose.getRotation().getDegrees() + 90, 0.2);
 
         return goalPose.transformBy(new Transform2d(0, 0, new Rotation2d(Math.PI)));
     }
 
-    public static int closestReefTag(Pose2d currPose){
+    public static Pose2d getStraightOutPose(int tag){
+        Pose2d tagPose = kTagLayout.getTagPose(tag).get().toPose2d();
+        Pose2d goalPose = translateCoordinates(tagPose, tagPose.getRotation().getDegrees(), 1.5);
+
+        return goalPose.transformBy(new Transform2d(0, 0, new Rotation2d(Math.PI)));
+    }
+
+    public static int closestReefTag(Supplier<Pose2d> currPoseSupplier){
+        Pose2d currPose = currPoseSupplier.get();
         int[] reefTags = DriverStation.getAlliance().get() == Alliance.Blue ? AlignmentConstants.BLUE_REEF : AlignmentConstants.RED_REEF;
         double closestDistance = Double.MAX_VALUE;
         int closestTag = 0;

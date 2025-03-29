@@ -18,7 +18,7 @@ public class Elevator extends SubsystemBase {
     SparkMax elevatorL = new SparkMax(10, MotorType.kBrushless);
     SparkMax elevatorR = new SparkMax(9, MotorType.kBrushless);
     RelativeEncoder encoderL = elevatorL.getEncoder();
-    RelativeEncoder encoderR = elevatorL.getEncoder();
+    RelativeEncoder encoderR = elevatorR.getEncoder();
     SparkClosedLoopController pid;
 
     double targetReference;
@@ -37,6 +37,8 @@ public class Elevator extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putNumber("Elevator Position", getPosition());
         SmartDashboard.putString("Elevator Control Type", currentControlType.toString());
+        SmartDashboard.putNumber("Elevator L Position", encoderL.getPosition());
+        SmartDashboard.putNumber("Elevator R Position", encoderR.getPosition());
     }
 
     public void set(double speed) {

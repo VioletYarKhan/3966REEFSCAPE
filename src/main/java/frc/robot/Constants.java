@@ -116,7 +116,7 @@ public final class Constants {
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
     
     public static final PathConstraints constraints = new PathConstraints(
-        3.0, 2,
+        4, 2.5,
         Units.degreesToRadians(360), Units.degreesToRadians(720));
 
     public static final Transform3d leftBranchCoral = new Transform3d(0.381, 0.381, 0, new Rotation3d());
@@ -135,8 +135,8 @@ public final class Constants {
 
   public static final class ElevatorConstants {
     public static final double L1Height = 2;
-    public static final double L2Height = 10.7;
-    public static final double L3Height = 17.6;
+    public static final double L2Height = 11;
+    public static final double L3Height = 18;
     public static final double L4Height = 22.5;
     public static final double IntakeHeight = 0.5;
   }
