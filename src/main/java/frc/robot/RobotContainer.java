@@ -39,6 +39,7 @@ import frc.robot.subsystems.EffectorWrist;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -102,7 +103,7 @@ public class RobotContainer {
     m_coralHand.setDefaultCommand(
       new RunCommand(
         ()-> {
-            if(m_wrist.getVelocity() > 600){
+            if(m_wrist.getVelocity() > 400){
               m_coralHand.intake();
             } else {
               if(m_coralHand.getControlType() != ControlType.kPosition){
@@ -186,7 +187,7 @@ public class RobotContainer {
                 new SequentialCommandGroup(
                   (new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral())),
                   new RunCommand(() -> m_coralHand.intake(), m_coralHand).withTimeout(0.3)), subsystemMovement)),
-              new ScoreCoral(
+              new RepeatCommand(new ScoreCoral(
                   putCmd.getLevel(),
                   putCmd.getLeft(),
                   m_coralHand,
@@ -195,7 +196,7 @@ public class RobotContainer {
                   m_funnel,
                   m_robotDrive,
                   reefTags[putCmd.getSide() - 1]
-              )
+              ).andThen((m_robotDrive.AlignToTagFar(reefTags[putCmd.getSide() - 1]).onlyIf(m_coralHand::hasCoral))).until(m_coralHand::hasCoral))
           );
           convertedCommands.add(fullSequence);
         } else if (fullCommand instanceof Parser.GetCoralCommand) {
@@ -211,7 +212,6 @@ public class RobotContainer {
               new ParallelCommandGroup(pathCommand, intakeSequence),
               new RunCommand(() -> m_coralHand.intake(), m_coralHand).withTimeout(0.3)
             );
-            
             convertedCommands.add(fullSequence);
         }
     }
@@ -219,7 +219,5 @@ public class RobotContainer {
       autoRoutine.addCommands(command);
     }
     return autoRoutine;
-    
-    // return new SequentialCommandGroup(new ScoreCoral(4, true, m_coralHand, m_wrist, m_elevator, m_funnel, m_robotDrive), new ParallelCommandGroup(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel), new RunCommand(()->m_robotDrive.driveRobotRelativeChassis(new ChassisSpeeds(-0.5, 0, 0)), m_robotDrive).withTimeout(0.5)));
   }
 }
