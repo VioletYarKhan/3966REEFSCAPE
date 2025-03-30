@@ -13,6 +13,7 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
+import frc.robot.Constants.ElevatorConstants;
 
 public class Elevator extends SubsystemBase {
     SparkMax elevatorL = new SparkMax(10, MotorType.kBrushless);
@@ -25,6 +26,11 @@ public class Elevator extends SubsystemBase {
     ControlType currentControlType;
 
     public Elevator() {
+        SmartDashboard.putNumber("Elevator Intake Height", ElevatorConstants.IntakeHeight);
+        SmartDashboard.putNumber("Elevator L1 Height", ElevatorConstants.L1Height);
+        SmartDashboard.putNumber("Elevator L2 Height", ElevatorConstants.L2Height);
+        SmartDashboard.putNumber("Elevator L3 Height", ElevatorConstants.L3Height);
+        SmartDashboard.putNumber("Elevator L4 Height", ElevatorConstants.L4Height);
         elevatorL.configure(Configs.Elevator.elevatorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
         elevatorR.configure(Configs.Elevator.elevatorFollowerConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
         pid = elevatorL.getClosedLoopController();

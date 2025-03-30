@@ -13,6 +13,7 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
+import frc.robot.Constants.WristConstants;
 
 public class EffectorWrist extends SubsystemBase {
     SparkFlex wristMotor = new SparkFlex(11, MotorType.kBrushless);
@@ -23,6 +24,10 @@ public class EffectorWrist extends SubsystemBase {
     ControlType currentControlType;
 
     public EffectorWrist() {
+        SmartDashboard.putNumber("Wrist Intake Angle", WristConstants.IntakeAngle);
+        SmartDashboard.putNumber("Wrist L1 Angle", WristConstants.L1Angle);
+        SmartDashboard.putNumber("Wrist L2-3 Angle", WristConstants.L2_3Angle);
+        SmartDashboard.putNumber("Wrist L4 Angle", WristConstants.L4Angle);
         wristMotor.configure(Configs.Wrist.wristConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
         pid = wristMotor.getClosedLoopController();
 
