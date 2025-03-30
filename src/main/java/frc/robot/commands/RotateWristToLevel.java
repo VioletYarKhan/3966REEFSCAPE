@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.WristConstants;
 import frc.robot.subsystems.EffectorWrist;
@@ -22,13 +23,13 @@ public class RotateWristToLevel extends Command {
     @Override
     public void initialize(){
         if(level == 0){
-            wrist.setPosition(WristConstants.IntakeAngle);
+            wrist.setPosition(SmartDashboard.getNumber("Wrist Intake Angle", WristConstants.IntakeAngle));
         } else if(level == 1){
-            wrist.setPosition(WristConstants.L1Angle);
+            wrist.setPosition(SmartDashboard.getNumber("Wrist L1 Angle", WristConstants.L1Angle));
         } else if(level == 2 || level == 3){
-            wrist.setPosition(WristConstants.L2_3Angle);
+            wrist.setPosition(SmartDashboard.getNumber("Wrist L2-3 Angle", WristConstants.L2_3Angle));
         } else if(level == 4){
-            wrist.setPosition(WristConstants.L4Angle);
+            wrist.setPosition(SmartDashboard.getNumber("Wrist L4 Angle", WristConstants.L4Angle));
         }     
     }
 

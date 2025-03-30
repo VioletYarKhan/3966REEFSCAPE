@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -73,7 +74,7 @@ public final class Configs {
                     // These are example gains you may need to them for your own robot!
                     .pid(0.1, 0, 0.01)
                     .velocityFF(0)
-                    .outputRange(-0.13, 0.5); // down speed -0.35 max
+                    .outputRange(-0.2, 0.5); // down speed -0.35 max
                         
 
                 elevatorFollowerConfig
@@ -86,7 +87,7 @@ public final class Configs {
     }
 
     public static final class Wrist {
-        public static final SparkMaxConfig wristConfig = new SparkMaxConfig();
+        public static final SparkFlexConfig wristConfig = new SparkFlexConfig();
 
         static {
                 wristConfig
@@ -103,7 +104,7 @@ public final class Configs {
                         // These are example gains you may need to them for your own robot!
                         .pid(0.1, 0, 0)
                         .velocityFF(0)
-                        .outputRange(-0.35, 0.2);
+                        .outputRange(-0.35, 0.4);
                 }
         }
 
