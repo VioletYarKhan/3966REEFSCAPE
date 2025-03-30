@@ -111,4 +111,8 @@ public class CoralEffector extends SubsystemBase {
     public boolean hasCoral(){
         return !coralSwitch.get();
     }
+
+    public boolean notHasCoral(){
+        return coralSwitch.get();
+    }
 }
