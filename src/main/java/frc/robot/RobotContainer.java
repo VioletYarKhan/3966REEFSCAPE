@@ -39,7 +39,6 @@ import frc.robot.subsystems.EffectorWrist;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -112,6 +111,9 @@ public class RobotContainer {
             }
         }, m_coralHand)
     );
+
+    SmartDashboard.putNumber("Left Reef Align", 0.22);
+    SmartDashboard.putNumber("Right Reef Align", 0.1);
   }
 
 
@@ -204,18 +206,13 @@ public class RobotContainer {
           Pose2d stationTagPose = kTagLayout.getTagPose(stationTags[getCmd.getStation() - 1]).get().toPose2d();
           Command pathCommand = m_robotDrive.PathToPose(PositionCalculations.translateCoordinates(stationTagPose, stationTagPose.getRotation().getDegrees(), 0.3), 0.0);
             // For GetCoralCommand, run your intake sequence in parallel with the path command.
-            Command intakeSequence = new ParallelCommandGroup(
+            Command intakeSequence = new SequentialCommandGroup(
                 new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand),
-                new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()).withTimeout(3)
+                new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()).withTimeout(5)
             );
-            ParallelRaceGroup fullSequence = new ParallelRaceGroup(
-              new SequentialCommandGroup(
-                new ParallelCommandGroup(pathCommand, intakeSequence),
-                new RunCommand(() -> m_coralHand.intake(), m_coralHand).withTimeout(0.2)
-              ), new SequentialCommandGroup(
-                new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()),
-                new RunCommand(() -> m_coralHand.intake(), m_coralHand).withTimeout(0.2)
-              )
+            SequentialCommandGroup fullSequence = new SequentialCommandGroup(
+              new ParallelCommandGroup(pathCommand, intakeSequence).until(m_coralHand::hasCoral),
+              new RunCommand(() -> m_coralHand.intake(), m_coralHand).withTimeout(0.2)
             );
 
             convertedCommands.add(fullSequence);

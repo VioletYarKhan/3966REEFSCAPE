@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -86,7 +87,7 @@ public final class Configs {
     }
 
     public static final class Wrist {
-        public static final SparkMaxConfig wristConfig = new SparkMaxConfig();
+        public static final SparkFlexConfig wristConfig = new SparkFlexConfig();
 
         static {
                 wristConfig

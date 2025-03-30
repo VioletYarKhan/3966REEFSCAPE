@@ -91,7 +91,7 @@ public final class Constants {
     // 45 teeth on the wheel's bevel gear, 22 teeth on the first-stage spur gear, 15
     // teeth on the bevel pinion
     // Correction Multiplies
-    public static final double kDrivingMotorReduction = ((45.0 * 22) / (kDrivingMotorPinionTeeth * 15)) * 0.93;
+    public static final double kDrivingMotorReduction = ((45.0 * 22) / (kDrivingMotorPinionTeeth * 15));// * 0.93;
     public static final double kDriveWheelFreeSpeedRps = (kDrivingMotorFreeSpeedRps * kWheelCircumferenceMeters)
         / kDrivingMotorReduction;
   }
@@ -143,13 +143,13 @@ public final class Constants {
 
   public static final class WristConstants {
     public static final double L1Angle = 7.4;
-    public static final double L2_3Angle = 9;
-    public static final double L4Angle = 4.2;
+    public static final double L2_3Angle = 9.7;
+    public static final double L4Angle = 5;
     public static final double IntakeAngle = 0;
   }
 
   public static final class FunnelConstants {
-    public static final double IntakeAngle = 0.3532;
+    public static final double IntakeAngle = 0.3522;
     public static final double ClimbAngle = 0.7;
   }
 

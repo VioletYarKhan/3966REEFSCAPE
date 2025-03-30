@@ -28,8 +28,8 @@ public class ScoreCoral extends SequentialCommandGroup{
                     new MoveToScoringPosition(level, wrist, elevator),
                     new MoveCoralToL4Position(level, hand),
                     drivetrain.PathToPose(PositionCalculations.getAlignmentReefPose(goalTag, left), 0.0),
-                    new RunCommand(()->drivetrain.driveRobotRelativeChassis(new ChassisSpeeds(0.7, 0, 0)), drivetrain).withTimeout(0.3),
-                    new WaitCommand(0.5),
+                    new RunCommand(()->drivetrain.driveRobotRelativeChassis(new ChassisSpeeds(0.7, 0, 0)), drivetrain).withTimeout(0.5),
+                    new WaitCommand(0.4),
                     new MoveToIntakePositions(wrist, elevator, funnel, hand).withTimeout(0.5)
                 );
             } else {
