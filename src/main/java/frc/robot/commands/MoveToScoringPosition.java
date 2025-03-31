@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.EffectorWrist;
 import frc.robot.subsystems.Elevator;
@@ -15,9 +16,8 @@ public class MoveToScoringPosition extends SequentialCommandGroup {
         Elevator elevator
        ){
 
-        super(
-            new RotateWristToLevel(level, wrist),
-            new MoveElevatorToLevel(level, elevator)
-        );
+        SmartDashboard.putNumber("Scored level", level);
+        addCommands(new RotateWristToLevel(level, wrist), new MoveElevatorToLevel(level, elevator));
+        
     }
 }
