@@ -140,10 +140,10 @@ public class RobotContainer {
     m_operatorController.rightBumper().whileTrue(new InstantCommand(()->m_wrist.set(0.15), m_wrist)).onFalse(new InstantCommand(()->m_wrist.setPosition(m_wrist.getPosition()), m_wrist));
     m_operatorController.rightTrigger().onTrue(new MoveCoralToL4Position(4, m_coralHand));
     m_operatorController.leftTrigger().whileTrue(new InstantCommand(()->m_coralHand.intake(), m_coralHand)).onFalse(new InstantCommand(()->m_coralHand.stop()));
-    // m_operatorController.povLeft().whileTrue(new InstantCommand(()->m_funnel.set(0.3), m_funnel)).onFalse(new InstantCommand(()->m_funnel.setPosition(m_funnel.getPosition()), m_funnel));
-    // m_operatorController.povRight().whileTrue(new InstantCommand(()->m_funnel.set(-0.3), m_funnel)).onFalse(new InstantCommand(()->m_funnel.setPosition(m_funnel.getPosition()), m_funnel));
-    m_operatorController.povLeft().onTrue(new InstantCommand(() -> m_lights.set(m_lights.getColor() + 0.01)));
-    m_operatorController.povRight().onTrue(new InstantCommand(() -> m_lights.set(m_lights.getColor() - 0.01)));
+    m_operatorController.povLeft().whileTrue(new InstantCommand(()->m_funnel.set(0.3), m_funnel)).onFalse(new InstantCommand(()->m_funnel.setPosition(m_funnel.getPosition()), m_funnel));
+    m_operatorController.povRight().whileTrue(new InstantCommand(()->m_funnel.set(-0.3), m_funnel)).onFalse(new InstantCommand(()->m_funnel.setPosition(m_funnel.getPosition()), m_funnel));
+    // m_operatorController.povLeft().onTrue(new InstantCommand(() -> m_lights.set(m_lights.getColor() + 0.01)));
+    // m_operatorController.povRight().onTrue(new InstantCommand(() -> m_lights.set(m_lights.getColor() - 0.01)));
     m_operatorController.x().onTrue(new InstantCommand(()->m_wrist.setEncoderPosition(0), m_wrist));
     m_operatorController.a().onTrue(new InstantCommand(()->m_robotDrive.stop(), m_robotDrive));
     m_operatorController.b().onTrue(new InstantCommand(() -> m_elevator.setEncoderPosition(0), m_elevator));
