@@ -70,7 +70,7 @@ public class DriveSubsystem extends SubsystemBase {
   private double gyroOffset = 0.0;
 
   private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
-  private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30));
+  private static Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(1, 1, Units.degreesToRadians(30));
   private final SwerveDrivePoseEstimator poseEstimator;
   private final Field2d field2d = new Field2d();
   private double previousPipelineTimestamp = 0;
@@ -336,7 +336,7 @@ public class DriveSubsystem extends SubsystemBase {
     try{
       var resultTimestamp = pipelineResult.getTimestampSeconds();
       if (resultTimestamp != previousPipelineTimestamp && pipelineResult.hasTargets()) {
-        EstimatedRobotPose botPose = Vision.getEstimatedGlobalPose(getCurrentPose(), pipelineResult);
+        EstimatedRobotPose botPose = Vision.getEstimatedGlobalPose(getCurrentPose(), pipelineResult, poseEstimator);
         poseEstimator.addVisionMeasurement(botPose.estimatedPose.toPose2d(), botPose.timestampSeconds);
       }
     } catch(Exception e){}
