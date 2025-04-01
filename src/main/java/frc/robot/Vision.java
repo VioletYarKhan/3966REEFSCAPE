@@ -1,6 +1,5 @@
 package frc.robot;
 
-import static frc.robot.Constants.VisionConstants.kCamToRobot;
 
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -9,12 +8,9 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
@@ -64,11 +60,9 @@ public class Vision extends SubsystemBase {
         return tags;
     }
 
-    public static EstimatedRobotPose getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose, PhotonPipelineResult result, SwerveDrivePoseEstimator poseEst) {
+    public static EstimatedRobotPose getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose, PhotonPipelineResult result) {
         photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
         var update = photonPoseEstimator.update(result);
-        Transform3d botToTarget = result.getBestTarget().getBestCameraToTarget().plus(kCamToRobot);
-        poseEst.setVisionMeasurementStdDevs(VecBuilder.fill(botToTarget.getX()/2.5, botToTarget.getY()/2.5, Units.degreesToRadians(30)));
         Pose3d currentPose3d = update.get().estimatedPose;
         double photonTimestamp = update.get().timestampSeconds;
         
