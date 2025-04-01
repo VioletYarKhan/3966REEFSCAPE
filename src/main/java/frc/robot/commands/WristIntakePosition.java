@@ -22,7 +22,7 @@ public class WristIntakePosition extends Command {
 
     @Override
     public void initialize(){
-        if(hand.hasCoral()){
+        if(hand.hasCoral() && wrist.getPosition() > 3){
             wrist.setPosition(WristConstants.L4Angle);
         } else{
             wrist.setPosition(WristConstants.IntakeAngle);   
