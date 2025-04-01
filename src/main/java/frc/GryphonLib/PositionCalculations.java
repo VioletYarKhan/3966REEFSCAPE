@@ -75,7 +75,7 @@ public class PositionCalculations {
     public static Pose2d getAlignmentReefPose(int tag, boolean left){
         Pose2d tagPose = kTagLayout.getTagPose(tag).get().toPose2d();
         Pose2d goalPose = translateCoordinates(tagPose, tagPose.getRotation().getDegrees(), 0.6);
-        goalPose = left ? translateCoordinates(goalPose, tagPose.getRotation().getDegrees() - 90, SmartDashboard.getNumber("Left Reef Align", 0.2)) : translateCoordinates(goalPose, tagPose.getRotation().getDegrees() + 90, SmartDashboard.getNumber("Right Reef Align", 0.2));
+        goalPose = left ? translateCoordinates(goalPose, tagPose.getRotation().getDegrees() - 90, SmartDashboard.getNumber("Left Reef Align", AlignmentConstants.leftReefFieldAlignment)) : translateCoordinates(goalPose, tagPose.getRotation().getDegrees() + 90, SmartDashboard.getNumber("Right Reef Align", AlignmentConstants.rightReefFieldAlignment));
 
         return goalPose.transformBy(new Transform2d(0, 0, new Rotation2d(Math.PI)));
     }

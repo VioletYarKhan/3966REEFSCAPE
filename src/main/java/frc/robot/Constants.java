@@ -197,6 +197,11 @@ public final class Constants {
 
     public static final int[] BLUE_HUMAN = {13, 12};
     public static final int[] RED_HUMAN = {1, 2};
+
+
+    public static final double leftReefFieldAlignment = 0.2;
+    public static final double rightReefFieldAlignment = 0.1;
+
   }
 
   public static class BlinkinConstants{

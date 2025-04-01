@@ -112,8 +112,8 @@ public class RobotContainer {
         }, m_coralHand)
     );
 
-    SmartDashboard.putNumber("Left Reef Align", 0.22);
-    SmartDashboard.putNumber("Right Reef Align", 0.1);
+    SmartDashboard.putNumber("Left Reef Align", AlignmentConstants.leftReefFieldAlignment);
+    SmartDashboard.putNumber("Right Reef Align", AlignmentConstants.rightReefFieldAlignment);
   }
 
 
