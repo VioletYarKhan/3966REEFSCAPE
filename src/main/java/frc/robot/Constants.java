@@ -136,7 +136,7 @@ public final class Constants {
   public static final class ElevatorConstants {
     public static final double L1Height = 2;
     public static final double L2Height = 11;
-    public static final double L3Height = 18;
+    public static final double L3Height = 17.9;
     public static final double L4Height = 22.5;
     public static final double IntakeHeight = 0.5;
   }
@@ -199,8 +199,8 @@ public final class Constants {
     public static final int[] RED_HUMAN = {1, 2};
 
 
-    public static final double leftReefFieldAlignment = 0.2;
-    public static final double rightReefFieldAlignment = 0.1;
+    public static final double leftReefFieldAlignment = 0.21;
+    public static final double rightReefFieldAlignment = 0.12;
 
   }
 
