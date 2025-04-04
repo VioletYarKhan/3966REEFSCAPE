@@ -172,20 +172,19 @@ public class RobotContainer {
       side[0] = i;
       for (Boolean left : new Boolean[]{true, false}){
         SmartDashboard.putData("Operator Controls/" + i + (left ? "L" : "R"), 
+        new InstantCommand(()->
           new SequentialCommandGroup(
-            m_robotDrive.AlignToTagFar(reefTags[i-1]),
-            new OperatorScoreCoal(
-              operatorScoringLevel,
-              left,
-              m_coralHand,
-              m_wrist,
-              m_elevator,
-              m_funnel,
-              m_robotDrive,
-              reefTags[side[0] - 1]
-            )
+          m_robotDrive.AlignToTagFar(reefTags[side[0] - 1]),
+          new OperatorScoreCoal(
+            left,
+            m_coralHand,
+            m_wrist,
+            m_elevator,
+            m_funnel,
+            m_robotDrive,
+            reefTags[side[0] - 1]
           )
-        );
+        ).schedule()));
       }
     }
 

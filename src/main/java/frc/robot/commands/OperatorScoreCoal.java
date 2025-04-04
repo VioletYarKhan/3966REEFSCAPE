@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -15,7 +16,6 @@ import frc.robot.subsystems.EffectorWrist;
 
 public class OperatorScoreCoal extends SequentialCommandGroup{
     public OperatorScoreCoal(
-        SendableChooser<Integer> levelChooser,
         boolean left,
         CoralEffector hand,
         EffectorWrist wrist,
@@ -23,7 +23,10 @@ public class OperatorScoreCoal extends SequentialCommandGroup{
         CoralFunnel funnel,
         DriveSubsystem drivetrain,
         int goalTag){
+            @SuppressWarnings("unchecked")
+            SendableChooser<Integer> levelChooser = (SendableChooser<Integer>) SmartDashboard.getData("Operator Height Chooser");
             int level = levelChooser.getSelected();
+            SmartDashboard.putNumber("Operator Scoring Level", level);
             if (level == 4) {
                 addCommands(
                     new MoveToScoringPosition(level, wrist, elevator),
@@ -44,5 +47,6 @@ public class OperatorScoreCoal extends SequentialCommandGroup{
                     new RunCommand(()->hand.stop(), hand).withTimeout(0.1)
                 );
             }
+            SmartDashboard.putString("Subsystems Required by Operator", this.getRequirements().toString());
     }
 }
