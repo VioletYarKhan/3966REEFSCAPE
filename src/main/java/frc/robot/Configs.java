@@ -104,7 +104,7 @@ public final class Configs {
                         // These are example gains you may need to them for your own robot!
                         .pid(0.1, 0, 0)
                         .velocityFF(0)
-                        .outputRange(-0.35, 0.5);
+                        .outputRange(-0.4, 0.4);
                 }
         }
 
