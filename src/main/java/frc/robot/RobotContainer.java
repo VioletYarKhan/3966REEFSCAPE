@@ -81,6 +81,7 @@ public class RobotContainer {
         // Turning is controlled by the X axis of the right stick.
          new RunCommand(
             () -> { 
+              SmartDashboard.putNumber("Current Level", currentLevel);
                 double forward = m_driverController.getLeftY();
                 double strafe = m_driverController.getLeftX();
                 double turn = m_driverController.getRightX();
@@ -119,15 +120,13 @@ public class RobotContainer {
   }
 
   private void configureButtonBindings() {
-    m_driverController.a().onTrue(new MoveToScoringPosition(1, m_wrist, m_elevator));
-    m_driverController.x().onTrue(new MoveToScoringPosition(2, m_wrist, m_elevator));
-    m_driverController.b().onTrue(new MoveToScoringPosition(3, m_wrist, m_elevator));
-    m_driverController.y().onTrue(new MoveToScoringPosition(4, m_wrist, m_elevator).andThen(new MoveCoralToL4Position(4, m_coralHand)));
-    // m_driverController.leftBumper().whileTrue(new AlignToReefTagRelative(false, m_robotDrive).andThen(new RunCommand(()->m_robotDrive.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), m_robotDrive).withTimeout(1))).onFalse(new InstantCommand(m_robotDrive::stop));
-    // m_driverController.rightBumper().whileTrue(new AlignToReefTagRelative(true, m_robotDrive).andThen(new RunCommand(()->m_robotDrive.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), m_robotDrive).withTimeout(1))).onFalse(new InstantCommand(m_robotDrive::stop));
-    m_driverController.leftBumper().whileTrue(new RunCommand(()->new AlignToReefFieldRelative(true, m_robotDrive).schedule(), m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop, m_robotDrive));
-    m_driverController.rightBumper().whileTrue(new RunCommand(()->new AlignToReefFieldRelative(false, m_robotDrive).schedule(), m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop, m_robotDrive));
-    m_driverController.leftTrigger().whileTrue(new RunCommand(()->m_coralHand.intake(), m_coralHand)).onTrue(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand));
+    m_driverController.a().onTrue(new InstantCommand(()->currentLevel = 1).andThen(new MoveToScoringPosition(1, m_wrist, m_elevator)));
+    m_driverController.x().onTrue(new InstantCommand(()->currentLevel = 2).andThen(new MoveToScoringPosition(2, m_wrist, m_elevator)));
+    m_driverController.b().onTrue(new InstantCommand(()->currentLevel = 3).andThen(new MoveToScoringPosition(3, m_wrist, m_elevator)));
+    m_driverController.y().onTrue(new InstantCommand(()->currentLevel = 4).andThen(new MoveToScoringPosition(4, m_wrist, m_elevator).andThen(new MoveCoralToL4Position(4, m_coralHand))));
+    m_driverController.leftBumper().whileTrue(new RunCommand(()->new AlignToReefFieldRelative(true, m_robotDrive, ()->currentLevel).schedule(), m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop, m_robotDrive));
+    m_driverController.rightBumper().whileTrue(new RunCommand(()->new AlignToReefFieldRelative(false, m_robotDrive, ()->currentLevel).schedule(), m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop, m_robotDrive));
+    m_driverController.leftTrigger().whileTrue(new RunCommand(()->m_coralHand.intake(), m_coralHand)).onTrue(new InstantCommand(()->currentLevel = 0).andThen(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand)));
     m_driverController.rightTrigger().whileTrue(new RunCommand(()->m_coralHand.outtake(), m_coralHand));
     m_driverController.povRight().onTrue(new RotateFunnel(m_funnel, FunnelConstants.IntakeAngle));
     m_driverController.povLeft().onTrue(new RotateFunnel(m_funnel, FunnelConstants.ClimbAngle));
