@@ -295,12 +295,12 @@ public class DriveSubsystem extends SubsystemBase {
     return new ParallelRaceGroup(pathfindingCommand, new TrajectoryGeneration(this, goalPose, field2d));
   }
 
-  public Command AlignToTag(int goalTag, boolean isLeftScore){
+  public Command AlignToTag(int goalTag, int level, boolean isLeftScore){
     Pose2d goalPose;
     if (goalTag == 0){
       goalPose = getCurrentPose();
     } else {
-      goalPose = PositionCalculations.getAlignmentReefPose(goalTag, isLeftScore);
+      goalPose = PositionCalculations.getAlignmentReefPose(goalTag, level, isLeftScore);
     }
 
     field2d.getObject("Goal Pose").setPose(goalPose);
