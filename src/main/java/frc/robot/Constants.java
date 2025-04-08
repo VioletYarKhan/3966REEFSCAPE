@@ -201,7 +201,6 @@ public final class Constants {
 
     public static final double leftReefFieldAlignment = 0.21;
     public static final double rightReefFieldAlignment = 0.12;
-
   }
 
   public static class BlinkinConstants{

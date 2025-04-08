@@ -66,6 +66,8 @@ public class RobotContainer {
 
   Trigger handHasCoral = new Trigger(m_coralHand::hasCoral);
 
+  int currentLevel = 0;
+
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -116,9 +118,6 @@ public class RobotContainer {
     SmartDashboard.putNumber("Right Reef Align", AlignmentConstants.rightReefFieldAlignment);
   }
 
-
-
-
   private void configureButtonBindings() {
     m_driverController.a().onTrue(new MoveToScoringPosition(1, m_wrist, m_elevator));
     m_driverController.x().onTrue(new MoveToScoringPosition(2, m_wrist, m_elevator));
@@ -149,13 +148,14 @@ public class RobotContainer {
     m_operatorController.b().onTrue(new InstantCommand(() -> m_elevator.setEncoderPosition(0), m_elevator));
     m_operatorController.y().onTrue(new InstantCommand(() -> m_robotDrive.setX(), m_robotDrive));
   }
-  
-  public SequentialCommandGroup getAutonomousCommand() {
 
+  public SequentialCommandGroup parseAutoCommand(){
+    SequentialCommandGroup autoRoutine = new SequentialCommandGroup();
+    
     int[] reefTags = DriverStation.getAlliance().get() == Alliance.Blue ? AlignmentConstants.BLUE_REEF : AlignmentConstants.RED_REEF;
     int[] stationTags = DriverStation.getAlliance().get() == Alliance.Blue ? AlignmentConstants.BLUE_HUMAN : AlignmentConstants.RED_HUMAN;
 
-    SequentialCommandGroup autoRoutine = new SequentialCommandGroup();
+    
     ArrayList<Command> commands = Parser.parse(SmartDashboard.getString("Auto Code", "1S-13L-1C-63L-1C-63R"));
     Parser.SetPositionCommand setPositionCommand;
     try {
@@ -222,7 +222,5 @@ public class RobotContainer {
       autoRoutine.addCommands(command);
     }
     return autoRoutine;
-    
-    // return new SequentialCommandGroup(new ScoreCoral(4, true, m_coralHand, m_wrist, m_elevator, m_funnel, m_robotDrive), new ParallelCommandGroup(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel), new RunCommand(()->m_robotDrive.driveRobotRelativeChassis(new ChassisSpeeds(-0.5, 0, 0)), m_robotDrive).withTimeout(0.5)));
   }
 }
