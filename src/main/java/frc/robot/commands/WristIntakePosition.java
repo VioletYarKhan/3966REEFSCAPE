@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.WristConstants;
 import frc.robot.subsystems.CoralEffector;
@@ -23,9 +24,9 @@ public class WristIntakePosition extends Command {
     @Override
     public void initialize(){
         if(hand.hasCoral() && wrist.getPosition() > 3){
-            wrist.setPosition(WristConstants.L4Angle);
+            wrist.setPosition(SmartDashboard.getNumber("Wrist L4 Angle", WristConstants.L4Angle));
         } else{
-            wrist.setPosition(WristConstants.IntakeAngle);   
+            wrist.setPosition(SmartDashboard.getNumber("Wrist Intake Angle", WristConstants.IntakeAngle));   
         } 
     }
 

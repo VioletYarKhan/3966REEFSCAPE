@@ -25,18 +25,18 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ElevatorConstants;
 
 public class ElevatorSimSystem extends SubsystemBase implements ElevatorIO {
-    ProfiledPIDController elevatorController = new ProfiledPIDController(1, 0, 0, new TrapezoidProfile.Constraints(8, 8));
+    ProfiledPIDController elevatorController = new ProfiledPIDController(2.3, 0, 0.2, new TrapezoidProfile.Constraints(12, 16));
     DCMotor elevatorGearbox = DCMotor.getNEO(2);
     PWMSparkMax elevatorMotor = new PWMSparkMax(10);
     Encoder elevatorEncoder = new Encoder(3, 4);
 
-    EncoderSim wristEncoderSim = new EncoderSim(elevatorEncoder);
+    EncoderSim elevatorEncoderSim = new EncoderSim(elevatorEncoder);
 
     double targetReference;
     ControlType currentControlType;
 
     private final ElevatorSim elevatorSim = new ElevatorSim(elevatorGearbox, 5, Units.lbsToKilograms(20), Units.inchesToMeters(1), 0, Units.inchesToMeters(70), true, 0);
-    private final Mechanism2d elevatorSimMechanism = new Mechanism2d(Units.inchesToMeters(10), Units.inchesToMeters(70));
+    private final Mechanism2d elevatorSimMechanism = new Mechanism2d(Units.inchesToMeters(10), Units.inchesToMeters(58));
     private final MechanismRoot2d elevatorRoot = elevatorSimMechanism.getRoot("Base", Units.inchesToMeters(15), Units.inchesToMeters(8));
     public final MechanismLigament2d elevatorLigament = elevatorRoot.append(new MechanismLigament2d("Elevator", Units.inchesToMeters(10), 90, 10, new Color8Bit(Color.kBlue)));
 
@@ -59,8 +59,8 @@ public class ElevatorSimSystem extends SubsystemBase implements ElevatorIO {
     public void periodic() {
         elevatorSim.setInput(elevatorMotor.get() * RobotController.getBatteryVoltage());
         elevatorSim.update(0.02);
-        wristEncoderSim.setDistance(elevatorSim.getPositionMeters());
-        elevatorLigament.setLength(elevatorSim.getPositionMeters());
+        elevatorEncoderSim.setDistance(elevatorSim.getPositionMeters());
+        elevatorLigament.setLength(elevatorSim.getPositionMeters() * 0.82 + 0.3);
         if (currentControlType == ControlType.kPosition) {
             double pidOutput = elevatorController.calculate(elevatorEncoder.getDistance() * 5, targetReference * (8.88/22));
             elevatorMotor.set(pidOutput);

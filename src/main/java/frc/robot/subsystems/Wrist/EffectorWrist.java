@@ -12,7 +12,10 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkBase.ResetMode;
 
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
@@ -25,6 +28,10 @@ public class EffectorWrist extends SubsystemBase implements WristIO {
 
     double targetReference;
     ControlType currentControlType;
+
+    private final Mechanism2d wristSimMechanism = new Mechanism2d(Units.inchesToMeters(30), Units.inchesToMeters(30));
+    private final MechanismRoot2d wristHome = wristSimMechanism.getRoot("Base", Units.inchesToMeters(15), Units.inchesToMeters(15));
+    public final MechanismLigament2d wristArm = wristHome.append(new MechanismLigament2d("Sword", Units.inchesToMeters(13), 0));
 
     public EffectorWrist() {
         SmartDashboard.putNumber("Wrist Intake Angle", WristConstants.IntakeAngle);
@@ -42,6 +49,7 @@ public class EffectorWrist extends SubsystemBase implements WristIO {
     public void periodic() {
         SmartDashboard.putNumber("Wrist Position", wristEncoder.getPosition());
         SmartDashboard.putNumber("Wrist Velocity", wristEncoder.getVelocity());
+        wristArm.setAngle(Units.rotationsToDegrees(getPosition() / 25));
     }
     
     @Override

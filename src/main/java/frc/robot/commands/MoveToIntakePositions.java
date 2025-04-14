@@ -2,8 +2,10 @@ package frc.robot.commands;
 
 
 
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.Wrist.WristIO;
+import frc.robot.Robot;
 import frc.robot.Constants.FunnelConstants;
 import frc.robot.subsystems.CoralEffector;
 import frc.robot.subsystems.CoralFunnel;
@@ -23,7 +25,7 @@ public class MoveToIntakePositions extends SequentialCommandGroup {
         CoralEffector hand){
 
         addCommands(new MoveElevatorToLevel(0, elevator), new WristIntakePosition(hand, wrist));
-        addCommands(new RotateFunnel(funnel, FunnelConstants.IntakeAngle));
+        addCommands(Robot.isReal() ? new RotateFunnel(funnel, FunnelConstants.IntakeAngle) : new InstantCommand());
     
     }
 }

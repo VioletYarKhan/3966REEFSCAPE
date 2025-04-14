@@ -23,7 +23,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.WristConstants;
 
 public class WristSim extends SubsystemBase implements WristIO {
-    ProfiledPIDController wristController = new ProfiledPIDController(1, 0, 0, new TrapezoidProfile.Constraints(8, 8));
+    ProfiledPIDController wristController = new ProfiledPIDController(1, 0, 0.1, new TrapezoidProfile.Constraints(8, 16));
     DCMotor wristGearbox = DCMotor.getNeoVortex(1);
     PWMSparkFlex wristMotor = new PWMSparkFlex(11);
     Encoder wristEncoder = new Encoder(0, 1);
@@ -51,7 +51,6 @@ public class WristSim extends SubsystemBase implements WristIO {
         targetReference = 0;
         currentControlType = ControlType.kDutyCycle;
         wristEncoder.setDistancePerPulse((2*Math.PI)/(1024*25));
-        setPosition(5);
     }
 
     @Override
@@ -68,7 +67,6 @@ public class WristSim extends SubsystemBase implements WristIO {
         SmartDashboard.putNumber("Wrist Position", Units.radiansToRotations(wristEncoder.getDistance()*15));
 
         RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(wristSim.getCurrentDrawAmps()));
-        SmartDashboard.putBoolean("Wrist at Position", Math.abs(getPosition() - targetReference) < 1);
     }
     
     @Override
