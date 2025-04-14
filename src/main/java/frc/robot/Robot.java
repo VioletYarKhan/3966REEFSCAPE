@@ -44,8 +44,7 @@ public class Robot extends TimedRobot {
     }
     SmartDashboard.putString("Auto Code", "");
 
-    prevAutoCode = SmartDashboard.getString("Auto Code", prevAutoCode);
-    m_autonomousCommand = m_robotContainer.parseAutoCommand();
+    prevAutoCode = "";
   }
 
   /**
