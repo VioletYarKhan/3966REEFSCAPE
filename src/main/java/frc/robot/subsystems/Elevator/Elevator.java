@@ -1,8 +1,10 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.Elevator;
 
 
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
+
+import java.util.Optional;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -10,12 +12,13 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkBase.ResetMode;
 
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 import frc.robot.Constants.ElevatorConstants;
 
-public class Elevator extends SubsystemBase {
+public class Elevator extends SubsystemBase implements ElevatorIO {
     SparkMax elevatorL = new SparkMax(10, MotorType.kBrushless);
     SparkMax elevatorR = new SparkMax(9, MotorType.kBrushless);
     RelativeEncoder encoderL = elevatorL.getEncoder();
@@ -102,5 +105,15 @@ public class Elevator extends SubsystemBase {
         } else {
             return false;
         }
+    }
+    
+    @Override
+    public SubsystemBase returnSubsystem(){
+        return this;
+    }
+
+    @Override
+    public Optional<MechanismLigament2d> returnLigament() {
+        return null;
     }
 }

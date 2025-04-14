@@ -3,21 +3,21 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.WristConstants;
 import frc.robot.subsystems.CoralEffector;
-import frc.robot.subsystems.EffectorWrist;
+import frc.robot.subsystems.Wrist.WristIO;
 
 public class WristIntakePosition extends Command {
-    public EffectorWrist wrist;
+    public WristIO wrist;
     public CoralEffector hand;
 
 
     public WristIntakePosition(
         CoralEffector hand,
-        EffectorWrist wrist){
+        WristIO wrist){
 
         this.hand = hand;
         this.wrist = wrist;
 
-        addRequirements(wrist);
+        addRequirements(wrist.returnSubsystem());
     }
 
     @Override
