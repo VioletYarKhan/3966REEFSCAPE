@@ -1,18 +1,18 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.subsystems.EffectorWrist;
-import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Elevator.ElevatorIO;
+import frc.robot.subsystems.Wrist.WristIO;
 
 public class MoveToScoringPosition extends SequentialCommandGroup {
-    public Elevator elevator;
+    public ElevatorIO elevator;
     public int level;
-    public EffectorWrist wrist;
+    public WristIO wrist;
 
     public MoveToScoringPosition(
         int level,
-        EffectorWrist wrist,
-        Elevator elevator
+        WristIO wrist,
+        ElevatorIO elevator
        ){
 
         super(
