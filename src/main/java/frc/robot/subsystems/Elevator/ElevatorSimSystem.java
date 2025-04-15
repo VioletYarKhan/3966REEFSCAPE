@@ -36,7 +36,7 @@ public class ElevatorSimSystem extends SubsystemBase implements ElevatorIO {
     ControlType currentControlType;
 
     private final ElevatorSim elevatorSim = new ElevatorSim(elevatorGearbox, 5, Units.lbsToKilograms(20), Units.inchesToMeters(1), 0, Units.inchesToMeters(70), true, 0);
-    private final Mechanism2d elevatorSimMechanism = new Mechanism2d(Units.inchesToMeters(10), Units.inchesToMeters(58));
+    private final Mechanism2d elevatorSimMechanism = new Mechanism2d(Units.inchesToMeters(30), Units.inchesToMeters(80));
     private final MechanismRoot2d elevatorRoot = elevatorSimMechanism.getRoot("Base", Units.inchesToMeters(15), Units.inchesToMeters(8));
     public final MechanismLigament2d elevatorLigament = elevatorRoot.append(new MechanismLigament2d("Elevator", Units.inchesToMeters(10), 90, 10, new Color8Bit(Color.kBlue)));
 
@@ -52,7 +52,6 @@ public class ElevatorSimSystem extends SubsystemBase implements ElevatorIO {
         targetReference = 0;
         currentControlType = ControlType.kDutyCycle;
         elevatorEncoder.setDistancePerPulse((2*Math.PI)/(1024*5));
-        setPosition(22);
     }
 
     @Override

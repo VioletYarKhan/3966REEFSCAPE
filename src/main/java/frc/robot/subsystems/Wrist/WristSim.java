@@ -51,6 +51,7 @@ public class WristSim extends SubsystemBase implements WristIO {
         targetReference = 0;
         currentControlType = ControlType.kDutyCycle;
         wristEncoder.setDistancePerPulse((2*Math.PI)/(1024*25));
+        setPosition(1);
     }
 
     @Override

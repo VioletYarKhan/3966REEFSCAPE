@@ -49,7 +49,8 @@ public class EffectorWrist extends SubsystemBase implements WristIO {
     public void periodic() {
         SmartDashboard.putNumber("Wrist Position", wristEncoder.getPosition());
         SmartDashboard.putNumber("Wrist Velocity", wristEncoder.getVelocity());
-        wristArm.setAngle(-Units.rotationsToDegrees(getPosition() / 20) + Units.radiansToDegrees((Math.PI)/3));
+        wristArm.setAngle(-Units.rotationsToDegrees(wristEncoder.getPosition() / 20) + Units.radiansToDegrees((Math.PI)/3));
+        SmartDashboard.putString("Wrist State", "Real");
     }
     
     @Override
