@@ -336,7 +336,7 @@ public class DriveSubsystem extends SubsystemBase {
     try{
       var resultTimestamp = pipelineResult.getTimestampSeconds();
       if (resultTimestamp != previousPipelineTimestamp && pipelineResult.hasTargets()) {
-        if (pipelineResult.getBestTarget().getBestCameraToTarget().getTranslation().getNorm() > 2.5){
+        if (pipelineResult.getBestTarget().getBestCameraToTarget().getTranslation().getNorm() < 2.5){
           EstimatedRobotPose botPose = Vision.getEstimatedGlobalPose(getCurrentPose(), pipelineResult);
           poseEstimator.addVisionMeasurement(botPose.estimatedPose.toPose2d(), botPose.timestampSeconds);
         }
