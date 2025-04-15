@@ -39,6 +39,7 @@ import frc.robot.subsystems.EffectorWrist;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -149,7 +150,8 @@ public class RobotContainer {
   }
 
   public SequentialCommandGroup parseAutoCommand(){
-    SequentialCommandGroup autoRoutine = new SequentialCommandGroup();
+    try {
+      SequentialCommandGroup autoRoutine = new SequentialCommandGroup();
     
     int[] reefTags = DriverStation.getAlliance().get() == Alliance.Blue ? AlignmentConstants.BLUE_REEF : AlignmentConstants.RED_REEF;
     int[] stationTags = DriverStation.getAlliance().get() == Alliance.Blue ? AlignmentConstants.BLUE_HUMAN : AlignmentConstants.RED_HUMAN;
@@ -176,7 +178,8 @@ public class RobotContainer {
 
       if (fullCommand instanceof Parser.PutCoralCommand) {
         Parser.PutCoralCommand putCmd = (Parser.PutCoralCommand) fullCommand;
-        Command pathCommand = m_robotDrive.AlignToTagFar(reefTags[putCmd.getSide() - 1]);
+        // Command pathCommand = m_robotDrive.AlignToTagFar(reefTags[putCmd.getSide() - 1]);
+        Command pathCommand = m_robotDrive.AlignToTag(reefTags[putCmd.getSide() - 1], putCmd.getLevel(), putCmd.getLeft());
           
           // Build the scoring sequence that will run concurrently with the path command.
           Command subsystemMovement = new MoveToScoringPosition(putCmd.getLevel(), m_wrist, m_elevator);
@@ -209,10 +212,8 @@ public class RobotContainer {
                 new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand),
                 new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()).withTimeout(5)
             );
-            SequentialCommandGroup fullSequence = new SequentialCommandGroup(
-              new ParallelCommandGroup(pathCommand, intakeSequence).until(m_coralHand::hasCoral),
-              new RunCommand(() -> m_coralHand.intake(), m_coralHand).withTimeout(0.2)
-            );
+
+            ParallelRaceGroup fullSequence = new ParallelCommandGroup(pathCommand, intakeSequence).until(m_coralHand::hasCoral);
 
             convertedCommands.add(fullSequence);
         }
@@ -221,5 +222,8 @@ public class RobotContainer {
       autoRoutine.addCommands(command);
     }
     return autoRoutine;
+    } catch (Exception e){
+      return new SequentialCommandGroup();
+    }
   }
 }
