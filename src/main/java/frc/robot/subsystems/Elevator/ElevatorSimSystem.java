@@ -60,7 +60,7 @@ public class ElevatorSimSystem extends SubsystemBase implements ElevatorIO {
         elevatorSim.setInput(elevatorMotor.get() * RobotController.getBatteryVoltage());
         elevatorSim.update(0.02);
         elevatorEncoderSim.setDistance(elevatorSim.getPositionMeters());
-        elevatorLigament.setLength(elevatorSim.getPositionMeters() * 0.82 + 0.3);
+        elevatorLigament.setLength(elevatorSim.getPositionMeters() * 0.7 + 0.3);
         if (currentControlType == ControlType.kPosition) {
             double pidOutput = elevatorController.calculate(elevatorEncoder.getDistance() * 5, targetReference * (8.88/22));
             elevatorMotor.set(pidOutput);

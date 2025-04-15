@@ -49,7 +49,7 @@ public class EffectorWrist extends SubsystemBase implements WristIO {
     public void periodic() {
         SmartDashboard.putNumber("Wrist Position", wristEncoder.getPosition());
         SmartDashboard.putNumber("Wrist Velocity", wristEncoder.getVelocity());
-        wristArm.setAngle(Units.rotationsToDegrees(getPosition() / 25));
+        wristArm.setAngle(-Units.rotationsToDegrees(getPosition() / 20) + Units.radiansToDegrees((Math.PI)/3));
     }
     
     @Override
@@ -115,6 +115,6 @@ public class EffectorWrist extends SubsystemBase implements WristIO {
 
     @Override
     public Optional<MechanismLigament2d> returnLigament() {
-        return null;
+        return Optional.of(wristArm);
     }
 }

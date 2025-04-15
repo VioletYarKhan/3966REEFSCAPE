@@ -58,7 +58,7 @@ public class Elevator extends SubsystemBase implements ElevatorIO {
         SmartDashboard.putString("Elevator Control Type", currentControlType.toString());
         SmartDashboard.putNumber("Elevator L Position", encoderL.getPosition());
         SmartDashboard.putNumber("Elevator R Position", encoderR.getPosition());
-        elevatorLigament.setLength(getPosition() * Units.inchesToMeters(70)/22 + 0.3);
+        elevatorLigament.setLength((getPosition()* 0.05) + 0.3);
     }
 
     public void set(double speed) {
@@ -125,6 +125,6 @@ public class Elevator extends SubsystemBase implements ElevatorIO {
 
     @Override
     public Optional<MechanismLigament2d> returnLigament() {
-        return null;
+        return Optional.of(elevatorLigament);
     }
 }

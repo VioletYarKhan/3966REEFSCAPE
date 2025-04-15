@@ -35,7 +35,7 @@ public class WristSim extends SubsystemBase implements WristIO {
 
     double jKgMS = SingleJointedArmSim.estimateMOI(Units.inchesToMeters(13), Units.lbsToKilograms(8));
 
-    private final SingleJointedArmSim wristSim = new SingleJointedArmSim(wristGearbox, 15, jKgMS, Units.inchesToMeters(13), -Math.PI/4, (5*Math.PI)/4, true, Math.PI/6);
+    private final SingleJointedArmSim wristSim = new SingleJointedArmSim(wristGearbox, 25, jKgMS, Units.inchesToMeters(13), -Math.PI/4, (5*Math.PI)/4, true, Math.PI/6);
     private final Mechanism2d wristSimMechanism = new Mechanism2d(Units.inchesToMeters(30), Units.inchesToMeters(30));
     private final MechanismRoot2d wristHome = wristSimMechanism.getRoot("Base", Units.inchesToMeters(15), Units.inchesToMeters(15));
     public final MechanismLigament2d wristArm = wristHome.append(new MechanismLigament2d("Sword", Units.inchesToMeters(13), 0));
@@ -43,9 +43,9 @@ public class WristSim extends SubsystemBase implements WristIO {
     public WristSim() {
         wristController.reset(0);
         SmartDashboard.putData("Wrist Mech2D", wristSimMechanism);
-        SmartDashboard.putNumber("Wrist Intake Angle", WristConstants.IntakeAngle);
-        SmartDashboard.putNumber("Wrist L1 Angle", WristConstants.L1Angle);
-        SmartDashboard.putNumber("Wrist L2-3 Angle", WristConstants.L2_3Angle);
+        SmartDashboard.putNumber("Wrist Intake Angle", WristConstants.IntakeAngle + 1);
+        SmartDashboard.putNumber("Wrist L1 Angle", WristConstants.L1Angle - 0.9);
+        SmartDashboard.putNumber("Wrist L2-3 Angle", WristConstants.L2_3Angle - 1.7);
         SmartDashboard.putNumber("Wrist L4 Angle", WristConstants.L4Angle);
 
         targetReference = 0;
@@ -64,7 +64,7 @@ public class WristSim extends SubsystemBase implements WristIO {
             wristMotor.set(pidOutput);
         }
 
-        SmartDashboard.putNumber("Wrist Position", Units.radiansToRotations(wristEncoder.getDistance()*15));
+        SmartDashboard.putNumber("Wrist Position", Units.radiansToRotations(wristEncoder.getDistance()/15));
 
         RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(wristSim.getCurrentDrawAmps()));
     }
