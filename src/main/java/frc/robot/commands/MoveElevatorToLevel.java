@@ -3,18 +3,18 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ElevatorConstants;
-import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Elevator.ElevatorIO;
 
 public class MoveElevatorToLevel extends Command {
     public int level;
-    public Elevator elevator;
+    public ElevatorIO elevator;
 
-    public MoveElevatorToLevel(int level, Elevator elevator){
+    public MoveElevatorToLevel(int level, ElevatorIO elevator){
 
         this.level = level;
         this.elevator = elevator;
 
-        addRequirements(elevator);
+        addRequirements(elevator.returnSubsystem());
     }
 
     @Override

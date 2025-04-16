@@ -1,8 +1,10 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.Wrist;
 
 
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
+
+import java.util.Optional;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -10,18 +12,26 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkBase.ResetMode;
 
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 import frc.robot.Constants.WristConstants;
 
-public class EffectorWrist extends SubsystemBase {
+public class EffectorWrist extends SubsystemBase implements WristIO {
     SparkFlex wristMotor = new SparkFlex(11, MotorType.kBrushless);
     RelativeEncoder wristEncoder = wristMotor.getEncoder();
     SparkClosedLoopController pid;
 
     double targetReference;
     ControlType currentControlType;
+
+    private final Mechanism2d wristSimMechanism = new Mechanism2d(Units.inchesToMeters(30), Units.inchesToMeters(30));
+    private final MechanismRoot2d wristHome = wristSimMechanism.getRoot("Base", Units.inchesToMeters(15), Units.inchesToMeters(15));
+    public final MechanismLigament2d wristArm = wristHome.append(new MechanismLigament2d("Sword", Units.inchesToMeters(13), 0));
 
     public EffectorWrist() {
         SmartDashboard.putNumber("Wrist Intake Angle", WristConstants.IntakeAngle);
@@ -39,13 +49,17 @@ public class EffectorWrist extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putNumber("Wrist Position", wristEncoder.getPosition());
         SmartDashboard.putNumber("Wrist Velocity", wristEncoder.getVelocity());
+        wristArm.setAngle(-Units.rotationsToDegrees(wristEncoder.getPosition() / 20) + Units.radiansToDegrees((Math.PI)/3));
+        SmartDashboard.putString("Wrist State", "Real");
     }
-
+    
+    @Override
     public void set(double speed) {
         wristMotor.set(speed);
         currentControlType = ControlType.kDutyCycle;
     }
 
+    @Override
     public void setVelocity(double velocity) {
         pid.setReference(velocity, ControlType.kVelocity);
 
@@ -53,6 +67,7 @@ public class EffectorWrist extends SubsystemBase {
         currentControlType = ControlType.kVelocity;
     }
 
+    @Override
     public void setPosition(double position) {
         pid.setReference(position, ControlType.kPosition);
         SmartDashboard.putNumber("Requested Wrist Position", position);
@@ -61,24 +76,29 @@ public class EffectorWrist extends SubsystemBase {
         currentControlType = ControlType.kPosition;
     }
 
+    @Override
     public void setVoltage(double voltage) {
         wristMotor.setVoltage(voltage);
         
         currentControlType = ControlType.kVoltage;
     }
 
+    @Override
     public void setEncoderPosition(double position) {
         wristEncoder.setPosition(position);
     }
 
+    @Override
     public double getVelocity() {
         return wristEncoder.getVelocity();
     }
 
+    @Override
     public double getPosition() {        
         return wristEncoder.getPosition();
     }
 
+    @Override
     public boolean atTarget(double threshold) {
         if (currentControlType == ControlType.kVelocity) {
             return Math.abs(getVelocity() - targetReference) < threshold;
@@ -87,5 +107,15 @@ public class EffectorWrist extends SubsystemBase {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public SubsystemBase returnSubsystem() {
+        return this;
+    }
+
+    @Override
+    public Optional<MechanismLigament2d> returnLigament() {
+        return Optional.of(wristArm);
     }
 }

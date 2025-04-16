@@ -137,7 +137,7 @@ public final class Constants {
     public static final double L1Height = 2;
     public static final double L2Height = 11;
     public static final double L3Height = 17.9;
-    public static final double L4Height = 22.5;
+    public static final double L4Height = 23;
     public static final double IntakeHeight = 0.5;
   }
 
@@ -200,8 +200,7 @@ public final class Constants {
 
 
     public static final double leftReefFieldAlignment = 0.21;
-    public static final double rightReefFieldAlignment = 0.12;
-
+    public static final double rightReefFieldAlignment = 0.1;
   }
 
   public static class BlinkinConstants{

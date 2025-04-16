@@ -3,21 +3,21 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.WristConstants;
-import frc.robot.subsystems.EffectorWrist;
+import frc.robot.subsystems.Wrist.WristIO;
 
 public class RotateWristToLevel extends Command {
     public int level;
-    public EffectorWrist wrist;
+    public WristIO wrist;
 
 
     public RotateWristToLevel(
         int level,
-        EffectorWrist wrist){
+        WristIO wrist){
 
         this.level = level;
         this.wrist = wrist;
 
-        addRequirements(wrist);
+        addRequirements(wrist.returnSubsystem());
     }
 
     @Override

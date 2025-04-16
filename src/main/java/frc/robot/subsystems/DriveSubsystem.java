@@ -295,12 +295,12 @@ public class DriveSubsystem extends SubsystemBase {
     return new ParallelRaceGroup(pathfindingCommand, new TrajectoryGeneration(this, goalPose, field2d));
   }
 
-  public Command AlignToTag(int goalTag, boolean isLeftScore){
+  public Command AlignToTag(int goalTag, int level, boolean isLeftScore){
     Pose2d goalPose;
     if (goalTag == 0){
       goalPose = getCurrentPose();
     } else {
-      goalPose = PositionCalculations.getAlignmentReefPose(goalTag, isLeftScore);
+      goalPose = PositionCalculations.getAlignmentReefPose(goalTag, level, isLeftScore);
     }
 
     field2d.getObject("Goal Pose").setPose(goalPose);
@@ -336,8 +336,10 @@ public class DriveSubsystem extends SubsystemBase {
     try{
       var resultTimestamp = pipelineResult.getTimestampSeconds();
       if (resultTimestamp != previousPipelineTimestamp && pipelineResult.hasTargets()) {
-        EstimatedRobotPose botPose = Vision.getEstimatedGlobalPose(getCurrentPose(), pipelineResult);
-        poseEstimator.addVisionMeasurement(botPose.estimatedPose.toPose2d(), botPose.timestampSeconds);
+        if (pipelineResult.getBestTarget().getBestCameraToTarget().getTranslation().getNorm() < 2.5){
+          EstimatedRobotPose botPose = Vision.getEstimatedGlobalPose(getCurrentPose(), pipelineResult);
+          poseEstimator.addVisionMeasurement(botPose.estimatedPose.toPose2d(), botPose.timestampSeconds);
+        }
       }
     } catch(Exception e){}
     // Update pose estimator with drivetrain sensors
@@ -349,14 +351,6 @@ public class DriveSubsystem extends SubsystemBase {
       publisher.set(getStates());
     SmartDashboard.putNumber("Distance to Goal", getDistanceToGoal());
   }
-
-  /*private String getFomattedPose() {
-    var pose = getCurrentPose();
-    return String.format("(%.2f, %.2f) %.2f degrees", 
-        pose.getX(),
-        pose.getY(),
-        pose.getRotation().getDegrees());
-  }*/
 
   public Pose2d getCurrentPose() {
     return poseEstimator.getEstimatedPosition();
