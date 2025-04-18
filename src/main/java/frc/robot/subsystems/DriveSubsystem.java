@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.ArrayList;
 
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonUtils;
@@ -38,9 +37,7 @@ import frc.robot.Vision;
 import frc.GryphonLib.PositionCalculations;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.commands.TrajectoryGeneration;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
@@ -75,7 +72,6 @@ public class DriveSubsystem extends SubsystemBase {
   private final Field2d field2d = new Field2d();
   private double previousPipelineTimestamp = 0;
   private final StructArrayPublisher<SwerveModuleState> publisher;
-
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
@@ -280,10 +276,6 @@ public class DriveSubsystem extends SubsystemBase {
 
   public Command PathToPose(Pose2d goalPose, double endSpeed){
     field2d.getObject("Goal Pose").setPose(goalPose);
-    ArrayList<Pose2d> waypoints = new ArrayList<Pose2d>();
-    waypoints.add(getCurrentPose());
-    waypoints.add(goalPose);
-    field2d.getObject("Current Trajectory").setPoses(waypoints);
     
 
     Command pathfindingCommand = AutoBuilder.pathfindToPose(
@@ -292,7 +284,7 @@ public class DriveSubsystem extends SubsystemBase {
         endSpeed // Goal end velocity in meters/sec
     );
 
-    return new ParallelRaceGroup(pathfindingCommand, new TrajectoryGeneration(this, goalPose, field2d));
+    return pathfindingCommand;
   }
 
   public Command AlignToTag(int goalTag, int level, boolean isLeftScore){
@@ -304,10 +296,6 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     field2d.getObject("Goal Pose").setPose(goalPose);
-    ArrayList<Pose2d> waypoints = new ArrayList<Pose2d>();
-    waypoints.add(getCurrentPose());
-    waypoints.add(goalPose);
-    field2d.getObject("Current Trajectory").setPoses(waypoints);
     
 
     Command pathfindingCommand = AutoBuilder.pathfindToPose(
@@ -316,7 +304,7 @@ public class DriveSubsystem extends SubsystemBase {
         0.0 // Goal end velocity in meters/sec
     );
 
-    return new ParallelRaceGroup(pathfindingCommand, new TrajectoryGeneration(this, goalPose, field2d));
+    return pathfindingCommand;
   }
 
   public Command AlignToTagFar(int goalTag){
@@ -371,5 +359,9 @@ public class DriveSubsystem extends SubsystemBase {
       getRotation(),
       getPositions(),
       newPose);
+  }
+
+  public Field2d getField2d(){
+    return field2d;
   }
 }
