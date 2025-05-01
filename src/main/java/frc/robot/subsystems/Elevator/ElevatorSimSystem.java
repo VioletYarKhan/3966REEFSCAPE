@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ElevatorConstants;
 
 public class ElevatorSimSystem extends SubsystemBase implements ElevatorIO {
-    ProfiledPIDController elevatorController = new ProfiledPIDController(2.3, 0, 0.2, new TrapezoidProfile.Constraints(12, 16));
+    ProfiledPIDController elevatorController = new ProfiledPIDController(4, 0, 0.2, new TrapezoidProfile.Constraints(32, 32));
     DCMotor elevatorGearbox = DCMotor.getNEO(2);
     PWMSparkMax elevatorMotor = new PWMSparkMax(10);
     Encoder elevatorEncoder = new Encoder(3, 4);
