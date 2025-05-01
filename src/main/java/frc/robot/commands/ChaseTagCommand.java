@@ -4,7 +4,6 @@ import static frc.robot.Constants.VisionConstants.kRobotToCam;
 
 import java.util.function.Supplier;
 
-import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -16,6 +15,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Vision;
 import frc.robot.subsystems.DriveSubsystem;
 
 public class ChaseTagCommand extends Command {
@@ -28,7 +28,6 @@ public class ChaseTagCommand extends Command {
   private final Supplier<Transform3d> TAG_TO_GOAL; 
 
 
-  private final PhotonCamera photonCamera;
   private final DriveSubsystem drivetrainSubsystem;
   private final Supplier<Pose2d> poseProvider;
 
@@ -39,11 +38,9 @@ public class ChaseTagCommand extends Command {
   private PhotonTrackedTarget lastTarget;
 
   public ChaseTagCommand(
-        PhotonCamera photonCamera, 
         DriveSubsystem drivetrainSubsystem,
         Supplier<Pose2d> poseProvider,
         Supplier<Transform3d> tagToGoal) {
-    this.photonCamera = photonCamera;
     this.drivetrainSubsystem = drivetrainSubsystem;
     this.poseProvider = poseProvider;
     this.TAG_TO_GOAL = tagToGoal;
@@ -75,7 +72,7 @@ public class ChaseTagCommand extends Command {
             0.0, 
             new Rotation3d(0.0, 0.0, robotPose2d.getRotation().getRadians()));
     
-    var photonRes = photonCamera.getLatestResult();
+    var photonRes = Vision.getResult();
     if (photonRes.hasTargets()) {
       TAG_TO_CHASE = photonRes.getBestTarget().getFiducialId();
       // Find the tag we want to chase

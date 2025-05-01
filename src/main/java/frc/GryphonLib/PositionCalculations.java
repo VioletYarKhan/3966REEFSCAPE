@@ -5,7 +5,6 @@ import static frc.robot.Constants.VisionConstants.kTagLayout;
 
 import java.util.function.Supplier;
 
-import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -17,6 +16,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Vision;
 import frc.robot.Constants.AlignmentConstants;
 
 public class PositionCalculations {
@@ -30,14 +30,14 @@ public class PositionCalculations {
      * @param TAG_TO_CHASE
      * @return The goal pose
      */
-    public static Pose2d getGoalPoseFromTag(PhotonCamera photonCamera,  Pose2d robotPose2d, Transform3d tagToGoal, int TAG_TO_CHASE) {
+    public static Pose2d getGoalPoseFromTag(Pose2d robotPose2d, Transform3d tagToGoal, int TAG_TO_CHASE) {
         var robotPose = 
             new Pose3d(
                 robotPose2d.getX(),
                 robotPose2d.getY(),
                 0.0, 
                 new Rotation3d(0.0, 0.0, robotPose2d.getRotation().getRadians()));
-        var photonRes = photonCamera.getLatestResult();
+        var photonRes = Vision.getResult();
         if (photonRes.hasTargets()) {
             // Find the tag we want to chase
             var targetOpt = photonRes.getTargets().stream()
