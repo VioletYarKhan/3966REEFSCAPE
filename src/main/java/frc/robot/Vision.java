@@ -21,9 +21,12 @@ public class Vision extends SubsystemBase {
     private static PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(VisionConstants.kTagLayout, PoseStrategy.LOWEST_AMBIGUITY, VisionConstants.kRobotToCam);
 
     public void periodic() {
-        result = camera.getLatestResult();
-        if (result.hasTargets()){SmartDashboard.putNumber("Best Tag Seen", result.getBestTarget().getFiducialId());}
-        else{SmartDashboard.putNumber("Best Tag Seen", 0);}
+        var results = camera.getAllUnreadResults();
+        if (!results.isEmpty()){
+            result = results.get(results.size() - 1);
+            if (result.hasTargets()){SmartDashboard.putNumber("Best Tag Seen", result.getBestTarget().getFiducialId());}
+            else{SmartDashboard.putNumber("Best Tag Seen", 0);}
+        }
     }
 
     public static PhotonPipelineResult getResult(){
