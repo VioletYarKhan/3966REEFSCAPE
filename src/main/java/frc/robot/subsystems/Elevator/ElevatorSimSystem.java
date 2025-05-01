@@ -37,7 +37,7 @@ public class ElevatorSimSystem extends SubsystemBase implements ElevatorIO {
 
     private final ElevatorSim elevatorSim = new ElevatorSim(elevatorGearbox, 5, Units.lbsToKilograms(20), Units.inchesToMeters(1), 0, Units.inchesToMeters(70), true, 0);
     private final Mechanism2d elevatorSimMechanism = new Mechanism2d(Units.inchesToMeters(30), Units.inchesToMeters(80));
-    private final MechanismRoot2d elevatorRoot = elevatorSimMechanism.getRoot("Base", Units.inchesToMeters(15), Units.inchesToMeters(8));
+    private final MechanismRoot2d elevatorRoot = elevatorSimMechanism.getRoot("Base", Units.inchesToMeters(25), Units.inchesToMeters(8));
     public final MechanismLigament2d elevatorLigament = elevatorRoot.append(new MechanismLigament2d("Elevator", Units.inchesToMeters(10), 90, 10, new Color8Bit(Color.kBlue)));
 
     public ElevatorSimSystem() {

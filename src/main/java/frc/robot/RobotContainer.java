@@ -199,7 +199,7 @@ public class RobotContainer {
           Command fullSequence = new SequentialCommandGroup(
               new ParallelCommandGroup(pathCommand, new SequentialCommandGroup(
                 new SequentialCommandGroup(
-                  (new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral())),
+                  (Robot.isReal() ? new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()) : new InstantCommand()),
                   new RunCommand(() -> m_coralHand.intake(), m_coralHand).withTimeout(0.3)), subsystemMovement)),
               new ScoreCoral(
                   putCmd.getLevel(),
@@ -220,7 +220,7 @@ public class RobotContainer {
             // For GetCoralCommand, run your intake sequence in parallel with the path command.
             Command intakeSequence = new SequentialCommandGroup(
                 new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand),
-                new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()).withTimeout(5)
+                new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()).withTimeout(2)
             );
 
             ParallelRaceGroup fullSequence = new ParallelCommandGroup(pathCommand, intakeSequence).until(m_coralHand::hasCoral);
