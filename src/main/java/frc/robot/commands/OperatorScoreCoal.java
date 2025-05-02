@@ -10,7 +10,7 @@ import frc.robot.subsystems.Elevator.ElevatorIO;
 import frc.GryphonLib.PositionCalculations;
 import frc.robot.subsystems.CoralEffector;
 import frc.robot.subsystems.CoralFunnel;
-import frc.robot.subsystems.Drive.DriveSubsystem;
+import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Wrist.WristIO;
 
 public class OperatorScoreCoal extends SequentialCommandGroup{
