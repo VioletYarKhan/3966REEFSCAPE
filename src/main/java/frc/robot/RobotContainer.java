@@ -40,13 +40,14 @@ import frc.robot.subsystems.Wrist.WristSim;
 import frc.robot.subsystems.BlinkinLEDs;
 import frc.robot.subsystems.CoralEffector;
 import frc.robot.subsystems.CoralFunnel;
-import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.Drive.DriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -205,7 +206,7 @@ public class RobotContainer {
     }
   }
   
-  public SequentialCommandGroup parseAutoCommand(){
+  public Command parseAutoCommand(){
     try {
       SequentialCommandGroup autoRoutine = new SequentialCommandGroup();
     
@@ -236,10 +237,15 @@ public class RobotContainer {
       if (fullCommand instanceof Parser.PutCoralCommand) {
         Parser.PutCoralCommand putCmd = (Parser.PutCoralCommand) fullCommand;
         // Command pathCommand = m_robotDrive.AlignToTagFar(reefTags[putCmd.getSide() - 1]);
-        Command pathCommand = m_robotDrive.AlignToTag(reefTags[putCmd.getSide() - 1], putCmd.getLevel(), putCmd.getLeft());
+        Command pathCommand = m_robotDrive.AlignToTag(reefTags[putCmd.getSide() - 1], putCmd.getLevel(), putCmd.getLeft()).until(m_robotDrive::closeToGoal);
           
           // Build the scoring sequence that will run concurrently with the path command.
-          Command subsystemMovement = new MoveToScoringPosition(putCmd.getLevel(), m_wrist, m_elevator);
+          Command subsystemMovement = new SequentialCommandGroup(
+              new WaitUntilCommand(()->(m_robotDrive.getDistanceToGoal() < 2.5)),
+              new MoveToScoringPosition(putCmd.getLevel(), m_wrist, m_elevator)
+          );
+          
+          
           // Create a sequential group:
           // 1. Run the path command and scoringSequence in parallel.
           // 2. Then run ScoreCoral.
@@ -267,7 +273,7 @@ public class RobotContainer {
             // For GetCoralCommand, run your intake sequence in parallel with the path command.
             Command intakeSequence = new SequentialCommandGroup(
                 new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand),
-                new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()).withTimeout(2)
+                new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()).withTimeout(1)
             );
 
             ParallelRaceGroup fullSequence = new ParallelCommandGroup(pathCommand, intakeSequence).until(m_coralHand::hasCoral);
@@ -278,7 +284,7 @@ public class RobotContainer {
     for (Command command : convertedCommands){
       autoRoutine.addCommands(command);
     }
-    return autoRoutine;
+    return autoRoutine.withTimeout(15);
     } catch (Exception e){
       return new SequentialCommandGroup();
     }

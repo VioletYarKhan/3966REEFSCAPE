@@ -1,12 +1,14 @@
-// Copyright (c) FIRST and other WPILib contributors.
+// Copyright (c) FIRST and other WPILib contributors. 
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems;
+package frc.robot.subsystems.Drive;
 
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
@@ -20,7 +22,7 @@ import com.revrobotics.RelativeEncoder;
 import frc.robot.Configs;
 import frc.robot.Robot;
 
-public class MAXSwerveModule {
+public class MAXSwerveModule implements SwerveModuleIO {
   private final SparkMax m_drivingSpark;
   private final SparkMax m_turningSpark;
 
@@ -32,6 +34,12 @@ public class MAXSwerveModule {
 
   private double m_chassisAngularOffset = 0;
   private SwerveModuleState m_desiredState = new SwerveModuleState(0.0, new Rotation2d());
+  private SwerveModuleState correctedDesiredState = new SwerveModuleState();
+  
+  private ProfiledPIDController simDrivingPID = new ProfiledPIDController(0.5, 0, 0, new TrapezoidProfile.Constraints(4.8, 100000));
+  private ProfiledPIDController simTurningPID = new ProfiledPIDController(1, 0, 0, new TrapezoidProfile.Constraints(2*Math.PI, 2*Math.PI));
+  private double simTurningPos = 0;
+  private double simDrivingSpeed = 0;
 
   /**
    * Constructs a MAXSwerveModule and configures the driving and turning motor,
@@ -60,6 +68,7 @@ public class MAXSwerveModule {
     m_chassisAngularOffset = chassisAngularOffset;
     m_desiredState.angle = new Rotation2d(m_turningEncoder.getPosition());
     m_drivingEncoder.setPosition(0);
+    simTurningPID.enableContinuousInput(-Math.PI, Math.PI);
   }
 
   /**
@@ -72,7 +81,7 @@ public class MAXSwerveModule {
     // relative to the chassis.
     return Robot.isReal() ? 
       new SwerveModuleState(m_drivingEncoder.getVelocity(), new Rotation2d(m_turningEncoder.getPosition() - m_chassisAngularOffset)) : 
-      m_desiredState;
+      new SwerveModuleState(simDrivingPID.calculate(simDrivingSpeed), new Rotation2d(simTurningPID.calculate(simTurningPos)));
   }
 
   /**
@@ -95,16 +104,19 @@ public class MAXSwerveModule {
    */
   public void setDesiredState(SwerveModuleState desiredState) {
     // Apply chassis angular offset to the desired state.
-    SwerveModuleState correctedDesiredState = new SwerveModuleState();
+    correctedDesiredState = new SwerveModuleState();
     correctedDesiredState.speedMetersPerSecond = desiredState.speedMetersPerSecond;
     correctedDesiredState.angle = desiredState.angle.plus(Rotation2d.fromRadians(m_chassisAngularOffset));
 
     // Optimize the reference state to avoid spinning further than 90 degrees.
+    m_desiredState.optimize(new Rotation2d(m_turningEncoder.getPosition()));
     correctedDesiredState.optimize(new Rotation2d(m_turningEncoder.getPosition()));
 
     // Command driving and turning SPARKS towards their respective setpoints.
     m_drivingClosedLoopController.setReference(correctedDesiredState.speedMetersPerSecond, ControlType.kVelocity);
     m_turningClosedLoopController.setReference(correctedDesiredState.angle.getRadians(), ControlType.kPosition);
+    simDrivingPID.setGoal(desiredState.speedMetersPerSecond);
+    simTurningPID.setGoal(desiredState.angle.getRadians());
 
     m_desiredState = desiredState;
   }

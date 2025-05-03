@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems;
+package frc.robot.subsystems.Drive;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +35,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Robot;
 import frc.robot.Vision;
 import frc.GryphonLib.PositionCalculations;
 import frc.littletonUtils.PoseEstimator;
@@ -48,25 +49,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
   // Create MAXSwerveModules
-  private final MAXSwerveModule m_frontLeft = new MAXSwerveModule(
-      DriveConstants.kFrontLeftDrivingCanId,
-      DriveConstants.kFrontLeftTurningCanId,
-      DriveConstants.kFrontLeftChassisAngularOffset);
+  private final SwerveModuleIO m_frontLeft;
 
-  private final MAXSwerveModule m_frontRight = new MAXSwerveModule(
-      DriveConstants.kFrontRightDrivingCanId,
-      DriveConstants.kFrontRightTurningCanId,
-      DriveConstants.kFrontRightChassisAngularOffset);
+  private final SwerveModuleIO m_frontRight;
 
-  private final MAXSwerveModule m_rearLeft = new MAXSwerveModule(
-      DriveConstants.kRearLeftDrivingCanId,
-      DriveConstants.kRearLeftTurningCanId,
-      DriveConstants.kBackLeftChassisAngularOffset);
+  private final SwerveModuleIO m_rearLeft;
 
-  private final MAXSwerveModule m_rearRight = new MAXSwerveModule(
-      DriveConstants.kRearRightDrivingCanId,
-      DriveConstants.kRearRightTurningCanId,
-      DriveConstants.kBackRightChassisAngularOffset);
+  private final SwerveModuleIO m_rearRight;
 
   // The gyro sensor
   private final ADIS16470_IMU m_gyro = new ADIS16470_IMU();
@@ -78,13 +67,39 @@ public class DriveSubsystem extends SubsystemBase {
   private final Field2d field2d = new Field2d();
   private double previousPipelineTimestamp = 0;
   private final StructArrayPublisher<SwerveModuleState> publisher;
+  private final StructArrayPublisher<SwerveModuleState> requestedPublisher;
   private double currentTimestamp = Timer.getTimestamp();
 
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
+    if (true){
+      m_frontLeft = new MAXSwerveModule(
+        DriveConstants.kFrontLeftDrivingCanId,
+        DriveConstants.kFrontLeftTurningCanId,
+        DriveConstants.kFrontLeftChassisAngularOffset);
+      m_frontRight = new MAXSwerveModule(
+        DriveConstants.kFrontRightDrivingCanId,
+        DriveConstants.kFrontRightTurningCanId,
+        DriveConstants.kFrontRightChassisAngularOffset);
+      m_rearLeft = new MAXSwerveModule(
+        DriveConstants.kRearLeftDrivingCanId,
+        DriveConstants.kRearLeftTurningCanId,
+        DriveConstants.kBackLeftChassisAngularOffset);
+      m_rearRight = new MAXSwerveModule(
+        DriveConstants.kRearRightDrivingCanId,
+        DriveConstants.kRearRightTurningCanId,
+        DriveConstants.kBackRightChassisAngularOffset);
+    } else {
+      m_frontLeft = new SwerveModuleSim(DriveConstants.kFrontLeftChassisAngularOffset);
+      m_frontRight = new SwerveModuleSim(DriveConstants.kFrontRightChassisAngularOffset);
+      m_rearLeft = new SwerveModuleSim(DriveConstants.kBackLeftChassisAngularOffset);
+      m_rearRight = new SwerveModuleSim(DriveConstants.kBackRightChassisAngularOffset);
+    }
     publisher = NetworkTableInstance.getDefault()
       .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
+    requestedPublisher = NetworkTableInstance.getDefault()
+      .getStructArrayTopic("/RequestedSwerveStates", SwerveModuleState.struct).publish();
     var alliance = DriverStation.getAlliance();
 
     poseEstimator = new PoseEstimator(stateStdDevs);
@@ -150,6 +165,7 @@ public class DriveSubsystem extends SubsystemBase {
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_rearLeft.setDesiredState(swerveModuleStates[2]);
     m_rearRight.setDesiredState(swerveModuleStates[3]);
+    requestedPublisher.set(swerveModuleStates);
   }
 
   /**
@@ -170,7 +186,7 @@ public class DriveSubsystem extends SubsystemBase {
     var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
         fieldRelative
             ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered,
-                Rotation2d.fromDegrees(getHeading()))
+                Rotation2d.fromDegrees(Robot.isReal() ? getHeading() : getCurrentPose().getRotation().getDegrees()))
             : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
     SwerveDriveKinematics.desaturateWheelSpeeds(
         swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
@@ -178,6 +194,7 @@ public class DriveSubsystem extends SubsystemBase {
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_rearLeft.setDesiredState(swerveModuleStates[2]);
     m_rearRight.setDesiredState(swerveModuleStates[3]);
+    requestedPublisher.set(swerveModuleStates);
   }
 
   /**
@@ -334,7 +351,7 @@ public class DriveSubsystem extends SubsystemBase {
     try{
       var resultTimestamp = pipelineResult.getTimestampSeconds();
       if (resultTimestamp != previousPipelineTimestamp && pipelineResult.hasTargets()) {
-        if (pipelineResult.getBestTarget().getBestCameraToTarget().getTranslation().getNorm() < 2.5){
+        if (pipelineResult.getBestTarget().poseAmbiguity < 0.2){
           EstimatedRobotPose botPose = Vision.getEstimatedGlobalPose(getCurrentPose(), pipelineResult);
           poseEstimator.addVisionData(List.of(new TimestampedVisionUpdate(botPose.timestampSeconds, botPose.estimatedPose.toPose2d(), visionMeasurementStdDevs)));
         }
@@ -358,6 +375,10 @@ public class DriveSubsystem extends SubsystemBase {
 
   public double getDistanceToGoal(){
     return PhotonUtils.getDistanceToPose(getCurrentPose(), field2d.getObject("Goal Pose").getPose());
+  }
+
+  public boolean closeToGoal(){
+    return PhotonUtils.getDistanceToPose(getCurrentPose(), field2d.getObject("Goal Pose").getPose()) < 0.05;
   }
 
   /**

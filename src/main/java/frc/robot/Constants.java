@@ -117,14 +117,14 @@ public final class Constants {
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
     
     public static final PathConstraints constraints = new PathConstraints(
-        4, 2.5,
+        4.8, 3,
         Units.degreesToRadians(360), Units.degreesToRadians(720));
 
     public static final Transform3d leftBranchCoral = new Transform3d(0.381, 0.381, 0, new Rotation3d());
     public static final Transform3d rightBranchCoral = new Transform3d(0.381, -0.381, 0, new Rotation3d());
 
     public static final Pose2d[] startPositions = new Pose2d[]{
-      new Pose2d(7.286383928571428, 6.21875, new Rotation2d(Math.PI)), // S1
+      new Pose2d(7.286383928571428, 6.21875, new Rotation2d(4*Math.PI/3)), // S1
       new Pose2d(7.260267857142857, 4.06417, new Rotation2d(Math.PI)), // S2
       new Pose2d(7.299441964285713, 1.88348, new Rotation2d(Math.PI))  // S3 
     };
@@ -207,5 +207,24 @@ public final class Constants {
   public static class BlinkinConstants{
     public static final double blue = 0.92;
     public static final double green = 0.73;
+  }
+
+  public static class SimulationConstants {
+    public static final double driveKs = 0.2;
+    public static final double driveKv = 0.789;
+
+    public static final double driveP = 1;
+    public static final double driveI = 0;
+    public static final double driveD = 0;
+
+    public static final double turnP = 1;
+    public static final double turnI = 0;
+    public static final double turnD = 0;
+
+    public static final double maxSpeedMps = 4.8;
+    public static final double maxAccelMps2 = 4.8;
+    
+    public static final double maxAngularSpeed = 2*Math.PI;
+    public static final double maxAngularAccel = 2*Math.PI;
   }
 }

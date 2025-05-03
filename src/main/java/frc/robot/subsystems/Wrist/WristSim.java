@@ -23,7 +23,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.WristConstants;
 
 public class WristSim extends SubsystemBase implements WristIO {
-    ProfiledPIDController wristController = new ProfiledPIDController(4, 0, 0.1, new TrapezoidProfile.Constraints(32, 32));
+    ProfiledPIDController wristController = new ProfiledPIDController(3, 0, 0.1, new TrapezoidProfile.Constraints(1000, 1000));
     DCMotor wristGearbox = DCMotor.getNeoVortex(1);
     PWMSparkFlex wristMotor = new PWMSparkFlex(11);
     Encoder wristEncoder = new Encoder(0, 1);
