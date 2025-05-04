@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
@@ -17,7 +18,6 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -33,6 +33,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.ADIS16470_IMU.IMUAxis;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Vision;
@@ -40,6 +41,8 @@ import frc.GryphonLib.PositionCalculations;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.TrajectoryGeneration;
+import frc.littletonUtils.PoseEstimator;
+import frc.littletonUtils.PoseEstimator.TimestampedVisionUpdate;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -72,11 +75,11 @@ public class DriveSubsystem extends SubsystemBase {
 
   private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
   private static Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(1, 1, Units.degreesToRadians(30));
-  private final SwerveDrivePoseEstimator poseEstimator;
+  private final PoseEstimator poseEstimator;
   private final Field2d field2d = new Field2d();
   private double previousPipelineTimestamp = 0;
   private final StructArrayPublisher<SwerveModuleState> publisher;
-
+  private double currentTimestamp = Timer.getTimestamp();
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
@@ -84,13 +87,7 @@ public class DriveSubsystem extends SubsystemBase {
       .getStructArrayTopic("/SwerveStates", SwerveModuleState.struct).publish();
     var alliance = DriverStation.getAlliance();
 
-    poseEstimator =  new SwerveDrivePoseEstimator(
-        DriveConstants.kDriveKinematics,
-        getRotation(),
-        getPositions(),
-        new Pose2d(),
-        stateStdDevs,
-        visionMeasurementStdDevs);
+    poseEstimator = new PoseEstimator(stateStdDevs);
     
     Logger.recordOutput("Robot Pose", getCurrentPose());
     Logger.recordOutput("Goal Pose", field2d.getObject("Goal Pose").getPose());
@@ -341,22 +338,24 @@ public class DriveSubsystem extends SubsystemBase {
       if (resultTimestamp != previousPipelineTimestamp && pipelineResult.hasTargets()) {
         if (pipelineResult.getBestTarget().getBestCameraToTarget().getTranslation().getNorm() < 2.5){
           EstimatedRobotPose botPose = Vision.getEstimatedGlobalPose(getCurrentPose(), pipelineResult);
-          poseEstimator.addVisionMeasurement(botPose.estimatedPose.toPose2d(), botPose.timestampSeconds);
+          poseEstimator.addVisionData(List.of(new TimestampedVisionUpdate(botPose.timestampSeconds, botPose.estimatedPose.toPose2d(), visionMeasurementStdDevs)));
         }
       }
     } catch(Exception e){}
     // Update pose estimator with drivetrain sensors
-    poseEstimator.update(
-      getRotation(),
-      getPositions());
+    poseEstimator.addDriveData(
+      Timer.getTimestamp(),
+      getCurrentSpeeds().toTwist2d(Timer.getTimestamp() - currentTimestamp)
+      );
 
       field2d.setRobotPose(getCurrentPose());
       publisher.set(getStates());
     SmartDashboard.putNumber("Distance to Goal", getDistanceToGoal());
+    currentTimestamp = Timer.getTimestamp();
   }
 
   public Pose2d getCurrentPose() {
-    return poseEstimator.getEstimatedPosition();
+    return poseEstimator.getLatestPose();
   }
 
   public double getDistanceToGoal(){
@@ -370,9 +369,6 @@ public class DriveSubsystem extends SubsystemBase {
    * @param newPose new pose
    */
   public void setCurrentPose(Pose2d newPose) {
-    poseEstimator.resetPosition(
-      getRotation(),
-      getPositions(),
-      newPose);
+    poseEstimator.resetPose(newPose);
   }
 }
