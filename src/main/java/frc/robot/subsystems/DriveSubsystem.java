@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import java.util.ArrayList;
 
+import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonUtils;
 
@@ -91,7 +92,9 @@ public class DriveSubsystem extends SubsystemBase {
         stateStdDevs,
         visionMeasurementStdDevs);
     
-    SmartDashboard.putData("TrueRobotField", field2d);
+    Logger.recordOutput("Robot Pose", getCurrentPose());
+    Logger.recordOutput("Goal Pose", field2d.getObject("Goal Pose").getPose());
+    Logger.recordOutput("Current Trajectory", field2d.getObject("Current Trajectory").getPose());
 
     SmartDashboard.putData("Swerve Drive", new Sendable() {
       @Override
