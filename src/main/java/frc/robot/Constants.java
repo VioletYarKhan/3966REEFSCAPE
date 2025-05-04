@@ -124,9 +124,9 @@ public final class Constants {
     public static final Transform3d rightBranchCoral = new Transform3d(0.381, -0.381, 0, new Rotation3d());
 
     public static final Pose2d[] startPositions = new Pose2d[]{
-      new Pose2d(7.286383928571428, 6.21875, new Rotation2d(Math.PI)), // S1
+      new Pose2d(7.171, 5.422, new Rotation2d((5*Math.PI)/4)), // S1
       new Pose2d(7.260267857142857, 4.06417, new Rotation2d(Math.PI)), // S2
-      new Pose2d(7.299441964285713, 1.88348, new Rotation2d(Math.PI))  // S3 
+      new Pose2d(7.111, 2.521, new Rotation2d((3*Math.PI)/4))  // S3 
     };
   }
 
