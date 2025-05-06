@@ -16,6 +16,7 @@ import com.revrobotics.spark.SparkBase.ControlType;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -223,7 +224,7 @@ public class RobotContainer {
     }
     
     autoRoutine.addCommands(
-      new InstantCommand(()->m_robotDrive.setHeading(180), m_robotDrive),
+      new InstantCommand(()->m_robotDrive.setHeading(new Rotation2d(Math.PI).minus(AutoConstants.startPositions[setPositionCommand.getPosition()].getRotation()).getDegrees()), m_robotDrive),
       new InstantCommand(()->m_robotDrive.setCurrentPose(
         AllianceFlipUtil.apply(AutoConstants.startPositions[setPositionCommand.getPosition()])), m_robotDrive)
     );
