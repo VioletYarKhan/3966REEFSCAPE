@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.AlignmentConstants;
 import frc.robot.Constants.AutoConstants;
@@ -28,9 +29,9 @@ import frc.robot.commands.AlignToReefFieldRelative;
 import frc.robot.commands.MoveCoralToL4Position;
 import frc.robot.commands.MoveToIntakePositions;
 import frc.robot.commands.MoveToScoringPosition;
+import frc.robot.commands.OperatorScoreCoal;
 import frc.robot.commands.RotateFunnel;
 import frc.robot.commands.ScoreCoral;
-import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.Elevator.Elevator;
 import frc.robot.subsystems.Elevator.ElevatorIO;
 import frc.robot.subsystems.Elevator.ElevatorSimSystem;
@@ -40,6 +41,7 @@ import frc.robot.subsystems.Wrist.WristSim;
 import frc.robot.subsystems.BlinkinLEDs;
 import frc.robot.subsystems.CoralEffector;
 import frc.robot.subsystems.CoralFunnel;
+import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
@@ -70,6 +72,10 @@ public class RobotContainer {
   CommandXboxController m_operatorController = new CommandXboxController(1);
 
   Trigger handHasCoral = new Trigger(m_coralHand::hasCoral);
+  int[] reefTags;
+  int[] stationTags;
+  
+  private Pose2d operatorStationTagPose;
 
   int currentLevel = 0;
 
@@ -78,6 +84,9 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
+    reefTags = DriverStation.getAlliance().get() == Alliance.Blue ? AlignmentConstants.BLUE_REEF : AlignmentConstants.RED_REEF;
+    stationTags = DriverStation.getAlliance().get() == Alliance.Blue ? AlignmentConstants.BLUE_HUMAN : AlignmentConstants.RED_HUMAN;
+    operatorScoring();
     configureButtonBindings();
     handHasCoral.onTrue(new InstantCommand(m_lights::setHasCoral, m_lights)).onFalse(new InstantCommand(m_lights::setReadyIntake, m_lights));
     m_elevator.returnLigament().get().append(m_wrist.returnLigament().get());
@@ -151,14 +160,52 @@ public class RobotContainer {
     m_operatorController.a().onTrue(new InstantCommand(()->m_robotDrive.stop(), m_robotDrive));
     m_operatorController.b().onTrue(new InstantCommand(() -> m_elevator.setEncoderPosition(0), m_elevator.returnSubsystem()));
     m_operatorController.y().onTrue(new InstantCommand(() -> m_robotDrive.setX(), m_robotDrive));
-
-    SmartDashboard.putData("L1", new InstantCommand(()->currentLevel = 1).andThen(new MoveToScoringPosition(1, m_wrist, m_elevator)));
-    SmartDashboard.putData("L2", new InstantCommand(()->currentLevel = 2).andThen(new MoveToScoringPosition(2, m_wrist, m_elevator)));
-    SmartDashboard.putData("L3", new InstantCommand(()->currentLevel = 3).andThen(new MoveToScoringPosition(3, m_wrist, m_elevator)));
-    SmartDashboard.putData("L4", new InstantCommand(()->currentLevel = 4).andThen(new MoveToScoringPosition(4, m_wrist, m_elevator)));
-    SmartDashboard.putData("Intake", new InstantCommand(()->currentLevel = 0).andThen(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand)));
   }
 
+  private void operatorScoring(){
+    SendableChooser<Integer> operatorScoringLevel = new SendableChooser<>();
+    for (int i = 2; i <= 3; i++){
+      operatorScoringLevel.addOption(""+i, i);
+    }
+    operatorScoringLevel.setDefaultOption("4", 4);
+    SmartDashboard.putData("Operator Height Chooser", operatorScoringLevel);
+    for(int i = 1; i <= 6; i++){
+      int side = i;
+      for (Boolean left : new Boolean[]{true, false}){
+        SmartDashboard.putData("Operator Controls/" + i + (left ? "L" : "R"), 
+        new InstantCommand(()->
+          new SequentialCommandGroup(
+          m_robotDrive.AlignToTagFar(reefTags[side - 1]),
+          new OperatorScoreCoal(
+            left,
+            m_coralHand,
+            m_wrist,
+            m_elevator,
+            m_funnel,
+            m_robotDrive,
+            reefTags[side - 1]
+          )
+        ).schedule()));
+      }
+    }
+
+    // Workaround of weird Java thing
+    int[] station = new int[]{0};
+    for (int i = 1; i <=2; i++){
+      station[0] = i;
+      operatorStationTagPose = kTagLayout.getTagPose(stationTags[station[0] - 1]).get().toPose2d();
+      SmartDashboard.putData(("Operator Controls/" + i + "C"),
+        new ParallelCommandGroup(
+          new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand),
+          m_robotDrive.PathToPose(PositionCalculations.translateCoordinates(operatorStationTagPose, operatorStationTagPose.getRotation().getDegrees(), 0.3), 0.0),
+          new SequentialCommandGroup(
+            (new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral())),
+            new RunCommand(() -> m_coralHand.intake(), m_coralHand).withTimeout(0.3))
+        )
+      );
+    }
+  }
+  
   public SequentialCommandGroup parseAutoCommand(){
     try {
       SequentialCommandGroup autoRoutine = new SequentialCommandGroup();
@@ -200,7 +247,7 @@ public class RobotContainer {
           Command fullSequence = new SequentialCommandGroup(
               new ParallelCommandGroup(pathCommand, new SequentialCommandGroup(
                 new SequentialCommandGroup(
-                  (new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral())),
+                  (Robot.isReal() ? new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()) : new InstantCommand()),
                   new RunCommand(() -> m_coralHand.intake(), m_coralHand).withTimeout(0.3)), subsystemMovement)),
               new ScoreCoral(
                   putCmd.getLevel(),
@@ -221,7 +268,7 @@ public class RobotContainer {
             // For GetCoralCommand, run your intake sequence in parallel with the path command.
             Command intakeSequence = new SequentialCommandGroup(
                 new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand),
-                new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()).withTimeout(5)
+                new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()).withTimeout(2)
             );
 
             ParallelRaceGroup fullSequence = new ParallelCommandGroup(pathCommand, intakeSequence).until(m_coralHand::hasCoral);
