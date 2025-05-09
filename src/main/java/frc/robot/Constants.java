@@ -156,14 +156,21 @@ public final class Constants {
 
 
   public static class VisionConstants {
-    public static final String kCameraName = "gccamera";
+    public static final String kCameraName1 = "gccamera";
+    public static final String kCameraName2 = "orangePiTag";
     // Cam mounted facing forward, half a meter forward of center, half a meter up from center,
     // pitched upward.
-    private static final double camPitch = Units.degreesToRadians(-20);
-    private static final double camYaw = Units.degreesToRadians(-2);
-    public static final Transform3d kRobotToCam =
-            new Transform3d(new Translation3d(Units.inchesToMeters(11), -Units.inchesToMeters(0.5), Units.inchesToMeters(7.5)), new Rotation3d(0, camPitch, camYaw));
-    public static final Transform3d kCamToRobot = kRobotToCam.inverse();
+    private static final double camPitch1 = Units.degreesToRadians(-20);
+    private static final double camYaw1 = Units.degreesToRadians(-2);
+    public static final Transform3d kRobotToCam1 =
+            new Transform3d(new Translation3d(Units.inchesToMeters(11), -Units.inchesToMeters(0.5), Units.inchesToMeters(7.5)), new Rotation3d(0, camPitch1, camYaw1));
+    public static final Transform3d kCamToRobot1 = kRobotToCam1.inverse();
+
+    private static final double camPitch2 = Units.degreesToRadians(-20);
+    private static final double camYaw2 = Units.degreesToRadians(-2);
+    public static final Transform3d kRobotToCam2 =
+            new Transform3d(new Translation3d(Units.inchesToMeters(11), -Units.inchesToMeters(0.5), Units.inchesToMeters(7.5)), new Rotation3d(0, camPitch2, camYaw2));
+    public static final Transform3d kCamToRobot2 = kRobotToCam1.inverse();
 
     // The layout of the AprilTags on the field
     public static final AprilTagFieldLayout kTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);

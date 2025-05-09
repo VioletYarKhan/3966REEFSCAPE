@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
+import org.photonvision.EstimatedRobotPose;
+
 public class PoseEstimator {
   private static final double historyLengthSecs = 0.15;
 
@@ -54,11 +56,11 @@ public class PoseEstimator {
   }
 
   /** Records a new set of vision updates. */
-  public void addVisionData(List<TimestampedVisionUpdate> visionData) {
+  public void addVisionData(List<EstimatedRobotPose> visionData, Matrix<N3, N1> visionStdevs) {
     for (var timestampedVisionUpdate : visionData) {
-      var timestamp = timestampedVisionUpdate.timestamp();
+      var timestamp = timestampedVisionUpdate.timestampSeconds;
       var visionUpdate =
-          new VisionUpdate(timestampedVisionUpdate.pose(), timestampedVisionUpdate.stdDevs());
+          new VisionUpdate(timestampedVisionUpdate.estimatedPose.toPose2d(), visionStdevs);
 
       if (updates.containsKey(timestamp)) {
         // There was already an update at this timestamp, add to it

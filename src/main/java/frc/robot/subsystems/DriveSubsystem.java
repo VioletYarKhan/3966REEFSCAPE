@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
@@ -43,12 +44,9 @@ import frc.robot.Robot;
 import frc.robot.Vision;
 import frc.GryphonLib.PositionCalculations;
 import frc.littletonUtils.PoseEstimator;
-import frc.littletonUtils.PoseEstimator.TimestampedVisionUpdate;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.TrajectoryGeneration;
-import frc.littletonUtils.PoseEstimator;
-import frc.littletonUtils.PoseEstimator.TimestampedVisionUpdate;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -86,7 +84,6 @@ public class DriveSubsystem extends SubsystemBase {
   private static Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(1, 1, Units.degreesToRadians(30));
   private final PoseEstimator poseEstimator;
   private final Field2d field2d = new Field2d();
-  private double previousPipelineTimestamp = 0;
   private final StructArrayPublisher<SwerveModuleState> publisher;
   private double currentTimestamp = Timer.getTimestamp();
 
@@ -362,16 +359,19 @@ public class DriveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // Update pose estimator with the best visible target
-    var pipelineResult = Vision.getResult();
     try{
-      var resultTimestamp = pipelineResult.getTimestampSeconds();
-      if (resultTimestamp != previousPipelineTimestamp && pipelineResult.hasTargets()) {
-        if (pipelineResult.getBestTarget().getBestCameraToTarget().getTranslation().getNorm() < 2.5){
-          EstimatedRobotPose botPose = Vision.getEstimatedGlobalPose(getCurrentPose(), pipelineResult);
-          poseEstimator.addVisionData(List.of(new TimestampedVisionUpdate(botPose.timestampSeconds, botPose.estimatedPose.toPose2d(), visionMeasurementStdDevs)));
-        }
+      Optional<EstimatedRobotPose> visionBotPose1 = Vision.getEstimatedGlobalPoseCam1(getCurrentPose());
+      Optional<EstimatedRobotPose> visionBotPose2 = Vision.getEstimatedGlobalPoseCam2(getCurrentPose());
+      
+      List<EstimatedRobotPose> visionReadings = List.of();
+      if (visionBotPose1.isPresent()){
+        visionReadings.add(visionBotPose1.get());
       }
+      if (visionBotPose2.isPresent()){
+        visionReadings.add(visionBotPose2.get());
+      }
+
+      poseEstimator.addVisionData(visionReadings, visionMeasurementStdDevs);
     } catch(Exception e){}
     // Update pose estimator with drivetrain sensors
     poseEstimator.addDriveData(
@@ -381,6 +381,7 @@ public class DriveSubsystem extends SubsystemBase {
 
       field2d.setRobotPose(getCurrentPose());
       publisher.set(getStates());
+      SmartDashboard.putData("True Robot Field", field2d);
     SmartDashboard.putNumber("Distance to Goal", getDistanceToGoal());
     currentTimestamp = Timer.getTimestamp();
   }
