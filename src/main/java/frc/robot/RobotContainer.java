@@ -66,6 +66,7 @@ public class RobotContainer {
   private final CoralEffector m_coralHand = new CoralEffector();
   private final CoralFunnel m_funnel = new CoralFunnel();
   private final BlinkinLEDs m_lights = new BlinkinLEDs();
+  
 
   // The driver's controller
   CommandXboxController m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);
