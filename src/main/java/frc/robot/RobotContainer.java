@@ -85,8 +85,14 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    reefTags = DriverStation.getAlliance().get() == Alliance.Blue ? AlignmentConstants.BLUE_REEF : AlignmentConstants.RED_REEF;
-    stationTags = DriverStation.getAlliance().get() == Alliance.Blue ? AlignmentConstants.BLUE_HUMAN : AlignmentConstants.RED_HUMAN;
+    boolean isBlue;
+    if (DriverStation.getAlliance().isPresent()){
+      isBlue = DriverStation.getAlliance().get().equals(Alliance.Blue);
+    } else {
+      isBlue = true;
+    }
+    reefTags = isBlue ? AlignmentConstants.BLUE_REEF : AlignmentConstants.RED_REEF;
+    stationTags = isBlue ? AlignmentConstants.BLUE_HUMAN : AlignmentConstants.RED_HUMAN;
     operatorScoring();
     configureButtonBindings();
     handHasCoral.onTrue(new InstantCommand(m_lights::setHasCoral, m_lights)).onFalse(new InstantCommand(m_lights::setReadyIntake, m_lights));

@@ -1,5 +1,10 @@
 package frc.GryphonLib;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class MovementCalculations {
@@ -28,5 +33,9 @@ public class MovementCalculations {
             }
         }
     return speed;
+    }
+
+    public static LinearVelocity getVelocityMagnitude(ChassisSpeeds cs){
+        return MetersPerSecond.of(new Translation2d(cs.vxMetersPerSecond, cs.vyMetersPerSecond).getNorm());
     }
 }
