@@ -132,7 +132,7 @@ public final class Constants {
     };
 
     public static final PPHolonomicDriveController kAutoAlignPIDController = new PPHolonomicDriveController(
-        new PIDConstants(1, 0.01, 0, 0.1), 
+        new PIDConstants(1, 0, 0, 0), 
         new PIDConstants(1,0,0)
     );
   }

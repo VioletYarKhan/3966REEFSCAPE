@@ -147,8 +147,8 @@ public class RobotContainer {
     m_driverController.x().onTrue(new InstantCommand(()->currentLevel = 2).andThen(new MoveToScoringPosition(2, m_wrist, m_elevator)));
     m_driverController.b().onTrue(new InstantCommand(()->currentLevel = 3).andThen(new MoveToScoringPosition(3, m_wrist, m_elevator)));
     m_driverController.y().onTrue(new InstantCommand(()->currentLevel = 4).andThen(new MoveToScoringPosition(4, m_wrist, m_elevator).andThen(Robot.isReal() ? new MoveCoralToL4Position(4, m_coralHand) : new InstantCommand())));
-    m_driverController.leftBumper().whileTrue(new RunCommand(()->new AlignToReefFieldRelative(true, m_robotDrive, ()->currentLevel).schedule(), m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop, m_robotDrive));
-    m_driverController.rightBumper().whileTrue(new RunCommand(()->new AlignToReefFieldRelative(false, m_robotDrive, ()->currentLevel).schedule(), m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop, m_robotDrive));
+    m_driverController.leftBumper().whileTrue(new RunCommand(()->new AlignToReefFieldRelative(()->true, m_robotDrive, ()->currentLevel).schedule(), m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop, m_robotDrive));
+    m_driverController.rightBumper().whileTrue(new RunCommand(()->new AlignToReefFieldRelative(()->false, m_robotDrive, ()->currentLevel).schedule(), m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop, m_robotDrive));
     m_driverController.leftTrigger().whileTrue(new RunCommand(()->m_coralHand.intake(), m_coralHand)).onTrue(new InstantCommand(()->currentLevel = 0).andThen(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand)));
     m_driverController.rightTrigger().whileTrue(new RunCommand(()->m_coralHand.outtake(), m_coralHand));
     m_driverController.povRight().onTrue(new RotateFunnel(m_funnel, FunnelConstants.IntakeAngle));
@@ -171,26 +171,27 @@ public class RobotContainer {
 
   private void operatorScoring(){
     SendableChooser<Integer> operatorScoringLevel = new SendableChooser<>();
-    for (int i = 2; i <= 3; i++){
+    for (int i = 2; i <= 4; i++){
       operatorScoringLevel.addOption(""+i, i);
     }
     operatorScoringLevel.setDefaultOption("4", 4);
     SmartDashboard.putData("Operator Height Chooser", operatorScoringLevel);
+    OperatorScoreCoal.setSendableChooser(operatorScoringLevel);
     for(int i = 1; i <= 6; i++){
       int side = i;
-      for (Boolean left : new Boolean[]{true, false}){
+      for (boolean left : new boolean[]{true, false}){
         SmartDashboard.putData("Operator Controls/" + i + (left ? "L" : "R"), 
         new InstantCommand(()->
           new SequentialCommandGroup(
           m_robotDrive.AlignToTagFar(reefTags[side - 1]),
           new OperatorScoreCoal(
-            left,
+            () -> left,
             m_coralHand,
             m_wrist,
             m_elevator,
             m_funnel,
             m_robotDrive,
-            reefTags[side - 1]
+            ()->reefTags[side - 1]
           )
         ).schedule()));
       }
@@ -213,7 +214,7 @@ public class RobotContainer {
     }
   }
   
-  public SequentialCommandGroup parseAutoCommand(){
+  public Command parseAutoCommand(){
     try {
       SequentialCommandGroup autoRoutine = new SequentialCommandGroup();
     
@@ -243,9 +244,9 @@ public class RobotContainer {
 
       if (fullCommand instanceof Parser.PutCoralCommand) {
         Parser.PutCoralCommand putCmd = (Parser.PutCoralCommand) fullCommand;
-        // Command pathCommand = m_robotDrive.AlignToTagFar(reefTags[putCmd.getSide() - 1]);
-        Command pathCommand = m_robotDrive.AlignToTag(reefTags[putCmd.getSide() - 1], putCmd.getLevel(), putCmd.getLeft());
           
+
+          Command pathCommand = new AlignToReefFieldRelative(putCmd::getLeft, m_robotDrive, putCmd::getLevel, ()->reefTags[putCmd.getSide() - 1]);
           // Build the scoring sequence that will run concurrently with the path command.
           Command subsystemMovement = new MoveToScoringPosition(putCmd.getLevel(), m_wrist, m_elevator);
           // Create a sequential group:
@@ -257,14 +258,14 @@ public class RobotContainer {
                   (Robot.isReal() ? new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()) : new InstantCommand()),
                   new RunCommand(() -> m_coralHand.intake(), m_coralHand).withTimeout(0.3)), subsystemMovement)),
               new ScoreCoral(
-                  putCmd.getLevel(),
-                  putCmd.getLeft(),
+                  putCmd::getLevel,
+                  putCmd::getLeft,
                   m_coralHand,
                   m_wrist,
                   m_elevator,
                   m_funnel,
                   m_robotDrive,
-                  reefTags[putCmd.getSide() - 1]
+                  ()->reefTags[putCmd.getSide() - 1]
               )
           );
           convertedCommands.add(fullSequence);

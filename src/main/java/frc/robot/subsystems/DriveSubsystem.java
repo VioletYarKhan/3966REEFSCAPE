@@ -372,11 +372,13 @@ public class DriveSubsystem extends SubsystemBase {
         }
       }
     } catch(Exception e){}
-    // Update pose estimator with drivetrain sensors
-    poseEstimator.addDriveData(
-      Timer.getTimestamp(),
-      getCurrentSpeeds().toTwist2d(Timer.getTimestamp() - currentTimestamp)
-      );
+      // Update pose estimator with drivetrain sensors
+      if (DriverStation.isEnabled()){
+        poseEstimator.addDriveData(
+          Timer.getTimestamp(),
+          getCurrentSpeeds().toTwist2d(Timer.getTimestamp() - currentTimestamp)
+        );
+      }
 
       field2d.setRobotPose(getCurrentPose());
       publisher.set(getStates());

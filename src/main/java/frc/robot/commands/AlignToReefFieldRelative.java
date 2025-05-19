@@ -8,6 +8,7 @@ package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.Seconds;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.IntSupplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,13 +20,26 @@ import frc.robot.subsystems.DriveSubsystem;
 public class AlignToReefFieldRelative extends SequentialCommandGroup {
   private int tagID = -1;
   private Command pathCommand;
+  private Command pidAlign;
   private Pose2d goalPose;
 
-  public AlignToReefFieldRelative(boolean isLeftScore, DriveSubsystem drivebase, IntSupplier level) {
-    addRequirements(drivebase);
+  public AlignToReefFieldRelative(BooleanSupplier isLeftScore, DriveSubsystem drivebase, IntSupplier level) {
     tagID = PositionCalculations.closestReefTag(drivebase::getCurrentPose);
-    goalPose = PositionCalculations.getAlignmentReefPose(tagID, level.getAsInt(), isLeftScore);
+    goalPose = PositionCalculations.getAlignmentReefPose(tagID, level.getAsInt(), isLeftScore.getAsBoolean());
+    pathCommand = drivebase.PathToPose(goalPose, 0.0).until(()->drivebase.getDistanceToGoal() < 1);
+    pidAlign = PositionPIDCommand.generateCommand(drivebase, goalPose, Seconds.of(2));
+    addCommands(pathCommand, pidAlign);
+  }
+
+  public AlignToReefFieldRelative(BooleanSupplier isLeftScore, DriveSubsystem drivebase, IntSupplier level, IntSupplier tag) {
+    tagID = tag.getAsInt();
+    goalPose = PositionCalculations.getAlignmentReefPose(tagID, level.getAsInt(), isLeftScore.getAsBoolean());
     pathCommand = drivebase.PathToPose(goalPose, 0.0).until(()->drivebase.getDistanceToGoal() < 0.5);
-    addCommands(pathCommand, PositionPIDCommand.generateCommand(drivebase, goalPose, Seconds.of(2)));
+    pidAlign = PositionPIDCommand.generateCommand(drivebase, goalPose, Seconds.of(2));
+    addCommands(pathCommand, pidAlign);
+  }
+
+  public static Command generateCommand(BooleanSupplier isLeftScore, DriveSubsystem drivebase, IntSupplier level){
+    return new AlignToReefFieldRelative(isLeftScore, drivebase, level);
   }
 }

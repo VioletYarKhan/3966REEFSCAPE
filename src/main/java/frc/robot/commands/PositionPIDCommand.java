@@ -99,7 +99,7 @@ public class PositionPIDCommand extends Command{
             1.0
         );
 
-        var position = diff.getTranslation().getNorm() < Centimeter.of(1.5).in(Meters);
+        var position = diff.getTranslation().getNorm() < Centimeter.of(10).in(Meters);
 
         var speed = MovementCalculations.getVelocityMagnitude(drivetrain.getCurrentSpeeds()).magnitude() < InchesPerSecond.of(2).in(MetersPerSecond);
 
