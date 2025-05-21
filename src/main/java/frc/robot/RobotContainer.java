@@ -12,8 +12,6 @@ import static frc.robot.Constants.VisionConstants.kTagLayout;
 
 import java.util.ArrayList;
 
-import com.revrobotics.spark.SparkBase.ControlType;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -96,6 +94,7 @@ public class RobotContainer {
     operatorScoring();
     configureButtonBindings();
     handHasCoral.onTrue(new InstantCommand(m_lights::setHasCoral, m_lights)).onFalse(new InstantCommand(m_lights::setReadyIntake, m_lights));
+    
     m_elevator.returnLigament().get().append(m_wrist.returnLigament().get());
 
     // Configure default commands
@@ -123,19 +122,6 @@ public class RobotContainer {
             m_elevator.setPosition(22);
           }
         }, m_elevator.returnSubsystem())
-    );
-
-    m_coralHand.setDefaultCommand(
-      new RunCommand(
-        ()-> {
-            if(m_wrist.getVelocity() > 600){
-              m_coralHand.intake();
-            } else {
-              if(m_coralHand.getControlType() != ControlType.kPosition){
-                m_coralHand.stop();
-              }
-            }
-        }, m_coralHand)
     );
 
     SmartDashboard.putNumber("Left Reef Align", AlignmentConstants.leftReefFieldAlignment);
@@ -213,7 +199,6 @@ public class RobotContainer {
       );
     }
   }
-  
   public Command parseAutoCommand(){
     try {
       SequentialCommandGroup autoRoutine = new SequentialCommandGroup();

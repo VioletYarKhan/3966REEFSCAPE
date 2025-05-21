@@ -6,6 +6,7 @@ import java.util.function.IntSupplier;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -31,7 +32,10 @@ public class OperatorScoreCoal extends SequentialCommandGroup{
             SmartDashboard.putNumber("Operator Scoring Level", levelSupplier.getAsInt());
             if (levelSupplier.getAsInt() == 4) {
                 addCommands(
-                    new MoveToScoringPosition(levelSupplier.getAsInt(), wrist, elevator),
+                    new ParallelRaceGroup(
+                        new MoveToScoringPosition(levelSupplier.getAsInt(), wrist, elevator),
+                        new RunCommand(()->hand.intake(), hand)
+                    ),
                     new MoveCoralToL4Position(levelSupplier.getAsInt(), hand),
                     new AlignToReefFieldRelative(left, drivetrain, levelSupplier, goalTag),
                     new WaitCommand(0.4),
