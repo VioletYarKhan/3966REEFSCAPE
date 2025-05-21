@@ -34,7 +34,7 @@ public class OperatorScoreCoal extends SequentialCommandGroup{
                 addCommands(
                     new ParallelRaceGroup(
                         new MoveToScoringPosition(levelSupplier.getAsInt(), wrist, elevator),
-                        new RunCommand(()->hand.intake(), hand)
+                        new RunCommand(()->hand.intake(), hand).until(()->false)
                     ),
                     new MoveCoralToL4Position(levelSupplier.getAsInt(), hand),
                     new AlignToReefFieldRelative(left, drivetrain, levelSupplier, goalTag),
