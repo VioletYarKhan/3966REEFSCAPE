@@ -15,10 +15,11 @@ public class CoralEffector extends SubsystemBase {
     
     TalonFX effectorWheel = new TalonFX(12);
     TalonFXConfiguration effectorConfig = new TalonFXConfiguration();
-    DigitalInput coralSwitch = new DigitalInput(2);
+    DigitalInput coralSwitch = new DigitalInput(0);
 
     double targetReference;
     ControlType currentControlType;
+
 
     public CoralEffector() {
         effectorConfig.MotorOutput.withNeutralMode(NeutralModeValue.Brake);
@@ -102,7 +103,7 @@ public class CoralEffector extends SubsystemBase {
 
     public void goToPosition(int level){
         if (level == 4){
-            setPosition(getPosition()-0.5);
+            setPosition(getPosition()-1);
         } else {
             setPosition(getPosition());
         }

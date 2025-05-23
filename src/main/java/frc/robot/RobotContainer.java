@@ -12,8 +12,6 @@ import static frc.robot.Constants.VisionConstants.kTagLayout;
 
 import java.util.ArrayList;
 
-import com.revrobotics.spark.SparkBase.ControlType;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -85,11 +83,18 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    reefTags = DriverStation.getAlliance().get() == Alliance.Blue ? AlignmentConstants.BLUE_REEF : AlignmentConstants.RED_REEF;
-    stationTags = DriverStation.getAlliance().get() == Alliance.Blue ? AlignmentConstants.BLUE_HUMAN : AlignmentConstants.RED_HUMAN;
+    boolean isBlue;
+    if (DriverStation.getAlliance().isPresent()){
+      isBlue = DriverStation.getAlliance().get().equals(Alliance.Blue);
+    } else {
+      isBlue = true;
+    }
+    reefTags = isBlue ? AlignmentConstants.BLUE_REEF : AlignmentConstants.RED_REEF;
+    stationTags = isBlue ? AlignmentConstants.BLUE_HUMAN : AlignmentConstants.RED_HUMAN;
     operatorScoring();
     configureButtonBindings();
     handHasCoral.onTrue(new InstantCommand(m_lights::setHasCoral, m_lights)).onFalse(new InstantCommand(m_lights::setReadyIntake, m_lights));
+    
     m_elevator.returnLigament().get().append(m_wrist.returnLigament().get());
 
     // Configure default commands
@@ -120,16 +125,13 @@ public class RobotContainer {
     );
 
     m_coralHand.setDefaultCommand(
-      new RunCommand(
-        ()-> {
-            if(m_wrist.getVelocity() > 600){
-              m_coralHand.intake();
-            } else {
-              if(m_coralHand.getControlType() != ControlType.kPosition){
-                m_coralHand.stop();
-              }
-            }
-        }, m_coralHand)
+      new RunCommand(()->{
+        if (m_wrist.getVelocity() > 600){
+          m_coralHand.intake();
+        } else {
+          m_coralHand.stop();
+        }
+      }, m_coralHand)
     );
 
     SmartDashboard.putNumber("Left Reef Align", AlignmentConstants.leftReefFieldAlignment);
@@ -137,18 +139,23 @@ public class RobotContainer {
   }
 
   private void configureButtonBindings() {
+    InstantCommand zeroHeadingCommand = new InstantCommand(() -> m_robotDrive.zeroHeading(), m_robotDrive);
+    InstantCommand stopDriveCommand = new InstantCommand(m_robotDrive::stop, m_robotDrive);
+    SequentialCommandGroup intakeCommand = new InstantCommand(() -> currentLevel = 0).andThen(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand));
+    RunCommand runIntake = new RunCommand(()->m_coralHand.intake());
+
     m_driverController.a().onTrue(new InstantCommand(()->currentLevel = 1).andThen(new MoveToScoringPosition(1, m_wrist, m_elevator)));
     m_driverController.x().onTrue(new InstantCommand(()->currentLevel = 2).andThen(new MoveToScoringPosition(2, m_wrist, m_elevator)));
     m_driverController.b().onTrue(new InstantCommand(()->currentLevel = 3).andThen(new MoveToScoringPosition(3, m_wrist, m_elevator)));
     m_driverController.y().onTrue(new InstantCommand(()->currentLevel = 4).andThen(new MoveToScoringPosition(4, m_wrist, m_elevator).andThen(Robot.isReal() ? new MoveCoralToL4Position(4, m_coralHand) : new InstantCommand())));
-    m_driverController.leftBumper().whileTrue(new RunCommand(()->new AlignToReefFieldRelative(true, m_robotDrive, ()->currentLevel).schedule(), m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop, m_robotDrive));
-    m_driverController.rightBumper().whileTrue(new RunCommand(()->new AlignToReefFieldRelative(false, m_robotDrive, ()->currentLevel).schedule(), m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop, m_robotDrive));
-    m_driverController.leftTrigger().whileTrue(new RunCommand(()->m_coralHand.intake(), m_coralHand)).onTrue(new InstantCommand(()->currentLevel = 0).andThen(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand)));
+    m_driverController.leftBumper().whileTrue(new RunCommand(()->new AlignToReefFieldRelative(()->true, m_robotDrive, ()->currentLevel).schedule(), m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop, m_robotDrive));
+    m_driverController.rightBumper().whileTrue(new RunCommand(()->new AlignToReefFieldRelative(()->false, m_robotDrive, ()->currentLevel).schedule(), m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop, m_robotDrive));
+    m_driverController.leftTrigger().whileTrue(runIntake).onTrue(intakeCommand);
     m_driverController.rightTrigger().whileTrue(new RunCommand(()->m_coralHand.outtake(), m_coralHand));
     m_driverController.povRight().onTrue(new RotateFunnel(m_funnel, FunnelConstants.IntakeAngle));
     m_driverController.povLeft().onTrue(new RotateFunnel(m_funnel, FunnelConstants.ClimbAngle));
 
-    m_operatorController.start().onTrue(new InstantCommand(()->m_robotDrive.zeroHeading(), m_robotDrive));
+    m_operatorController.start().onTrue(zeroHeadingCommand);
     m_operatorController.povUp().whileTrue(new InstantCommand(()->m_elevator.set(0.15), m_elevator.returnSubsystem())).onFalse(new InstantCommand(()->m_elevator.setPosition(m_elevator.getPosition()), m_elevator.returnSubsystem()));
     m_operatorController.povDown().whileTrue(new InstantCommand(()->m_elevator.set(-0.05), m_elevator.returnSubsystem())).onFalse(new InstantCommand(()->m_elevator.setPosition(m_elevator.getPosition()), m_elevator.returnSubsystem()));
     m_operatorController.leftBumper().whileTrue(new InstantCommand(()->m_wrist.set(-0.15), m_wrist.returnSubsystem())).onFalse(new InstantCommand(()->m_wrist.setPosition(m_wrist.getPosition()), m_wrist.returnSubsystem()));
@@ -158,33 +165,34 @@ public class RobotContainer {
     m_operatorController.povLeft().whileTrue(new InstantCommand(()->m_funnel.set(0.5), m_funnel)).onFalse(new InstantCommand(()->m_funnel.setPosition(m_funnel.getPosition()), m_funnel));
     m_operatorController.povRight().whileTrue(new InstantCommand(()->m_funnel.set(-0.5), m_funnel)).onFalse(new InstantCommand(()->m_funnel.setPosition(m_funnel.getPosition()), m_funnel));
     m_operatorController.x().onTrue(new InstantCommand(()->m_wrist.setEncoderPosition(0), m_wrist.returnSubsystem()));
-    m_operatorController.a().onTrue(new InstantCommand(()->m_robotDrive.stop(), m_robotDrive));
+    m_operatorController.a().onTrue(stopDriveCommand);
     m_operatorController.b().onTrue(new InstantCommand(() -> m_elevator.setEncoderPosition(0), m_elevator.returnSubsystem()));
     m_operatorController.y().onTrue(new InstantCommand(() -> m_robotDrive.setX(), m_robotDrive));
   }
 
   private void operatorScoring(){
     SendableChooser<Integer> operatorScoringLevel = new SendableChooser<>();
-    for (int i = 2; i <= 3; i++){
+    for (int i = 2; i <= 4; i++){
       operatorScoringLevel.addOption(""+i, i);
     }
     operatorScoringLevel.setDefaultOption("4", 4);
     SmartDashboard.putData("Operator Height Chooser", operatorScoringLevel);
+    OperatorScoreCoal.setSendableChooser(operatorScoringLevel);
     for(int i = 1; i <= 6; i++){
       int side = i;
-      for (Boolean left : new Boolean[]{true, false}){
+      for (boolean left : new boolean[]{true, false}){
         SmartDashboard.putData("Operator Controls/" + i + (left ? "L" : "R"), 
         new InstantCommand(()->
           new SequentialCommandGroup(
           m_robotDrive.AlignToTagFar(reefTags[side - 1]),
           new OperatorScoreCoal(
-            left,
+            () -> left,
             m_coralHand,
             m_wrist,
             m_elevator,
             m_funnel,
             m_robotDrive,
-            reefTags[side - 1]
+            ()->reefTags[side - 1]
           )
         ).schedule()));
       }
@@ -206,8 +214,7 @@ public class RobotContainer {
       );
     }
   }
-  
-  public SequentialCommandGroup parseAutoCommand(){
+  public Command parseAutoCommand(){
     try {
       SequentialCommandGroup autoRoutine = new SequentialCommandGroup();
     
@@ -237,9 +244,9 @@ public class RobotContainer {
 
       if (fullCommand instanceof Parser.PutCoralCommand) {
         Parser.PutCoralCommand putCmd = (Parser.PutCoralCommand) fullCommand;
-        // Command pathCommand = m_robotDrive.AlignToTagFar(reefTags[putCmd.getSide() - 1]);
-        Command pathCommand = m_robotDrive.AlignToTag(reefTags[putCmd.getSide() - 1], putCmd.getLevel(), putCmd.getLeft());
           
+
+          Command pathCommand = new AlignToReefFieldRelative(putCmd::getLeft, m_robotDrive, putCmd::getLevel, ()->reefTags[putCmd.getSide() - 1]);
           // Build the scoring sequence that will run concurrently with the path command.
           Command subsystemMovement = new MoveToScoringPosition(putCmd.getLevel(), m_wrist, m_elevator);
           // Create a sequential group:
@@ -251,14 +258,14 @@ public class RobotContainer {
                   (Robot.isReal() ? new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()) : new InstantCommand()),
                   new RunCommand(() -> m_coralHand.intake(), m_coralHand).withTimeout(0.3)), subsystemMovement)),
               new ScoreCoral(
-                  putCmd.getLevel(),
-                  putCmd.getLeft(),
+                  putCmd::getLevel,
+                  putCmd::getLeft,
                   m_coralHand,
                   m_wrist,
                   m_elevator,
                   m_funnel,
                   m_robotDrive,
-                  reefTags[putCmd.getSide() - 1]
+                  ()->reefTags[putCmd.getSide() - 1]
               )
           );
           convertedCommands.add(fullSequence);
