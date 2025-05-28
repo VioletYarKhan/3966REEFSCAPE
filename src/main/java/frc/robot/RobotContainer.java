@@ -71,6 +71,7 @@ public class RobotContainer {
   CommandXboxController m_operatorController = new CommandXboxController(1);
 
   Trigger handHasCoral = new Trigger(m_coralHand::hasCoral);
+  Trigger wristMovingFast = new Trigger(()->m_wrist.getVelocity() > 600);
   int[] reefTags;
   int[] stationTags;
   
@@ -94,6 +95,7 @@ public class RobotContainer {
     operatorScoring();
     configureButtonBindings();
     handHasCoral.onTrue(new InstantCommand(m_lights::setHasCoral, m_lights)).onFalse(new InstantCommand(m_lights::setReadyIntake, m_lights));
+    wristMovingFast.onTrue(new InstantCommand(m_coralHand::intake)).onFalse(new InstantCommand(m_coralHand::stop));
     
     m_elevator.returnLigament().get().append(m_wrist.returnLigament().get());
 

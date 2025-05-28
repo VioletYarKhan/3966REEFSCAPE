@@ -10,18 +10,15 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class CoralEffector extends SubsystemBase {
     
     TalonFX effectorWheel = new TalonFX(12);
     TalonFXConfiguration effectorConfig = new TalonFXConfiguration();
-    DigitalInput coralSwitch = new DigitalInput(2);
+    DigitalInput coralSwitch = new DigitalInput(0);
 
     double targetReference;
     ControlType currentControlType;
-
-    Trigger handMovingFast = new Trigger(()->getVelocity() > 600);
 
     public CoralEffector() {
         effectorConfig.MotorOutput.withNeutralMode(NeutralModeValue.Brake);

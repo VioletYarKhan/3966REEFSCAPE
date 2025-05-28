@@ -26,7 +26,7 @@ public class WristSim extends SubsystemBase implements WristIO {
     ProfiledPIDController wristController = new ProfiledPIDController(4, 0, 0.1, new TrapezoidProfile.Constraints(32, 32));
     DCMotor wristGearbox = DCMotor.getNeoVortex(1);
     PWMSparkFlex wristMotor = new PWMSparkFlex(11);
-    Encoder wristEncoder = new Encoder(0, 1);
+    Encoder wristEncoder = new Encoder(1, 2);
 
     EncoderSim wristEncoderSim = new EncoderSim(wristEncoder);
 
@@ -65,7 +65,8 @@ public class WristSim extends SubsystemBase implements WristIO {
             wristMotor.set(pidOutput);
         }
 
-        SmartDashboard.putNumber("Wrist Position", Units.radiansToRotations(wristEncoder.getDistance()/15));
+        SmartDashboard.putNumber("Wrist Position", getPosition());
+        SmartDashboard.putNumber("Wrist Speed", getVelocity());
 
         RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(wristSim.getCurrentDrawAmps()));
     }
@@ -101,18 +102,16 @@ public class WristSim extends SubsystemBase implements WristIO {
 
     @Override
     public void setEncoderPosition(double position) {
-        // Converts from wrist angle (rad) to motor rotations assuming 25:1 gear ratio
         wristSim.setState(position*2*Math.PI, 0);
     }
 
     @Override
     public double getVelocity() {
-        return wristSim.getVelocityRadPerSec();
+        return Units.radiansPerSecondToRotationsPerMinute(wristSim.getVelocityRadPerSec()) * 10;
     }
 
     @Override
     public double getPosition() {      
-        // Converts from wrist angle (rad) to motor rotations assuming 25:1 gear ratio  
         return Units.radiansToRotations(wristEncoder.getDistance()*15);
     }
 
