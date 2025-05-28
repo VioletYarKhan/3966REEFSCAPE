@@ -124,38 +124,23 @@ public class RobotContainer {
         }, m_elevator.returnSubsystem())
     );
 
-    m_coralHand.setDefaultCommand(
-      new RunCommand(()->{
-        if (m_wrist.getVelocity() > 600){
-          m_coralHand.intake();
-        } else {
-          m_coralHand.stop();
-        }
-      }, m_coralHand)
-    );
-
     SmartDashboard.putNumber("Left Reef Align", AlignmentConstants.leftReefFieldAlignment);
     SmartDashboard.putNumber("Right Reef Align", AlignmentConstants.rightReefFieldAlignment);
   }
 
   private void configureButtonBindings() {
-    InstantCommand zeroHeadingCommand = new InstantCommand(() -> m_robotDrive.zeroHeading(), m_robotDrive);
-    InstantCommand stopDriveCommand = new InstantCommand(m_robotDrive::stop, m_robotDrive);
-    SequentialCommandGroup intakeCommand = new InstantCommand(() -> currentLevel = 0).andThen(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand));
-    RunCommand runIntake = new RunCommand(()->m_coralHand.intake());
-
     m_driverController.a().onTrue(new InstantCommand(()->currentLevel = 1).andThen(new MoveToScoringPosition(1, m_wrist, m_elevator)));
     m_driverController.x().onTrue(new InstantCommand(()->currentLevel = 2).andThen(new MoveToScoringPosition(2, m_wrist, m_elevator)));
     m_driverController.b().onTrue(new InstantCommand(()->currentLevel = 3).andThen(new MoveToScoringPosition(3, m_wrist, m_elevator)));
     m_driverController.y().onTrue(new InstantCommand(()->currentLevel = 4).andThen(new MoveToScoringPosition(4, m_wrist, m_elevator).andThen(Robot.isReal() ? new MoveCoralToL4Position(4, m_coralHand) : new InstantCommand())));
     m_driverController.leftBumper().whileTrue(new RunCommand(()->new AlignToReefFieldRelative(()->true, m_robotDrive, ()->currentLevel).schedule(), m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop, m_robotDrive));
     m_driverController.rightBumper().whileTrue(new RunCommand(()->new AlignToReefFieldRelative(()->false, m_robotDrive, ()->currentLevel).schedule(), m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop, m_robotDrive));
-    m_driverController.leftTrigger().whileTrue(runIntake).onTrue(intakeCommand);
+    m_driverController.leftTrigger().whileTrue(new RunCommand(()->m_coralHand.intake(), m_coralHand)).onTrue(new InstantCommand(()->currentLevel = 0).andThen(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand)));
     m_driverController.rightTrigger().whileTrue(new RunCommand(()->m_coralHand.outtake(), m_coralHand));
     m_driverController.povRight().onTrue(new RotateFunnel(m_funnel, FunnelConstants.IntakeAngle));
     m_driverController.povLeft().onTrue(new RotateFunnel(m_funnel, FunnelConstants.ClimbAngle));
 
-    m_operatorController.start().onTrue(zeroHeadingCommand);
+    m_operatorController.start().onTrue(new InstantCommand(()->m_robotDrive.zeroHeading(), m_robotDrive));
     m_operatorController.povUp().whileTrue(new InstantCommand(()->m_elevator.set(0.15), m_elevator.returnSubsystem())).onFalse(new InstantCommand(()->m_elevator.setPosition(m_elevator.getPosition()), m_elevator.returnSubsystem()));
     m_operatorController.povDown().whileTrue(new InstantCommand(()->m_elevator.set(-0.05), m_elevator.returnSubsystem())).onFalse(new InstantCommand(()->m_elevator.setPosition(m_elevator.getPosition()), m_elevator.returnSubsystem()));
     m_operatorController.leftBumper().whileTrue(new InstantCommand(()->m_wrist.set(-0.15), m_wrist.returnSubsystem())).onFalse(new InstantCommand(()->m_wrist.setPosition(m_wrist.getPosition()), m_wrist.returnSubsystem()));
@@ -165,7 +150,7 @@ public class RobotContainer {
     m_operatorController.povLeft().whileTrue(new InstantCommand(()->m_funnel.set(0.5), m_funnel)).onFalse(new InstantCommand(()->m_funnel.setPosition(m_funnel.getPosition()), m_funnel));
     m_operatorController.povRight().whileTrue(new InstantCommand(()->m_funnel.set(-0.5), m_funnel)).onFalse(new InstantCommand(()->m_funnel.setPosition(m_funnel.getPosition()), m_funnel));
     m_operatorController.x().onTrue(new InstantCommand(()->m_wrist.setEncoderPosition(0), m_wrist.returnSubsystem()));
-    m_operatorController.a().onTrue(stopDriveCommand);
+    m_operatorController.a().onTrue(new InstantCommand(()->m_robotDrive.stop(), m_robotDrive));
     m_operatorController.b().onTrue(new InstantCommand(() -> m_elevator.setEncoderPosition(0), m_elevator.returnSubsystem()));
     m_operatorController.y().onTrue(new InstantCommand(() -> m_robotDrive.setX(), m_robotDrive));
   }
