@@ -135,6 +135,10 @@ public final class Constants {
         new PIDConstants(0.7, 0, 0, 0), 
         new PIDConstants(1,0,0)
     );
+    public static final PPHolonomicDriveController kSlowAutoAlignPIDController = new PPHolonomicDriveController(
+        new PIDConstants(0.4, 0, 0, 0), 
+        new PIDConstants(1,0,0)
+    );
   }
 
   public static final class NeoMotorConstants {

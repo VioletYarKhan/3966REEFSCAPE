@@ -29,6 +29,8 @@ public class PositionPIDCommand extends Command{
     public DriveSubsystem drivetrain;
     public final Pose2d goalPose;
     private PPHolonomicDriveController mDriveController = AutoConstants.kAutoAlignPIDController;
+    private PPHolonomicDriveController m_slowDriveController = AutoConstants.kSlowAutoAlignPIDController;
+    private boolean fast;
 
     private final Timer timer = new Timer();
 
@@ -39,13 +41,21 @@ public class PositionPIDCommand extends Command{
 
 
 
-    private PositionPIDCommand(DriveSubsystem drivetrain, Pose2d goalPose) {
+    private PositionPIDCommand(DriveSubsystem drivetrain, Pose2d goalPose, boolean fast) {
         this.drivetrain = drivetrain;
         this.goalPose = goalPose;
+        this.fast = fast;
     }
 
     public static Command generateCommand(DriveSubsystem swerve, Pose2d goalPose, Time timeout){
-        return new PositionPIDCommand(swerve, goalPose).withTimeout(timeout).finallyDo(() -> {
+        return new PositionPIDCommand(swerve, goalPose, true).withTimeout(timeout).finallyDo(() -> {
+            swerve.driveRobotRelativeChassis(new ChassisSpeeds(0,0,0));
+            swerve.setX();
+        });
+    }
+
+    public static Command generateCommand(DriveSubsystem swerve, Pose2d goalPose, Time timeout, boolean fast){
+        return new PositionPIDCommand(swerve, goalPose, fast).withTimeout(timeout).finallyDo(() -> {
             swerve.driveRobotRelativeChassis(new ChassisSpeeds(0,0,0));
             swerve.setX();
         });
@@ -61,8 +71,10 @@ public class PositionPIDCommand extends Command{
         PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
         goalState.pose = goalPose;
 
+        PPHolonomicDriveController usedController = fast ? mDriveController : m_slowDriveController;
+
         drivetrain.driveRobotRelativeChassis(
-            mDriveController.calculateRobotRelativeSpeeds(
+            usedController.calculateRobotRelativeSpeeds(
                 drivetrain.getCurrentPose(), goalState
             )
         );

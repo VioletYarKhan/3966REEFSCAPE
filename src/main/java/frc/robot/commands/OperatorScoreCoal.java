@@ -37,14 +37,14 @@ public class OperatorScoreCoal extends SequentialCommandGroup{
                         new RunCommand(()->hand.intake(), hand)
                     ),
                     new MoveCoralToL4Position(levelSupplier.getAsInt(), hand),
-                    new AlignToReefFieldRelative(left, drivetrain, levelSupplier, goalTag),
+                    new AlignToReefFieldRelative(left, drivetrain, levelSupplier, goalTag, elevator),
                     new WaitCommand(0.4),
                     new MoveToIntakePositions(wrist, elevator, funnel, hand).withTimeout(0.5)
                 );
             } else {
                 addCommands(
                     new MoveToScoringPosition(levelSupplier.getAsInt(), wrist, elevator),
-                    new AlignToReefFieldRelative(left, drivetrain, levelSupplier, goalTag),
+                    new AlignToReefFieldRelative(left, drivetrain, levelSupplier, goalTag, elevator),
                     new ParallelCommandGroup(
                         new RunCommand(()->hand.outtake(), hand).withTimeout(1)
                     ),

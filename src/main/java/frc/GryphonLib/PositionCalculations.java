@@ -77,7 +77,7 @@ public class PositionCalculations {
         if (level != 1){
             transform = new Transform2d(0.75, isLeftScore ? -SmartDashboard.getNumber("Left Reef Align", AlignmentConstants.leftReefFieldAlignment) : SmartDashboard.getNumber("Right Reef Align", AlignmentConstants.rightReefFieldAlignment), new Rotation2d());
             if (level == 4){
-                transform = new Transform2d(0.5, transform.getY(), new Rotation2d());
+                transform = new Transform2d(0.7, transform.getY(), new Rotation2d());
             }
         } else {
             transform = new Transform2d(0.6, 0, new Rotation2d(isLeftScore ? Math.PI/6 : -Math.PI/6));
@@ -85,6 +85,16 @@ public class PositionCalculations {
 
         Pose2d tagPose = kTagLayout.getTagPose(tag).get().toPose2d();
         Pose2d goalPose = translateCoordinates(tagPose, tagPose.getRotation().getDegrees(), transform.getX());
+        goalPose = translateCoordinates(goalPose, tagPose.getRotation().getDegrees() + 90, transform.getY());
+
+        return goalPose.transformBy(new Transform2d(0, 0, new Rotation2d(Math.PI).plus(transform.getRotation())));
+    }
+
+    public static Pose2d getFullL4Align(int tag, boolean isLeftScore){
+        Transform2d transform = new Transform2d(0.4, isLeftScore ? -SmartDashboard.getNumber("Left Reef Align", AlignmentConstants.leftReefFieldAlignment) : SmartDashboard.getNumber("Right Reef Align", AlignmentConstants.rightReefFieldAlignment), new Rotation2d());
+        Pose2d tagPose = kTagLayout.getTagPose(tag).get().toPose2d();
+        Pose2d goalPose = translateCoordinates(tagPose, tagPose.getRotation().getDegrees(), transform.getX());
+
         goalPose = translateCoordinates(goalPose, tagPose.getRotation().getDegrees() + 90, transform.getY());
 
         return goalPose.transformBy(new Transform2d(0, 0, new Rotation2d(Math.PI).plus(transform.getRotation())));
