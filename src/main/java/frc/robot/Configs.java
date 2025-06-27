@@ -71,8 +71,7 @@ public final class Configs {
                     .velocityConversionFactor(1);
                 elevatorConfig.closedLoop
                     .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                    // These are example gains you may need to them for your own robot!
-                    .pid(0.1, 0, 0.01)
+                   .pid(0.1, 0, 0.01)
                     .velocityFF(0)
                     .outputRange(-0.2, 0.5); // down speed -0.35 max
                         
@@ -101,7 +100,6 @@ public final class Configs {
                         .velocityConversionFactor(1);
                 wristConfig.closedLoop
                         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                        // These are example gains you may need to them for your own robot!
                         .pid(0.1, 0, 0)
                         .velocityFF(0)
                         .outputRange(-0.35, 0.4);
@@ -123,7 +121,6 @@ public final class Configs {
                                 .velocityConversionFactor(1);
                         funnelConfig.closedLoop
                                 .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-                                // These are example gains you may need to them for your own robot!
                                 .pid(0.05, 0, 0)
                                 .velocityFF(0)
                                 .outputRange(-0.2, 0.2);

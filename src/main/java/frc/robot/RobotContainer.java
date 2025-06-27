@@ -185,11 +185,8 @@ public class RobotContainer {
       }
     }
 
-    // Workaround of weird Java thing
-    int[] station = new int[]{0};
     for (int i = 1; i <=2; i++){
-      station[0] = i;
-      operatorStationTagPose = kTagLayout.getTagPose(stationTags[station[0] - 1]).get().toPose2d();
+      operatorStationTagPose = kTagLayout.getTagPose(stationTags[i - 1]).get().toPose2d();
       SmartDashboard.putData(("Operator Controls/" + i + "C"),
         new ParallelCommandGroup(
           new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand),
