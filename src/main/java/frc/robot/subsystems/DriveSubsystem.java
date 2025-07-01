@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.littletonrobotics.junction.Logger;
@@ -15,6 +14,10 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.IdealStartingState;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.Waypoint;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
@@ -41,14 +44,13 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
 import frc.robot.Vision;
+import frc.GryphonLib.MovementCalculations;
 import frc.GryphonLib.PositionCalculations;
 import frc.littletonUtils.PoseEstimator;
 import frc.littletonUtils.PoseEstimator.TimestampedVisionUpdate;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.TrajectoryGeneration;
-import frc.littletonUtils.PoseEstimator;
-import frc.littletonUtils.PoseEstimator.TimestampedVisionUpdate;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -165,12 +167,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public void driveRobotRelativeChassis(ChassisSpeeds speeds) {
-    var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
-        new ChassisSpeeds(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond));
-    m_frontLeft.setDesiredState(swerveModuleStates[0]);
-    m_frontRight.setDesiredState(swerveModuleStates[1]);
-    m_rearLeft.setDesiredState(swerveModuleStates[2]);
-    m_rearRight.setDesiredState(swerveModuleStates[3]);
+    drive(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, false);
   }
 
   /**
@@ -309,13 +306,28 @@ public class DriveSubsystem extends SubsystemBase {
     driveRobotRelativeChassis(new ChassisSpeeds());
   }
 
+  public PathPlannerPath getPathFromWaypoint(Pose2d waypoint) {
+    List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
+        getCurrentPose(),
+        waypoint
+    );
+    PathPlannerPath path = new PathPlannerPath(
+      waypoints, 
+      AutoConstants.constraints,
+      new IdealStartingState(MovementCalculations.getVelocityMagnitude(getCurrentSpeeds()), getRotation()), 
+      new GoalEndState(0.0, waypoint.getRotation())
+    );
+    return path;
+  }
+
+  public Command followPath(PathPlannerPath path){
+    return AutoBuilder.followPath(path);
+  }
+
   public Command PathToPose(Pose2d goalPose, double endSpeed){
     field2d.getObject("Goal Pose").setPose(goalPose);
-    ArrayList<Pose2d> waypoints = new ArrayList<Pose2d>();
-    waypoints.add(getCurrentPose());
-    waypoints.add(goalPose);
+    List<Pose2d> waypoints = List.of(getCurrentPose(), goalPose);
     field2d.getObject("Current Trajectory").setPoses(waypoints);
-    
 
     Command pathfindingCommand = AutoBuilder.pathfindToPose(
         goalPose,
@@ -334,20 +346,7 @@ public class DriveSubsystem extends SubsystemBase {
       goalPose = PositionCalculations.getAlignmentReefPose(goalTag, level, isLeftScore);
     }
 
-    field2d.getObject("Goal Pose").setPose(goalPose);
-    ArrayList<Pose2d> waypoints = new ArrayList<Pose2d>();
-    waypoints.add(getCurrentPose());
-    waypoints.add(goalPose);
-    field2d.getObject("Current Trajectory").setPoses(waypoints);
-    
-
-    Command pathfindingCommand = AutoBuilder.pathfindToPose(
-        goalPose,
-        AutoConstants.constraints,
-        0.0 // Goal end velocity in meters/sec
-    );
-
-    return new ParallelRaceGroup(pathfindingCommand, new TrajectoryGeneration(this, goalPose, field2d));
+    return PathToPose(goalPose, 0);
   }
 
   public Command AlignToTagFar(int goalTag){
@@ -373,15 +372,19 @@ public class DriveSubsystem extends SubsystemBase {
         }
       }
     } catch(Exception e){}
-    // Update pose estimator with drivetrain sensors
-    poseEstimator.addDriveData(
-      Timer.getTimestamp(),
-      getCurrentSpeeds().toTwist2d(Timer.getTimestamp() - currentTimestamp)
-      );
+      // Update pose estimator with drivetrain sensors
+      if (DriverStation.isEnabled()){
+        poseEstimator.addDriveData(
+          Timer.getTimestamp(),
+          getCurrentSpeeds().toTwist2d(Timer.getTimestamp() - currentTimestamp)
+        );
+      }
 
       field2d.setRobotPose(getCurrentPose());
       publisher.set(getStates());
     SmartDashboard.putNumber("Distance to Goal", getDistanceToGoal());
+    SmartDashboard.putData("Field", field2d);
+    SmartDashboard.putNumber("Current Speed", MovementCalculations.getVelocityMagnitude(getCurrentSpeeds()).magnitude());
     currentTimestamp = Timer.getTimestamp();
   }
 

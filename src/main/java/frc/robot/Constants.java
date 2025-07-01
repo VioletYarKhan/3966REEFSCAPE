@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -128,6 +130,15 @@ public final class Constants {
       new Pose2d(7.260267857142857, 4.06417, new Rotation2d(Math.PI)), // S2
       new Pose2d(7.111, 2.521, new Rotation2d((3*Math.PI)/4))  // S3 
     };
+
+    public static final PPHolonomicDriveController kAutoAlignPIDController = new PPHolonomicDriveController(
+        new PIDConstants(0.7, 0, 0, 0), 
+        new PIDConstants(1,0,0)
+    );
+    public static final PPHolonomicDriveController kSlowAutoAlignPIDController = new PPHolonomicDriveController(
+        new PIDConstants(0.4, 0, 0, 0), 
+        new PIDConstants(1,0,0)
+    );
   }
 
   public static final class NeoMotorConstants {
