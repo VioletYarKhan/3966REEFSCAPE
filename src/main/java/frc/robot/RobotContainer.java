@@ -126,6 +126,16 @@ public class RobotContainer {
         }, m_elevator.returnSubsystem())
     );
 
+    m_coralHand.setDefaultCommand(
+      new RunCommand(()->{
+        if (m_wrist.getVelocity() > 600){
+          m_coralHand.intake();
+        } else {
+          m_coralHand.stop();
+        }
+      }, m_coralHand)
+    );
+
     SmartDashboard.putNumber("Left Reef Align", AlignmentConstants.leftReefFieldAlignment);
     SmartDashboard.putNumber("Right Reef Align", AlignmentConstants.rightReefFieldAlignment);
   }

@@ -44,7 +44,7 @@ public class AlignToReefFieldRelative extends SequentialCommandGroup {
     pathCommand = drivebase.PathToPose(goalPose, 0.0).until(()->drivebase.getDistanceToGoal() < 0.5);
     if (level.getAsInt() == 4){
       pidAlign = PositionPIDCommand.generateCommand(drivebase, goalPose, Seconds.of(2)).until(()->elevator.atTarget(8))
-      .andThen(PositionPIDCommand.generateCommand(drivebase, PositionCalculations.getFullL4Align(tagID, isLeftScore.getAsBoolean()), Seconds.of(1), false));
+      .andThen(PositionPIDCommand.generateCommand(drivebase, PositionCalculations.getFullL4Align(tagID, isLeftScore.getAsBoolean()), Seconds.of(1), true));
     } else {
       pidAlign = PositionPIDCommand.generateCommand(drivebase, goalPose, Seconds.of(2));
     }

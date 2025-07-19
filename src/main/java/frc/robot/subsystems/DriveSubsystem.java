@@ -4,6 +4,12 @@
 
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Pounds;
+
 import java.util.List;
 
 import org.littletonrobotics.junction.Logger;
@@ -11,6 +17,7 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonUtils;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -31,6 +38,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
@@ -128,7 +136,9 @@ public class DriveSubsystem extends SubsystemBase {
 
     RobotConfig config;
     try{
-      config = RobotConfig.fromGUISettings();
+      // config = RobotConfig.fromGUISettings();
+      ModuleConfig moduleConfig = new ModuleConfig(Meters.of(0.03), MetersPerSecond.of(4), 1.0, DCMotor.getNeoVortex(1).withReduction(4.714), Amps.of(60), 1);
+      config = new RobotConfig(Pounds.of(89), KilogramSquareMeters.of(3.95), moduleConfig, DriveConstants.kDriveKinematics.getModules());
     } catch (Exception e) {
       // Handle exception as needed
       e.printStackTrace();

@@ -32,7 +32,7 @@ public class ScoreCoral extends SequentialCommandGroup{
                     new MoveCoralToL4Position(level.getAsInt(), hand),
                     new AlignToReefFieldRelative(left, drivetrain, level, goalTag, elevator),
                     new WaitCommand(0.1),
-                    new MoveToIntakePositions(wrist, elevator, funnel, hand).withTimeout(0.1)
+                    new MoveToIntakePositions(wrist, elevator, funnel, hand).withTimeout(0.2)
                 );
             } else {
                 addCommands(
