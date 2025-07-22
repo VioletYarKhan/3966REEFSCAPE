@@ -15,7 +15,7 @@ public class CoralEffector extends SubsystemBase {
     
     TalonFX effectorWheel = new TalonFX(12);
     TalonFXConfiguration effectorConfig = new TalonFXConfiguration();
-    DigitalInput coralSwitch = new DigitalInput(2);
+    DigitalInput coralSwitch = new DigitalInput(0);
 
     double targetReference;
     ControlType currentControlType;

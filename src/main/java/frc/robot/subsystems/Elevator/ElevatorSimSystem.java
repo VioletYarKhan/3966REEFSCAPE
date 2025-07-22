@@ -8,6 +8,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
@@ -56,7 +57,11 @@ public class ElevatorSimSystem extends SubsystemBase implements ElevatorIO {
 
     @Override
     public void periodic() {
-        elevatorSim.setInput(elevatorMotor.get() * RobotController.getBatteryVoltage());
+        if (DriverStation.isEnabled()){
+            elevatorSim.setInput(elevatorMotor.get() * RobotController.getBatteryVoltage());
+        } else {
+            elevatorSim.setInput(0);
+        }
         elevatorSim.update(0.02);
         elevatorEncoderSim.setDistance(elevatorSim.getPositionMeters());
         elevatorLigament.setLength(elevatorSim.getPositionMeters() * 0.7 + 0.3);

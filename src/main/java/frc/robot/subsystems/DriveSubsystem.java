@@ -47,8 +47,6 @@ import frc.littletonUtils.PoseEstimator.TimestampedVisionUpdate;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.TrajectoryGeneration;
-import frc.littletonUtils.PoseEstimator;
-import frc.littletonUtils.PoseEstimator.TimestampedVisionUpdate;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -99,6 +97,8 @@ public class DriveSubsystem extends SubsystemBase {
 
     poseEstimator = new PoseEstimator(stateStdDevs);
     
+    SmartDashboard.putData("Field", field2d);
+
     Logger.recordOutput("Robot Pose", getCurrentPose());
     Logger.recordOutput("Goal Pose", field2d.getObject("Goal Pose").getPose());
     Logger.recordOutput("Current Trajectory", field2d.getObject("Current Trajectory").getPose());
@@ -377,7 +377,7 @@ public class DriveSubsystem extends SubsystemBase {
     poseEstimator.addDriveData(
       Timer.getTimestamp(),
       getCurrentSpeeds().toTwist2d(Timer.getTimestamp() - currentTimestamp)
-      );
+    );
 
       field2d.setRobotPose(getCurrentPose());
       publisher.set(getStates());

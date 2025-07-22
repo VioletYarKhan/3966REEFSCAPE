@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 
 
+import java.util.function.BooleanSupplier;
 import java.util.function.IntSupplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -19,10 +20,10 @@ public class AlignToReefFieldRelative extends SequentialCommandGroup {
   private Command pathCommand;
   private Pose2d goalPose;
 
-  public AlignToReefFieldRelative(boolean isLeftScore, DriveSubsystem drivebase, IntSupplier level) {
+  public AlignToReefFieldRelative(BooleanSupplier isLeftScore, DriveSubsystem drivebase, IntSupplier level) {
     addRequirements(drivebase);
     tagID = PositionCalculations.closestReefTag(drivebase::getCurrentPose);
-    goalPose = PositionCalculations.getAlignmentReefPose(tagID, level.getAsInt(), isLeftScore);
+    goalPose = PositionCalculations.getAlignmentReefPose(tagID, level.getAsInt(), isLeftScore.getAsBoolean());
     pathCommand = drivebase.PathToPose(goalPose, 0.0);
     addCommands(pathCommand);
   }

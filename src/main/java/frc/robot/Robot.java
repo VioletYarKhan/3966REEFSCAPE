@@ -68,6 +68,7 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
     SmartDashboard.putData(CommandScheduler.getInstance());
     SmartDashboard.putNumber("Match Time", DriverStation.getMatchTime());
+    SmartDashboard.updateValues();
   }
 
   /** This function is called once each time the robot enters Disabled mode. */

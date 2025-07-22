@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -117,7 +119,7 @@ public final class Constants {
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
     
     public static final PathConstraints constraints = new PathConstraints(
-        4, 2.5,
+        4, 3.5,
         Units.degreesToRadians(360), Units.degreesToRadians(720));
 
     public static final Transform3d leftBranchCoral = new Transform3d(0.381, 0.381, 0, new Rotation3d());
@@ -128,6 +130,11 @@ public final class Constants {
       new Pose2d(7.260267857142857, 4.06417, new Rotation2d(Math.PI)), // S2
       new Pose2d(7.111, 2.521, new Rotation2d((3*Math.PI)/4))  // S3 
     };
+
+    public static final PPHolonomicDriveController kAutoAlignPIDController = new PPHolonomicDriveController(
+        new PIDConstants(0.7, 0, 0, 0), 
+        new PIDConstants(1,0,0)
+    );
   }
 
   public static final class NeoMotorConstants {
@@ -145,8 +152,8 @@ public final class Constants {
   public static final class WristConstants {
     public static final double L1Angle = 7.4;
     public static final double L2_3Angle = 9.7;
-    public static final double L4Angle = 5;
-    public static final double IntakeAngle = 0;
+    public static final double L4Angle = 4.2;
+    public static final double IntakeAngle = 0.5;
   }
 
   public static final class FunnelConstants {
@@ -207,5 +214,9 @@ public final class Constants {
   public static class BlinkinConstants{
     public static final double blue = 0.92;
     public static final double green = 0.73;
+  }
+
+  public static class HandConstants {
+    public static final double L4Push = 0.5;
   }
 }

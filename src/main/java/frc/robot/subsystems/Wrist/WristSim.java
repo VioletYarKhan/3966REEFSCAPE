@@ -8,6 +8,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkFlex;
@@ -35,7 +36,7 @@ public class WristSim extends SubsystemBase implements WristIO {
 
     double jKgMS = SingleJointedArmSim.estimateMOI(Units.inchesToMeters(13), Units.lbsToKilograms(8));
 
-    private final SingleJointedArmSim wristSim = new SingleJointedArmSim(wristGearbox, 25, jKgMS, Units.inchesToMeters(13), -Math.PI/4, (5*Math.PI)/4, true, Math.PI/6);
+    private final SingleJointedArmSim wristSim = new SingleJointedArmSim(wristGearbox, 25, jKgMS, Units.inchesToMeters(13), Math.PI/6, (5*Math.PI)/4, true, Math.PI/6);
     private final Mechanism2d wristSimMechanism = new Mechanism2d(Units.inchesToMeters(30), Units.inchesToMeters(30));
     private final MechanismRoot2d wristHome = wristSimMechanism.getRoot("Base", Units.inchesToMeters(15), Units.inchesToMeters(15));
     public final MechanismLigament2d wristArm = wristHome.append(new MechanismLigament2d("Sword", Units.inchesToMeters(13), 0));
@@ -56,7 +57,11 @@ public class WristSim extends SubsystemBase implements WristIO {
 
     @Override
     public void periodic() {
-        wristSim.setInput(wristMotor.get() * RobotController.getBatteryVoltage());
+        if (DriverStation.isEnabled()){
+            wristSim.setInput(wristMotor.get() * RobotController.getBatteryVoltage());
+        } else {
+            wristSim.setInput(0);
+        }
         wristSim.update(0.02);
         wristEncoderSim.setDistance(wristSim.getAngleRads());
         wristArm.setAngle(270 + Math.toDegrees(Math.PI - wristSim.getAngleRads() % (2 * Math.PI) < 0 ? Math.PI - wristSim.getAngleRads() % (2 * Math.PI) + 2*Math.PI : Math.PI - wristSim.getAngleRads() % (2 * Math.PI)));

@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.Wrist.WristIO;
 import frc.GryphonLib.PositionCalculations;
+import frc.robot.Robot;
 import frc.robot.subsystems.CoralEffector;
 import frc.robot.subsystems.CoralFunnel;
 import frc.robot.subsystems.DriveSubsystem;
@@ -28,8 +29,9 @@ public class ScoreCoral extends SequentialCommandGroup{
                     new MoveToScoringPosition(level, wrist, elevator),
                     new MoveCoralToL4Position(level, hand),
                     drivetrain.AlignToTag(goalTag, level, left),
+                    Robot.isReal() ? new RunCommand(()->drivetrain.driveRobotRelativeChassis(new ChassisSpeeds(0.7, 0, 0)), drivetrain).withTimeout(0.5) : new WaitCommand(0.5),
                     new WaitCommand(0.3),
-                    new MoveToIntakePositions(wrist, elevator, funnel, hand).withTimeout(0.1)
+                    new MoveToIntakePositions(wrist, elevator, funnel, hand).withTimeout(0.2)
                 );
             } else {
                 addCommands(
