@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
+import org.photonvision.EstimatedRobotPose;
+
 public class PoseEstimator {
   private static final double historyLengthSecs = 0.15;
 
@@ -59,6 +61,51 @@ public class PoseEstimator {
       var timestamp = timestampedVisionUpdate.timestamp();
       var visionUpdate =
           new VisionUpdate(timestampedVisionUpdate.pose(), timestampedVisionUpdate.stdDevs());
+
+      if (updates.containsKey(timestamp)) {
+        // There was already an update at this timestamp, add to it
+        var oldVisionUpdates = updates.get(timestamp).visionUpdates();
+        oldVisionUpdates.add(visionUpdate);
+        oldVisionUpdates.sort(VisionUpdate.compareDescStdDev);
+
+      } else {
+        // Insert a new update
+        var prevUpdate = updates.floorEntry(timestamp);
+        var nextUpdate = updates.ceilingEntry(timestamp);
+        if ((prevUpdate == null || nextUpdate == null)) {
+          // Outside the range of existing data
+          return;
+        }
+
+        // Create partial twists (prev -> vision, vision -> next)
+        var twist0 =
+            GeomUtil.multiply(
+                nextUpdate.getValue().twist(),
+                (timestamp - prevUpdate.getKey()) / (nextUpdate.getKey() - prevUpdate.getKey()));
+        var twist1 =
+            GeomUtil.multiply(
+                nextUpdate.getValue().twist(),
+                (nextUpdate.getKey() - timestamp) / (nextUpdate.getKey() - prevUpdate.getKey()));
+
+        // Add new pose updates
+        var newVisionUpdates = new ArrayList<VisionUpdate>();
+        newVisionUpdates.add(visionUpdate);
+        newVisionUpdates.sort(VisionUpdate.compareDescStdDev);
+        updates.put(timestamp, new PoseUpdate(twist0, newVisionUpdates));
+        updates.put(
+            nextUpdate.getKey(), new PoseUpdate(twist1, nextUpdate.getValue().visionUpdates()));
+      }
+    }
+
+    // Recalculate latest pose once
+    // update();
+  }
+
+  public void addVisionData(List<EstimatedRobotPose> estimatedRobotPoses, Matrix<N3, N1> stdevs) {
+    for (var estimatedPose : estimatedRobotPoses) {
+      var timestamp = estimatedPose.timestampSeconds;
+      var visionUpdate =
+          new VisionUpdate(estimatedPose.estimatedPose.toPose2d(), stdevs);
 
       if (updates.containsKey(timestamp)) {
         // There was already an update at this timestamp, add to it

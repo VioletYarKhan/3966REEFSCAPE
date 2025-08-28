@@ -4,20 +4,14 @@
 
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Amps;
-import static edu.wpi.first.units.Units.KilogramSquareMeters;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Pounds;
-
 import java.util.List;
+import java.util.Optional;
 
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonUtils;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -29,6 +23,7 @@ import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -37,8 +32,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
@@ -55,7 +50,6 @@ import frc.robot.Vision;
 import frc.GryphonLib.MovementCalculations;
 import frc.GryphonLib.PositionCalculations;
 import frc.littletonUtils.PoseEstimator;
-import frc.littletonUtils.PoseEstimator.TimestampedVisionUpdate;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.TrajectoryGeneration;
@@ -94,9 +88,9 @@ public class DriveSubsystem extends SubsystemBase {
 
   private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
   private static Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(1, 1, Units.degreesToRadians(30));
+  private static Matrix<N3, N1> stdevsMat = new Matrix<>(visionMeasurementStdDevs.getStorage());
   private final PoseEstimator poseEstimator;
   private final Field2d field2d = new Field2d();
-  private double previousPipelineTimestamp = 0;
   private final StructArrayPublisher<SwerveModuleState> publisher;
   private double currentTimestamp = Timer.getTimestamp();
 
@@ -136,9 +130,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     RobotConfig config;
     try{
-      // config = RobotConfig.fromGUISettings();
-      ModuleConfig moduleConfig = new ModuleConfig(Meters.of(0.03), MetersPerSecond.of(4), 1.0, DCMotor.getNeoVortex(1).withReduction(4.714), Amps.of(60), 1);
-      config = new RobotConfig(Pounds.of(89), KilogramSquareMeters.of(3.95), moduleConfig, DriveConstants.kDriveKinematics.getModules());
+      config = RobotConfig.fromGUISettings();
     } catch (Exception e) {
       // Handle exception as needed
       e.printStackTrace();
@@ -372,23 +364,25 @@ public class DriveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // Update pose estimator with the best visible target
-    var pipelineResult = Vision.getResult();
     try{
-      var resultTimestamp = pipelineResult.getTimestampSeconds();
-      if (resultTimestamp != previousPipelineTimestamp && pipelineResult.hasTargets()) {
-        if (pipelineResult.getBestTarget().getBestCameraToTarget().getTranslation().getNorm() < 2.5){
-          EstimatedRobotPose botPose = Vision.getEstimatedGlobalPose(getCurrentPose(), pipelineResult);
-          poseEstimator.addVisionData(List.of(new TimestampedVisionUpdate(botPose.timestampSeconds, botPose.estimatedPose.toPose2d(), visionMeasurementStdDevs)));
-        }
+      Optional<EstimatedRobotPose> visionBotPose1 = Vision.getEstimatedGlobalPoseCam1(getCurrentPose());
+      Optional<EstimatedRobotPose> visionBotPose2 = Vision.getEstimatedGlobalPoseCam2(getCurrentPose());
+      
+      List<EstimatedRobotPose> visionReadings = List.of();
+      if (visionBotPose1.isPresent()){
+        visionReadings.add(visionBotPose1.get());
       }
+      if (visionBotPose2.isPresent()){
+        visionReadings.add(visionBotPose2.get());
+      }
+
+      poseEstimator.addVisionData(visionReadings, stdevsMat);
     } catch(Exception e){}
-      // Update pose estimator with drivetrain sensors
-      if (DriverStation.isEnabled()){
-        poseEstimator.addDriveData(
-          Timer.getTimestamp(),
-          getCurrentSpeeds().toTwist2d(Timer.getTimestamp() - currentTimestamp)
-        );
-      }
+    // Update pose estimator with drivetrain sensors
+    poseEstimator.addDriveData(
+      Timer.getTimestamp(),
+      getCurrentSpeeds().toTwist2d(Timer.getTimestamp() - currentTimestamp)
+      );
 
       field2d.setRobotPose(getCurrentPose());
       publisher.set(getStates());
