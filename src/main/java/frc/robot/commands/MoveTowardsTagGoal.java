@@ -38,7 +38,7 @@ public class MoveTowardsTagGoal extends Command {
     ChassisSpeeds directedSpeeds = new ChassisSpeeds();
     if(!distances.equals(new Transform3d())){
       Transform3d camToTarget = distances;
-      Transform3d robotToTarget = camToTarget.plus(VisionConstants.kRobotToCam);
+      Transform3d robotToTarget = camToTarget.plus(VisionConstants.kRobotToCam1);
       double omegaChange = 0;
       if (rotateTowards){
         if (Units.radiansToDegrees(distances.getRotation().getZ()) < 0){

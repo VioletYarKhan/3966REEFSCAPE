@@ -75,9 +75,9 @@ public class PositionCalculations {
     public static Pose2d getAlignmentReefPose(int tag, int level, boolean isLeftScore){
         Transform2d transform = new Transform2d();
         if (level != 1){
-            transform = new Transform2d(0.75, isLeftScore ? -SmartDashboard.getNumber("Left Reef Align", AlignmentConstants.leftReefFieldAlignment) : SmartDashboard.getNumber("Right Reef Align", AlignmentConstants.rightReefFieldAlignment), new Rotation2d());
+            transform = new Transform2d(0.9, isLeftScore ? -SmartDashboard.getNumber("Left Reef Align", AlignmentConstants.leftReefFieldAlignment) : SmartDashboard.getNumber("Right Reef Align", AlignmentConstants.rightReefFieldAlignment), new Rotation2d());
             if (level == 4){
-                transform = new Transform2d(0.7, transform.getY(), new Rotation2d());
+                transform = new Transform2d(0.5, transform.getY(), new Rotation2d());
             }
         } else {
             transform = new Transform2d(0.6, 0, new Rotation2d(isLeftScore ? Math.PI/6 : -Math.PI/6));
