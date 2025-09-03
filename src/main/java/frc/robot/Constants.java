@@ -177,10 +177,11 @@ public final class Constants {
             new Transform3d(new Translation3d(Units.inchesToMeters(11), -Units.inchesToMeters(0.5), Units.inchesToMeters(7.5)), new Rotation3d(0, camPitch1, camYaw1));
     public static final Transform3d kCamToRobot1 = kRobotToCam1.inverse();
 
-    private static final double camPitch2 = Units.degreesToRadians(-20);
-    private static final double camYaw2 = Units.degreesToRadians(-2);
+    // some of these probably need to be flipped
+    private static final double camPitch2 = Units.degreesToRadians(0);
+    private static final double camYaw2 = Units.degreesToRadians(15);
     public static final Transform3d kRobotToCam2 =
-            new Transform3d(new Translation3d(Units.inchesToMeters(11), -Units.inchesToMeters(0.5), Units.inchesToMeters(7.5)), new Rotation3d(0, camPitch2, camYaw2));
+            new Transform3d(new Translation3d(Units.inchesToMeters(9.25), Units.inchesToMeters(3), Units.inchesToMeters(18)), new Rotation3d(0, camPitch2, camYaw2));
     public static final Transform3d kCamToRobot2 = kRobotToCam2.inverse();
 
     // The layout of the AprilTags on the field
