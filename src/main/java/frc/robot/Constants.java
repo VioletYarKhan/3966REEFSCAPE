@@ -150,9 +150,9 @@ public final class Constants {
   }
 
   public static final class ElevatorConstants {
-    public static final double L1Height = 2;
-    public static final double L2Height = 11;
-    public static final double L3Height = 17.9;
+    public static final double L1Height = 6;
+    public static final double L2Height = 12.3;
+    public static final double L3Height = 18.5;
     public static final double L4Height = 23;
     public static final double IntakeHeight = 0.5;
   }

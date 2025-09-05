@@ -128,7 +128,7 @@ public class RobotContainer {
 
     m_coralHand.setDefaultCommand(
       new RunCommand(()->{
-        if (m_wrist.getVelocity() > 600  || (currentLevel != 4 && currentLevel != 0)){
+        if (m_wrist.getVelocity() > 600  || (currentLevel != 4 && currentLevel != 0 && m_coralHand.hasCoral())){
           m_coralHand.intake();
         } else {
           m_coralHand.stop();
