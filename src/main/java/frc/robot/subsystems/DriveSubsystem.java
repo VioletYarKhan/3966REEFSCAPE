@@ -87,7 +87,7 @@ public class DriveSubsystem extends SubsystemBase {
   private double gyroOffset = 0.0;
 
   private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
-  private static Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(1, 1, Units.degreesToRadians(30));
+  private static Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(10));
   private static Matrix<N3, N1> stdevsMat = new Matrix<>(visionMeasurementStdDevs.getStorage());
   private final PoseEstimator poseEstimator;
   private final Field2d field2d = new Field2d();
@@ -362,22 +362,29 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
-    // Update pose estimator with the best visible target
-    try{
-      Optional<EstimatedRobotPose> visionBotPose1 = Vision.getEstimatedGlobalPoseCam1(getCurrentPose());
-      Optional<EstimatedRobotPose> visionBotPose2 = Vision.getEstimatedGlobalPoseCam2(getCurrentPose());
-      
-      List<EstimatedRobotPose> visionReadings = List.of();
+  public void periodic() { 
+    if (Vision.getResult1() != null){
+      Optional<EstimatedRobotPose> visionBotPose1 = Vision.getEstimatedGlobalPoseCam1();
       if (visionBotPose1.isPresent()){
-        visionReadings.add(visionBotPose1.get());
+        poseEstimator.addVisionData(List.of(visionBotPose1.get()), stdevsMat);
+        field2d.getObject("Camera1 Pose Guess").setPose(visionBotPose1.get().estimatedPose.toPose2d());
       }
+    }
+    if (Vision.getResult2() != null){
+      Optional<EstimatedRobotPose> visionBotPose2 = Vision.getEstimatedGlobalPoseCam2();
       if (visionBotPose2.isPresent()){
-        visionReadings.add(visionBotPose2.get());
+        poseEstimator.addVisionData(List.of(visionBotPose2.get()), stdevsMat);
+        field2d.getObject("Camera2 Pose Guess").setPose(visionBotPose2.get().estimatedPose.toPose2d());
       }
-
-      poseEstimator.addVisionData(visionReadings, stdevsMat);
-    } catch(Exception e){}
+    }
+    if (Vision.getResult3() != null){
+      Optional<EstimatedRobotPose> visionBotPose3 = Vision.getEstimatedGlobalPoseCam3();
+      if (visionBotPose3.isPresent()){
+        poseEstimator.addVisionData(List.of(visionBotPose3.get()), stdevsMat);
+        field2d.getObject("Camera3 Pose Guess").setPose(visionBotPose3.get().estimatedPose.toPose2d());
+      }
+    }
+    
     // Update pose estimator with drivetrain sensors
     poseEstimator.addDriveData(
       Timer.getTimestamp(),

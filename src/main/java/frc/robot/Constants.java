@@ -119,8 +119,12 @@ public final class Constants {
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
     
     public static final PathConstraints constraints = new PathConstraints(
-        4, 3,
+        2, 1,
         Units.degreesToRadians(360), Units.degreesToRadians(720));
+      
+      public static final PathConstraints REAL_CONSTRAINTS = new PathConstraints(
+          4, 3,
+          Units.degreesToRadians(360), Units.degreesToRadians(720));
 
     public static final Transform3d leftBranchCoral = new Transform3d(0.381, 0.381, 0, new Rotation3d());
     public static final Transform3d rightBranchCoral = new Transform3d(0.381, -0.381, 0, new Rotation3d());
@@ -136,7 +140,7 @@ public final class Constants {
         new PIDConstants(1,0,0)
     );
     public static final PPHolonomicDriveController kSlowAutoAlignPIDController = new PPHolonomicDriveController(
-        new PIDConstants(0.4, 0, 0, 0), 
+        new PIDConstants(0.5, 0, 0.05, 0), 
         new PIDConstants(1,0,0)
     );
   }
@@ -156,7 +160,7 @@ public final class Constants {
   public static final class WristConstants {
     public static final double L1Angle = 7.4;
     public static final double L2_3Angle = 9.7;
-    public static final double L4Angle = 5;
+    public static final double L4Angle = 4.5;
     public static final double IntakeAngle = 0;
   }
 
@@ -168,7 +172,8 @@ public final class Constants {
 
   public static class VisionConstants {
     public static final String kCameraName1 = "limelight";
-    public static final String kCameraName2 = "OrangePI";
+    public static final String kCameraName2 = "ArduR";
+    public static final String kCameraName3 = "ArduL";
     // Cam mounted facing forward, half a meter forward of center, half a meter up from center,
     // pitched upward.
     private static final double camPitch1 = Units.degreesToRadians(-20);
@@ -179,10 +184,18 @@ public final class Constants {
 
     // some of these probably need to be flipped
     private static final double camPitch2 = Units.degreesToRadians(0);
-    private static final double camYaw2 = Units.degreesToRadians(15);
+    private static final double camYaw2 = -Units.degreesToRadians(15);
     public static final Transform3d kRobotToCam2 =
             new Transform3d(new Translation3d(Units.inchesToMeters(5.75), Units.inchesToMeters(12), Units.inchesToMeters(18)), new Rotation3d(180, camPitch2, camYaw2));
     public static final Transform3d kCamToRobot2 = kRobotToCam2.inverse();
+
+
+    private static final double camPitch3 = Units.degreesToRadians(0);
+    private static final double camYaw3 = -Units.degreesToRadians(15);
+    public static final Transform3d kRobotToCam3 =
+            new Transform3d(new Translation3d(Units.inchesToMeters(5.75), Units.inchesToMeters(12), Units.inchesToMeters(18)), new Rotation3d(0, camPitch3, camYaw3));
+    public static final Transform3d kCamToRobot3 = kRobotToCam3.inverse();
+
 
     // The layout of the AprilTags on the field
     public static final AprilTagFieldLayout kTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);

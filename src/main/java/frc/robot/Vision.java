@@ -7,9 +7,7 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
 
@@ -20,25 +18,34 @@ import java.util.Optional;
 public class Vision extends SubsystemBase {
     private static final PhotonCamera camera1 = new PhotonCamera(VisionConstants.kCameraName1);
     private static final PhotonCamera camera2 = new PhotonCamera(VisionConstants.kCameraName2);
+    private static final PhotonCamera camera3 = new PhotonCamera(VisionConstants.kCameraName3);
 
-    private static PhotonPipelineResult result1;
-    private static PhotonPipelineResult result2;
+
+    private static PhotonPipelineResult result1 = null;
+    private static PhotonPipelineResult result2 = null;
+    private static PhotonPipelineResult result3 = null;
 
     private static final PhotonPoseEstimator poseEstimator1 = new PhotonPoseEstimator(
         VisionConstants.kTagLayout, PoseStrategy.LOWEST_AMBIGUITY, VisionConstants.kRobotToCam1);
     private static final PhotonPoseEstimator poseEstimator2 = new PhotonPoseEstimator(
         VisionConstants.kTagLayout, PoseStrategy.LOWEST_AMBIGUITY, VisionConstants.kRobotToCam2);
+    private static final PhotonPoseEstimator poseEstimator3 = new PhotonPoseEstimator(
+        VisionConstants.kTagLayout, PoseStrategy.LOWEST_AMBIGUITY, VisionConstants.kRobotToCam3);
 
     @Override
     public void periodic() {
         var results1 = camera1.getAllUnreadResults();
+        if (!results1.isEmpty()){
+            result1 = results1.get(results1.size() - 1);
+        }
         var results2 = camera2.getAllUnreadResults();
-
-        result1 = results1.get(results1.size() - 1);
-        SmartDashboard.putNumber("Camera1 Best Tag", result1.hasTargets() ? result1.getBestTarget().getFiducialId() : 0);
-    
-        result2 = results2.get(results2.size() - 1);
-        SmartDashboard.putNumber("Camera2 Best Tag", result2.hasTargets() ? result2.getBestTarget().getFiducialId() : 0);
+        if (!results2.isEmpty()){
+            result2 = results2.get(results2.size() - 1);
+        }
+        var results3 = camera3.getAllUnreadResults();
+        if (!results3.isEmpty()){
+            result3 = results3.get(results3.size() - 1);
+        }
     }
 
     public static PhotonPipelineResult getResult1() {
@@ -49,6 +56,10 @@ public class Vision extends SubsystemBase {
         return result2;
     }
 
+    public static PhotonPipelineResult getResult3() {
+        return result3;
+    }
+
     public static PhotonCamera getCamera1() {
         return camera1;
     }
@@ -57,8 +68,12 @@ public class Vision extends SubsystemBase {
         return camera2;
     }
 
+    public static PhotonCamera getCamera3() {
+        return camera3;
+    }
+
     public static boolean resultHasTargets() {
-        return (result1 != null && result1.hasTargets()) || (result2 != null && result2.hasTargets());
+        return (result1 != null && result1.hasTargets()) || (result2 != null && result2.hasTargets()) || (result3 != null && result3.hasTargets());
     }
 
     public static int[] tagsInFrame() {
@@ -78,6 +93,9 @@ public class Vision extends SubsystemBase {
         if (result2 != null && result2.hasTargets()) {
             allTargets.addAll(result2.getTargets());
         }
+        if (result3 != null && result3.hasTargets()) {
+            allTargets.addAll(result3.getTargets());
+        }
         return allTargets;
     }
 
@@ -91,16 +109,20 @@ public class Vision extends SubsystemBase {
         return 0;
     }
 
-    public static Optional<EstimatedRobotPose> getEstimatedGlobalPoseCam1(Pose2d prevEstimatedRobotPose) {
-        poseEstimator1.setReferencePose(prevEstimatedRobotPose);
+    public static Optional<EstimatedRobotPose> getEstimatedGlobalPoseCam1() {
         var update = poseEstimator1.update(result1);
 
         return update;
     }
 
-    public static Optional<EstimatedRobotPose> getEstimatedGlobalPoseCam2(Pose2d prevEstimatedRobotPose) {
-        poseEstimator2.setReferencePose(prevEstimatedRobotPose);
+    public static Optional<EstimatedRobotPose> getEstimatedGlobalPoseCam2() {
         var update = poseEstimator2.update(result2);
+
+        return update;
+    }
+
+    public static Optional<EstimatedRobotPose> getEstimatedGlobalPoseCam3() {
+        var update = poseEstimator3.update(result3);
 
         return update;
     }

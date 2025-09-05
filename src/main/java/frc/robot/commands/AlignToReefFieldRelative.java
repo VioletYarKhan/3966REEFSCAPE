@@ -27,7 +27,7 @@ public class AlignToReefFieldRelative extends SequentialCommandGroup {
   public AlignToReefFieldRelative(BooleanSupplier isLeftScore, DriveSubsystem drivebase, IntSupplier level, ElevatorIO elevator) {
     tagID = PositionCalculations.closestReefTag(drivebase::getCurrentPose);
     goalPose = PositionCalculations.getAlignmentReefPose(tagID, level.getAsInt(), isLeftScore.getAsBoolean());
-    pathCommand = drivebase.PathToPose(goalPose, 0.0);//.until(()->drivebase.getDistanceToGoal() < 0.5);
+    pathCommand = drivebase.PathToPose(goalPose, -0.1).until(()->drivebase.getDistanceToGoal() < 0.5);
     if (level.getAsInt() == 4){
       pidAlign = PositionPIDCommand.generateCommand(drivebase, goalPose, Seconds.of(2)).until(()->elevator.atTarget(8))
       .andThen(PositionPIDCommand.generateCommand(drivebase, PositionCalculations.getFullL4Align(tagID, isLeftScore.getAsBoolean()), Seconds.of(1), false));
@@ -35,7 +35,7 @@ public class AlignToReefFieldRelative extends SequentialCommandGroup {
       pidAlign = PositionPIDCommand.generateCommand(drivebase, goalPose, Seconds.of(2));
     }
     
-    addCommands(pathCommand);
+    addCommands(pathCommand, pidAlign);
   }
 
   public AlignToReefFieldRelative(BooleanSupplier isLeftScore, DriveSubsystem drivebase, IntSupplier level, IntSupplier tag, ElevatorIO elevator) {
