@@ -191,9 +191,9 @@ public final class Constants {
 
 
     private static final double camPitch3 = Units.degreesToRadians(0);
-    private static final double camYaw3 = -Units.degreesToRadians(15);
+    private static final double camYaw3 = Units.degreesToRadians(15);
     public static final Transform3d kRobotToCam3 =
-            new Transform3d(new Translation3d(Units.inchesToMeters(5.75), Units.inchesToMeters(12), Units.inchesToMeters(18)), new Rotation3d(0, camPitch3, camYaw3));
+            new Transform3d(new Translation3d(Units.inchesToMeters(5.75), -Units.inchesToMeters(12), Units.inchesToMeters(18)), new Rotation3d(Math.PI, camPitch3, camYaw3));
     public static final Transform3d kCamToRobot3 = kRobotToCam3.inverse();
 
 
