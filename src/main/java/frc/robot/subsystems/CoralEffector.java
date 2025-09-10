@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import java.util.function.IntSupplier;
+
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
@@ -90,8 +92,13 @@ public class CoralEffector extends SubsystemBase {
     }
 
 
-    public void outtake(){
-        set(-0.15);
+    public void outtake(IntSupplier currentLevel){
+        if (currentLevel.getAsInt() != 1){
+            set(-0.15);
+        }
+        else {
+            set(-0.1);
+        }
     }
     public void intake(){
         set(0.15);

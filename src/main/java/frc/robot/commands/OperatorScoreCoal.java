@@ -39,7 +39,7 @@ public class OperatorScoreCoal extends SequentialCommandGroup{
                     new MoveToScoringPosition(level, wrist, elevator),
                     drivetrain.PathToPose(PositionCalculations.getAlignmentReefPose(goalTag, level, left), 0.0),
                     new ParallelCommandGroup(
-                        new RunCommand(()->hand.outtake(), hand).withTimeout(1)
+                        new RunCommand(()->hand.outtake(()->level), hand).withTimeout(1)
                     ),
                     new RunCommand(()->hand.stop(), hand).withTimeout(0.1)
                 );

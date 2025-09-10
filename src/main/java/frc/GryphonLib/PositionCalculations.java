@@ -31,11 +31,11 @@ public class PositionCalculations {
         Transform2d transform = new Transform2d();
         if (level != 1){
             transform = new Transform2d(0.7, isLeftScore ? -SmartDashboard.getNumber("Left Reef Align", AlignmentConstants.leftReefFieldAlignment) : SmartDashboard.getNumber("Right Reef Align", AlignmentConstants.rightReefFieldAlignment), new Rotation2d());
-        if (level == 4){
-            transform = new Transform2d(0.4, transform.getY(), new Rotation2d());
-        }
+            if (level == 4){
+                transform = new Transform2d(0.5, transform.getY(), new Rotation2d());
+            }
         } else {
-            transform = new Transform2d(0.6, 0, new Rotation2d(isLeftScore ? (Math.PI/6)-(Math.PI/24): (-Math.PI/6)+(Math.PI/24)));
+            transform = new Transform2d(0.6, 0, new Rotation2d(isLeftScore ? (Math.PI/6)-(Math.PI/64): (-Math.PI/6)+(Math.PI/64)));
         }
 
         Pose2d tagPose = kTagLayout.getTagPose(tag).get().toPose2d();

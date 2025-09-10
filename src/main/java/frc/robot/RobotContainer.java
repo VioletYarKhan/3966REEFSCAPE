@@ -143,7 +143,7 @@ public class RobotContainer {
     m_driverController.leftBumper().whileTrue(new RunCommand(()->new AlignToReefFieldRelative(true, m_robotDrive, ()->currentLevel).andThen(new RunCommand(()->m_robotDrive.stop(), m_robotDrive)).schedule(), m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop, m_robotDrive));
     m_driverController.rightBumper().whileTrue(new RunCommand(()->new AlignToReefFieldRelative(false, m_robotDrive, ()->currentLevel).andThen(new RunCommand(()->m_robotDrive.stop(), m_robotDrive)).schedule(), m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop, m_robotDrive));
     m_driverController.leftTrigger().whileTrue(new RunCommand(()->m_coralHand.intake(), m_coralHand)).onTrue(new InstantCommand(()->currentLevel = 0).andThen(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand)));
-    m_driverController.rightTrigger().whileTrue(new RunCommand(()->m_coralHand.outtake(), m_coralHand));
+    m_driverController.rightTrigger().whileTrue(new RunCommand(()->m_coralHand.outtake(()->currentLevel), m_coralHand));
     m_driverController.povRight().onTrue(new RotateFunnel(m_funnel, FunnelConstants.IntakeAngle));
     m_driverController.povLeft().onTrue(new RotateFunnel(m_funnel, FunnelConstants.ClimbAngle));
 
