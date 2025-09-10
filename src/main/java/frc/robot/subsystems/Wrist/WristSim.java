@@ -8,6 +8,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkFlex;
@@ -26,7 +27,7 @@ public class WristSim extends SubsystemBase implements WristIO {
     ProfiledPIDController wristController = new ProfiledPIDController(4, 0, 0.1, new TrapezoidProfile.Constraints(32, 32));
     DCMotor wristGearbox = DCMotor.getNeoVortex(1);
     PWMSparkFlex wristMotor = new PWMSparkFlex(11);
-    Encoder wristEncoder = new Encoder(0, 1);
+    Encoder wristEncoder = new Encoder(1, 2);
 
     EncoderSim wristEncoderSim = new EncoderSim(wristEncoder);
 
@@ -60,12 +61,13 @@ public class WristSim extends SubsystemBase implements WristIO {
         wristSim.update(0.02);
         wristEncoderSim.setDistance(wristSim.getAngleRads());
         wristArm.setAngle(270 + Math.toDegrees(Math.PI - wristSim.getAngleRads() % (2 * Math.PI) < 0 ? Math.PI - wristSim.getAngleRads() % (2 * Math.PI) + 2*Math.PI : Math.PI - wristSim.getAngleRads() % (2 * Math.PI)));
-        if (currentControlType == ControlType.kPosition) {
+        if (currentControlType == ControlType.kPosition && DriverStation.isEnabled()) {
             double pidOutput = wristController.calculate(wristSim.getAngleRads(), Units.rotationsToRadians(targetReference / 15));
             wristMotor.set(pidOutput);
         }
 
-        SmartDashboard.putNumber("Wrist Position", Units.radiansToRotations(wristEncoder.getDistance()/15));
+        SmartDashboard.putNumber("Wrist Position", getPosition());
+        SmartDashboard.putNumber("Wrist Speed", getVelocity());
 
         RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(wristSim.getCurrentDrawAmps()));
     }
@@ -101,18 +103,16 @@ public class WristSim extends SubsystemBase implements WristIO {
 
     @Override
     public void setEncoderPosition(double position) {
-        // Converts from wrist angle (rad) to motor rotations assuming 25:1 gear ratio
         wristSim.setState(position*2*Math.PI, 0);
     }
 
     @Override
     public double getVelocity() {
-        return wristSim.getVelocityRadPerSec();
+        return Units.radiansPerSecondToRotationsPerMinute(wristSim.getVelocityRadPerSec()) * 10;
     }
 
     @Override
     public double getPosition() {      
-        // Converts from wrist angle (rad) to motor rotations assuming 25:1 gear ratio  
         return Units.radiansToRotations(wristEncoder.getDistance()*15);
     }
 

@@ -87,8 +87,10 @@ public class DriveSubsystem extends SubsystemBase {
   private double gyroOffset = 0.0;
 
   private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
-  private static Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(10));
-  private static Matrix<N3, N1> stdevsMat = new Matrix<>(visionMeasurementStdDevs.getStorage());
+  private static Vector<N3> LLStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(10));
+  private static Matrix<N3, N1> LLstdevsMat = new Matrix<>(LLStdDevs.getStorage());
+  private static Vector<N3> ArduStdDevs = VecBuilder.fill(0.2, 0.2, Units.degreesToRadians(10));
+  private static Matrix<N3, N1> ArdustdevsMat = new Matrix<>(ArduStdDevs.getStorage());
   private final PoseEstimator poseEstimator;
   private final Field2d field2d = new Field2d();
   private final StructArrayPublisher<SwerveModuleState> publisher;
@@ -366,21 +368,21 @@ public class DriveSubsystem extends SubsystemBase {
     if (Vision.getResult1() != null){
       Optional<EstimatedRobotPose> visionBotPose1 = Vision.getEstimatedGlobalPoseCam1();
       if (visionBotPose1.isPresent()){
-        poseEstimator.addVisionData(List.of(visionBotPose1.get()), stdevsMat);
+        poseEstimator.addVisionData(List.of(visionBotPose1.get()), LLstdevsMat);
         field2d.getObject("Camera1 Pose Guess").setPose(visionBotPose1.get().estimatedPose.toPose2d());
       }
     }
     if (Vision.getResult2() != null){
       Optional<EstimatedRobotPose> visionBotPose2 = Vision.getEstimatedGlobalPoseCam2();
       if (visionBotPose2.isPresent()){
-        // poseEstimator.addVisionData(List.of(visionBotPose2.get()), stdevsMat);
+        // poseEstimator.addVisionData(List.of(visionBotPose2.get()), ArdustdevsMat);
         field2d.getObject("Camera2 Pose Guess").setPose(visionBotPose2.get().estimatedPose.toPose2d());
       }
     }
     if (Vision.getResult3() != null){
       Optional<EstimatedRobotPose> visionBotPose3 = Vision.getEstimatedGlobalPoseCam3();
       if (visionBotPose3.isPresent()){
-        // poseEstimator.addVisionData(List.of(visionBotPose3.get()), stdevsMat);
+        // poseEstimator.addVisionData(List.of(visionBotPose3.get()), ArdustdevsMat);
         field2d.getObject("Camera3 Pose Guess").setPose(visionBotPose3.get().estimatedPose.toPose2d());
       }
     }

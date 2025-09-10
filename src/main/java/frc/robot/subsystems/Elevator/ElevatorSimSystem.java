@@ -8,6 +8,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
@@ -25,7 +26,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ElevatorConstants;
 
 public class ElevatorSimSystem extends SubsystemBase implements ElevatorIO {
-    ProfiledPIDController elevatorController = new ProfiledPIDController(4, 0, 0.2, new TrapezoidProfile.Constraints(32, 32));
+    ProfiledPIDController elevatorController = new ProfiledPIDController(4, 0, 0.2, new TrapezoidProfile.Constraints(48, 32));
     DCMotor elevatorGearbox = DCMotor.getNEO(2);
     PWMSparkMax elevatorMotor = new PWMSparkMax(10);
     Encoder elevatorEncoder = new Encoder(3, 4);
@@ -35,7 +36,7 @@ public class ElevatorSimSystem extends SubsystemBase implements ElevatorIO {
     double targetReference;
     ControlType currentControlType;
 
-    private final ElevatorSim elevatorSim = new ElevatorSim(elevatorGearbox, 5, Units.lbsToKilograms(20), Units.inchesToMeters(1), 0, Units.inchesToMeters(70), true, 0);
+    private final ElevatorSim elevatorSim = new ElevatorSim(elevatorGearbox, 5, Units.lbsToKilograms(30), Units.inchesToMeters(1), 0, Units.inchesToMeters(70), true, 0);
     private final Mechanism2d elevatorSimMechanism = new Mechanism2d(Units.inchesToMeters(30), Units.inchesToMeters(80));
     private final MechanismRoot2d elevatorRoot = elevatorSimMechanism.getRoot("Base", Units.inchesToMeters(25), Units.inchesToMeters(8));
     public final MechanismLigament2d elevatorLigament = elevatorRoot.append(new MechanismLigament2d("Elevator", Units.inchesToMeters(10), 90, 10, new Color8Bit(Color.kBlue)));
@@ -60,7 +61,7 @@ public class ElevatorSimSystem extends SubsystemBase implements ElevatorIO {
         elevatorSim.update(0.02);
         elevatorEncoderSim.setDistance(elevatorSim.getPositionMeters());
         elevatorLigament.setLength(elevatorSim.getPositionMeters() * 0.7 + 0.3);
-        if (currentControlType == ControlType.kPosition) {
+        if (currentControlType == ControlType.kPosition && DriverStation.isEnabled()) {
             double pidOutput = elevatorController.calculate(elevatorEncoder.getDistance() * 5, targetReference * (8.88/22));
             elevatorMotor.set(pidOutput);
         }
