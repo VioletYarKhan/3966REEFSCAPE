@@ -6,10 +6,14 @@ package frc.robot.commands;
 
 
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import java.util.function.IntSupplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.GryphonLib.PositionCalculations;
 import frc.robot.subsystems.DriveSubsystem;
@@ -17,6 +21,7 @@ import frc.robot.subsystems.DriveSubsystem;
 public class AlignToReefFieldRelative extends SequentialCommandGroup {
   private int tagID = -1;
   private Command pathCommand;
+  private Command PIDAdjust;
   private Pose2d goalPose;
 
   public AlignToReefFieldRelative(boolean isLeftScore, DriveSubsystem drivebase, IntSupplier level) {
@@ -24,7 +29,13 @@ public class AlignToReefFieldRelative extends SequentialCommandGroup {
     tagID = PositionCalculations.closestReefTag(drivebase::getCurrentPose);
     goalPose = PositionCalculations.getAlignmentReefPose(tagID, level.getAsInt(), isLeftScore);
     pathCommand = drivebase.PathToPose(goalPose, 0.0);
+    PIDAdjust = PositionPIDCommand.generateCommand(drivebase, goalPose, Seconds.of(2));
     addCommands(pathCommand);
+    if (level.getAsInt() == 4){
+      addCommands(new RunCommand(()->drivebase.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), drivebase).withTimeout(0.1));
+    } else {
+      addCommands(PIDAdjust);
+    }
   }
 }
 

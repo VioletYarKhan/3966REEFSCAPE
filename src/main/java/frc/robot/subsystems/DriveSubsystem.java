@@ -4,8 +4,8 @@
 
 package frc.robot.subsystems;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
@@ -15,10 +15,15 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.IdealStartingState;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.Waypoint;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -27,6 +32,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -41,14 +47,12 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
 import frc.robot.Vision;
+import frc.GryphonLib.MovementCalculations;
 import frc.GryphonLib.PositionCalculations;
 import frc.littletonUtils.PoseEstimator;
-import frc.littletonUtils.PoseEstimator.TimestampedVisionUpdate;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.commands.TrajectoryGeneration;
-import frc.littletonUtils.PoseEstimator;
-import frc.littletonUtils.PoseEstimator.TimestampedVisionUpdate;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -83,10 +87,10 @@ public class DriveSubsystem extends SubsystemBase {
   private double gyroOffset = 0.0;
 
   private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
-  private static Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(1, 1, Units.degreesToRadians(30));
+  private static Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(10));
+  private static Matrix<N3, N1> stdevsMat = new Matrix<>(visionMeasurementStdDevs.getStorage());
   private final PoseEstimator poseEstimator;
   private final Field2d field2d = new Field2d();
-  private double previousPipelineTimestamp = 0;
   private final StructArrayPublisher<SwerveModuleState> publisher;
   private double currentTimestamp = Timer.getTimestamp();
 
@@ -165,12 +169,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public void driveRobotRelativeChassis(ChassisSpeeds speeds) {
-    var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
-        new ChassisSpeeds(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond));
-    m_frontLeft.setDesiredState(swerveModuleStates[0]);
-    m_frontRight.setDesiredState(swerveModuleStates[1]);
-    m_rearLeft.setDesiredState(swerveModuleStates[2]);
-    m_rearRight.setDesiredState(swerveModuleStates[3]);
+    drive(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, false);
   }
 
   /**
@@ -309,13 +308,28 @@ public class DriveSubsystem extends SubsystemBase {
     driveRobotRelativeChassis(new ChassisSpeeds());
   }
 
+  public PathPlannerPath getPathFromWaypoint(Pose2d waypoint) {
+    List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
+        getCurrentPose(),
+        waypoint
+    );
+    PathPlannerPath path = new PathPlannerPath(
+      waypoints, 
+      AutoConstants.constraints,
+      new IdealStartingState(MovementCalculations.getVelocityMagnitude(getCurrentSpeeds()), getRotation()), 
+      new GoalEndState(0.0, waypoint.getRotation())
+    );
+    return path;
+  }
+
+  public Command followPath(PathPlannerPath path){
+    return AutoBuilder.followPath(path);
+  }
+
   public Command PathToPose(Pose2d goalPose, double endSpeed){
     field2d.getObject("Goal Pose").setPose(goalPose);
-    ArrayList<Pose2d> waypoints = new ArrayList<Pose2d>();
-    waypoints.add(getCurrentPose());
-    waypoints.add(goalPose);
+    List<Pose2d> waypoints = List.of(getCurrentPose(), goalPose);
     field2d.getObject("Current Trajectory").setPoses(waypoints);
-    
 
     Command pathfindingCommand = AutoBuilder.pathfindToPose(
         goalPose,
@@ -334,20 +348,7 @@ public class DriveSubsystem extends SubsystemBase {
       goalPose = PositionCalculations.getAlignmentReefPose(goalTag, level, isLeftScore);
     }
 
-    field2d.getObject("Goal Pose").setPose(goalPose);
-    ArrayList<Pose2d> waypoints = new ArrayList<Pose2d>();
-    waypoints.add(getCurrentPose());
-    waypoints.add(goalPose);
-    field2d.getObject("Current Trajectory").setPoses(waypoints);
-    
-
-    Command pathfindingCommand = AutoBuilder.pathfindToPose(
-        goalPose,
-        AutoConstants.constraints,
-        0.0 // Goal end velocity in meters/sec
-    );
-
-    return new ParallelRaceGroup(pathfindingCommand, new TrajectoryGeneration(this, goalPose, field2d));
+    return PathToPose(goalPose, 0);
   }
 
   public Command AlignToTagFar(int goalTag){
@@ -361,18 +362,29 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
-    // Update pose estimator with the best visible target
-    var pipelineResult = Vision.getResult();
-    try{
-      var resultTimestamp = pipelineResult.getTimestampSeconds();
-      if (resultTimestamp != previousPipelineTimestamp && pipelineResult.hasTargets()) {
-        if (pipelineResult.getBestTarget().getBestCameraToTarget().getTranslation().getNorm() < 2.5){
-          EstimatedRobotPose botPose = Vision.getEstimatedGlobalPose(getCurrentPose(), pipelineResult);
-          poseEstimator.addVisionData(List.of(new TimestampedVisionUpdate(botPose.timestampSeconds, botPose.estimatedPose.toPose2d(), visionMeasurementStdDevs)));
-        }
+  public void periodic() { 
+    if (Vision.getResult1() != null){
+      Optional<EstimatedRobotPose> visionBotPose1 = Vision.getEstimatedGlobalPoseCam1();
+      if (visionBotPose1.isPresent()){
+        poseEstimator.addVisionData(List.of(visionBotPose1.get()), stdevsMat);
+        field2d.getObject("Camera1 Pose Guess").setPose(visionBotPose1.get().estimatedPose.toPose2d());
       }
-    } catch(Exception e){}
+    }
+    if (Vision.getResult2() != null){
+      Optional<EstimatedRobotPose> visionBotPose2 = Vision.getEstimatedGlobalPoseCam2();
+      if (visionBotPose2.isPresent()){
+        // poseEstimator.addVisionData(List.of(visionBotPose2.get()), stdevsMat);
+        field2d.getObject("Camera2 Pose Guess").setPose(visionBotPose2.get().estimatedPose.toPose2d());
+      }
+    }
+    if (Vision.getResult3() != null){
+      Optional<EstimatedRobotPose> visionBotPose3 = Vision.getEstimatedGlobalPoseCam3();
+      if (visionBotPose3.isPresent()){
+        // poseEstimator.addVisionData(List.of(visionBotPose3.get()), stdevsMat);
+        field2d.getObject("Camera3 Pose Guess").setPose(visionBotPose3.get().estimatedPose.toPose2d());
+      }
+    }
+    
     // Update pose estimator with drivetrain sensors
     poseEstimator.addDriveData(
       Timer.getTimestamp(),
@@ -382,6 +394,8 @@ public class DriveSubsystem extends SubsystemBase {
       field2d.setRobotPose(getCurrentPose());
       publisher.set(getStates());
     SmartDashboard.putNumber("Distance to Goal", getDistanceToGoal());
+    SmartDashboard.putData("Field", field2d);
+    SmartDashboard.putNumber("Current Speed", MovementCalculations.getVelocityMagnitude(getCurrentSpeeds()).magnitude());
     currentTimestamp = Timer.getTimestamp();
   }
 

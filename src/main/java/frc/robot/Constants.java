@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -115,10 +117,10 @@ public final class Constants {
     // Constraint for the motion profiled robot angle controller
     public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
-    
-    public static final PathConstraints constraints = new PathConstraints(
-        4, 2.5,
-        Units.degreesToRadians(360), Units.degreesToRadians(720));
+
+      public static final PathConstraints constraints = new PathConstraints(
+          4, 3,
+          Units.degreesToRadians(360), Units.degreesToRadians(720));
 
     public static final Transform3d leftBranchCoral = new Transform3d(0.381, 0.381, 0, new Rotation3d());
     public static final Transform3d rightBranchCoral = new Transform3d(0.381, -0.381, 0, new Rotation3d());
@@ -128,6 +130,16 @@ public final class Constants {
       new Pose2d(7.260267857142857, 4.06417, new Rotation2d(Math.PI)), // S2
       new Pose2d(7.111, 2.521, new Rotation2d((3*Math.PI)/4))  // S3 
     };
+
+    public static final PPHolonomicDriveController kAutoAlignPIDController = new PPHolonomicDriveController(
+      new PIDConstants(0.25, 0, 0.02),
+      new PIDConstants(0.5, 0, 0.01)
+    );
+
+    public static final PPHolonomicDriveController kSlowAutoAlignPIDController = new PPHolonomicDriveController(
+      new PIDConstants(0.15, 0, 0.02),
+      new PIDConstants(0.3, 0, 0.01)
+    );
   }
 
   public static final class NeoMotorConstants {
@@ -135,9 +147,9 @@ public final class Constants {
   }
 
   public static final class ElevatorConstants {
-    public static final double L1Height = 2;
-    public static final double L2Height = 11;
-    public static final double L3Height = 17.9;
+    public static final double L1Height = 3;
+    public static final double L2Height = 12.3;
+    public static final double L3Height = 19;
     public static final double L4Height = 23;
     public static final double IntakeHeight = 0.5;
   }
@@ -145,7 +157,7 @@ public final class Constants {
   public static final class WristConstants {
     public static final double L1Angle = 7.4;
     public static final double L2_3Angle = 9.7;
-    public static final double L4Angle = 5;
+    public static final double L4Angle = 4.4;
     public static final double IntakeAngle = 0;
   }
 
@@ -156,14 +168,31 @@ public final class Constants {
 
 
   public static class VisionConstants {
-    public static final String kCameraName = "gccamera";
+    public static final String kCameraName1 = "limelight";
+    public static final String kCameraName2 = "ArduR";
+    public static final String kCameraName3 = "ArduL";
     // Cam mounted facing forward, half a meter forward of center, half a meter up from center,
     // pitched upward.
-    private static final double camPitch = Units.degreesToRadians(-20);
-    private static final double camYaw = Units.degreesToRadians(-2);
-    public static final Transform3d kRobotToCam =
-            new Transform3d(new Translation3d(Units.inchesToMeters(11), -Units.inchesToMeters(0.5), Units.inchesToMeters(7.5)), new Rotation3d(0, camPitch, camYaw));
-    public static final Transform3d kCamToRobot = kRobotToCam.inverse();
+    private static final double camPitch1 = Units.degreesToRadians(-20);
+    private static final double camYaw1 = Units.degreesToRadians(-2);
+    public static final Transform3d kRobotToCam1 =
+            new Transform3d(new Translation3d(Units.inchesToMeters(11), -Units.inchesToMeters(0.5), Units.inchesToMeters(7.5)), new Rotation3d(0, camPitch1, camYaw1));
+    public static final Transform3d kCamToRobot1 = kRobotToCam1.inverse();
+
+    // some of these probably need to be flipped
+    private static final double camPitch2 = Units.degreesToRadians(0);
+    private static final double camYaw2 = -Units.degreesToRadians(15);
+    public static final Transform3d kRobotToCam2 =
+            new Transform3d(new Translation3d(Units.inchesToMeters(5.75), Units.inchesToMeters(12), Units.inchesToMeters(18)), new Rotation3d(180, camPitch2, camYaw2));
+    public static final Transform3d kCamToRobot2 = kRobotToCam2.inverse();
+
+
+    private static final double camPitch3 = Units.degreesToRadians(0);
+    private static final double camYaw3 = Units.degreesToRadians(15);
+    public static final Transform3d kRobotToCam3 =
+            new Transform3d(new Translation3d(Units.inchesToMeters(5.75), -Units.inchesToMeters(12), Units.inchesToMeters(18)), new Rotation3d(Math.PI, camPitch3, camYaw3));
+    public static final Transform3d kCamToRobot3 = kRobotToCam3.inverse();
+
 
     // The layout of the AprilTags on the field
     public static final AprilTagFieldLayout kTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
@@ -200,7 +229,7 @@ public final class Constants {
     public static final int[] RED_HUMAN = {1, 2};
 
 
-    public static final double leftReefFieldAlignment = 0.21;
+    public static final double leftReefFieldAlignment = 0.25;
     public static final double rightReefFieldAlignment = 0.1;
   }
 
