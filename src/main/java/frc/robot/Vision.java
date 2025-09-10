@@ -110,19 +110,28 @@ public class Vision extends SubsystemBase {
     }
 
     public static Optional<EstimatedRobotPose> getEstimatedGlobalPoseCam1() {
-        var update = poseEstimator1.update(result1);
+        Optional<EstimatedRobotPose> update = Optional.empty();
+        if (result1.hasTargets() && result1.getBestTarget().getPoseAmbiguity() < 0.1){
+            update = poseEstimator1.update(result1);
+        }
 
         return update;
     }
 
     public static Optional<EstimatedRobotPose> getEstimatedGlobalPoseCam2() {
-        var update = poseEstimator2.update(result2);
+        Optional<EstimatedRobotPose> update = Optional.empty();
+        if (result2.hasTargets() && result2.getBestTarget().getPoseAmbiguity() < 0.1){
+            update = poseEstimator2.update(result2);
+        }
 
         return update;
     }
 
     public static Optional<EstimatedRobotPose> getEstimatedGlobalPoseCam3() {
-        var update = poseEstimator3.update(result3);
+        Optional<EstimatedRobotPose> update = Optional.empty();
+        if (result3.hasTargets() && result3.getBestTarget().getPoseAmbiguity() < 0.1){
+            update = poseEstimator3.update(result3);
+        }
 
         return update;
     }

@@ -45,6 +45,7 @@ public class PositionPIDCommand extends Command{
         this.drivetrain = drivetrain;
         this.goalPose = goalPose;
         this.fast = fast;
+        addRequirements(drivetrain);
     }
 
     public static Command generateCommand(DriveSubsystem swerve, Pose2d goalPose, Time timeout){
@@ -87,6 +88,7 @@ public class PositionPIDCommand extends Command{
 
     @Override
     public void end(boolean interrupted) {
+        drivetrain.setX();
         timer.stop();
 
         Pose2d diff = drivetrain.getCurrentPose().relativeTo(goalPose);
@@ -111,9 +113,9 @@ public class PositionPIDCommand extends Command{
             1.0
         );
 
-        var position = diff.getTranslation().getNorm() < Centimeter.of(10).in(Meters);
+        var position = diff.getTranslation().getNorm() < Centimeter.of(2).in(Meters);
 
-        var speed = MovementCalculations.getVelocityMagnitude(drivetrain.getCurrentSpeeds()).magnitude() < InchesPerSecond.of(2).in(MetersPerSecond);
+        var speed = MovementCalculations.getVelocityMagnitude(drivetrain.getCurrentSpeeds()).magnitude() < InchesPerSecond.of(1).in(MetersPerSecond);
 
         // System.out.println("end trigger conditions R: "+ rotation + "\tP: " + position + "\tS: " + speed);
         

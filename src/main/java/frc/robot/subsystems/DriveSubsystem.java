@@ -373,14 +373,14 @@ public class DriveSubsystem extends SubsystemBase {
     if (Vision.getResult2() != null){
       Optional<EstimatedRobotPose> visionBotPose2 = Vision.getEstimatedGlobalPoseCam2();
       if (visionBotPose2.isPresent()){
-        poseEstimator.addVisionData(List.of(visionBotPose2.get()), stdevsMat);
+        // poseEstimator.addVisionData(List.of(visionBotPose2.get()), stdevsMat);
         field2d.getObject("Camera2 Pose Guess").setPose(visionBotPose2.get().estimatedPose.toPose2d());
       }
     }
     if (Vision.getResult3() != null){
       Optional<EstimatedRobotPose> visionBotPose3 = Vision.getEstimatedGlobalPoseCam3();
       if (visionBotPose3.isPresent()){
-        poseEstimator.addVisionData(List.of(visionBotPose3.get()), stdevsMat);
+        // poseEstimator.addVisionData(List.of(visionBotPose3.get()), stdevsMat);
         field2d.getObject("Camera3 Pose Guess").setPose(visionBotPose3.get().estimatedPose.toPose2d());
       }
     }

@@ -12,7 +12,9 @@ import java.util.function.BooleanSupplier;
 import java.util.function.IntSupplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.GryphonLib.PositionCalculations;
 import frc.robot.subsystems.DriveSubsystem;
@@ -27,15 +29,15 @@ public class AlignToReefFieldRelative extends SequentialCommandGroup {
   public AlignToReefFieldRelative(BooleanSupplier isLeftScore, DriveSubsystem drivebase, IntSupplier level, ElevatorIO elevator) {
     tagID = PositionCalculations.closestReefTag(drivebase::getCurrentPose);
     goalPose = PositionCalculations.getAlignmentReefPose(tagID, level.getAsInt(), isLeftScore.getAsBoolean());
-    pathCommand = drivebase.PathToPose(goalPose, -0.1).until(()->drivebase.getDistanceToGoal() < 0.5);
+    pathCommand = drivebase.PathToPose(goalPose, 0.0);
     if (level.getAsInt() == 4){
       pidAlign = PositionPIDCommand.generateCommand(drivebase, goalPose, Seconds.of(2)).until(()->elevator.atTarget(8))
-      .andThen(PositionPIDCommand.generateCommand(drivebase, PositionCalculations.getFullL4Align(tagID, isLeftScore.getAsBoolean()), Seconds.of(1), false));
+      .andThen(PositionPIDCommand.generateCommand(drivebase, PositionCalculations.getFullL4Align(tagID, isLeftScore.getAsBoolean()), Seconds.of(1), false))
+      .andThen(new RunCommand(()->drivebase.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), drivebase).withTimeout(0.1));
     } else {
       pidAlign = PositionPIDCommand.generateCommand(drivebase, goalPose, Seconds.of(2));
     }
-    
-    addCommands(pathCommand, pidAlign);
+    addCommands(pidAlign);
   }
 
   public AlignToReefFieldRelative(BooleanSupplier isLeftScore, DriveSubsystem drivebase, IntSupplier level, IntSupplier tag, ElevatorIO elevator) {

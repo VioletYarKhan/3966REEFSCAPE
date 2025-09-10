@@ -211,9 +211,15 @@ public class RobotContainer {
   public Command parseAutoCommand(){
     try {
       SequentialCommandGroup autoRoutine = new SequentialCommandGroup();
+      Alliance alliance;
     
-    int[] reefTags = DriverStation.getAlliance().get() == Alliance.Blue ? AlignmentConstants.BLUE_REEF : AlignmentConstants.RED_REEF;
-    int[] stationTags = DriverStation.getAlliance().get() == Alliance.Blue ? AlignmentConstants.BLUE_HUMAN : AlignmentConstants.RED_HUMAN;
+      if (DriverStation.getAlliance().isPresent()){
+        alliance = DriverStation.getAlliance().get();
+      } else {
+        alliance = Alliance.Red;
+      }
+    int[] reefTags = alliance == Alliance.Blue ? AlignmentConstants.BLUE_REEF : AlignmentConstants.RED_REEF;
+    int[] stationTags = alliance == Alliance.Blue ? AlignmentConstants.BLUE_HUMAN : AlignmentConstants.RED_HUMAN;
 
     String autoString = SmartDashboard.getString("Auto Code", "1S-13L-1C-63L-1C-63R");
     
@@ -224,11 +230,23 @@ public class RobotContainer {
     } catch (IndexOutOfBoundsException e){
       return new SequentialCommandGroup();
     }
-    
+    int startPos = setPositionCommand.getPosition();
+    Pose2d startPoseHelper = AllianceFlipUtil.apply(AutoConstants.startPositions[startPos]);
+    if (alliance == Alliance.Red){
+      if (startPos == 2){
+        startPoseHelper = AllianceFlipUtil.apply(AutoConstants.startPositions[0]);
+      }
+      if (startPos == 0){
+        startPoseHelper = AllianceFlipUtil.apply(AutoConstants.startPositions[2]);
+      }
+    }
+
+    Pose2d actualStart = startPoseHelper;
+
     autoRoutine.addCommands(
-      new InstantCommand(()->m_robotDrive.setHeading(new Rotation2d(Math.PI).minus(AutoConstants.startPositions[setPositionCommand.getPosition()].getRotation()).getDegrees()), m_robotDrive),
+      new InstantCommand(()->m_robotDrive.setHeading(new Rotation2d(Math.PI).minus(actualStart.getRotation()).getDegrees()), m_robotDrive),
       new InstantCommand(()->m_robotDrive.setCurrentPose(
-        AllianceFlipUtil.apply(AutoConstants.startPositions[setPositionCommand.getPosition()])), m_robotDrive)
+        actualStart), m_robotDrive)
     );
     commands.remove(0);
     // Default is placeholder
@@ -240,7 +258,7 @@ public class RobotContainer {
         Parser.PutCoralCommand putCmd = (Parser.PutCoralCommand) fullCommand;
           
 
-          Command pathCommand = new AlignToReefFieldRelative(putCmd::getLeft, m_robotDrive, putCmd::getLevel, ()->reefTags[putCmd.getSide() - 1], m_elevator);
+          Command pathCommand = m_robotDrive.AlignToTagFar(reefTags[putCmd.getSide() - 1]);
           // Build the scoring sequence that will run concurrently with the path command.
           Command subsystemMovement = new MoveToScoringPosition(putCmd.getLevel(), m_wrist, m_elevator);
           // Create a sequential group:

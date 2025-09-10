@@ -117,12 +117,8 @@ public final class Constants {
     // Constraint for the motion profiled robot angle controller
     public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
-    
-    public static final PathConstraints constraints = new PathConstraints(
-        2, 1,
-        Units.degreesToRadians(360), Units.degreesToRadians(720));
-      
-      public static final PathConstraints REAL_CONSTRAINTS = new PathConstraints(
+
+      public static final PathConstraints constraints = new PathConstraints(
           4, 3,
           Units.degreesToRadians(360), Units.degreesToRadians(720));
 
@@ -150,9 +146,9 @@ public final class Constants {
   }
 
   public static final class ElevatorConstants {
-    public static final double L1Height = 6;
+    public static final double L1Height = 3;
     public static final double L2Height = 12.3;
-    public static final double L3Height = 18.5;
+    public static final double L3Height = 19;
     public static final double L4Height = 23;
     public static final double IntakeHeight = 0.5;
   }
@@ -160,7 +156,7 @@ public final class Constants {
   public static final class WristConstants {
     public static final double L1Angle = 7.4;
     public static final double L2_3Angle = 9.7;
-    public static final double L4Angle = 4.5;
+    public static final double L4Angle = 4.4;
     public static final double IntakeAngle = 0;
   }
 
@@ -232,7 +228,7 @@ public final class Constants {
     public static final int[] RED_HUMAN = {1, 2};
 
 
-    public static final double leftReefFieldAlignment = 0.21;
+    public static final double leftReefFieldAlignment = 0.25;
     public static final double rightReefFieldAlignment = 0.1;
   }
 
