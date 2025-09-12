@@ -245,7 +245,7 @@ public class RobotContainer {
     Pose2d actualStart = startPoseHelper;
 
     autoRoutine.addCommands(
-      new InstantCommand(()->m_robotDrive.setHeading(actualStart.getRotation().getDegrees()), m_robotDrive),
+      new InstantCommand(()->m_robotDrive.setHeading(180), m_robotDrive),
       new InstantCommand(()->m_robotDrive.setCurrentPose(
         actualStart), m_robotDrive)
     );
