@@ -119,7 +119,7 @@ public final class Constants {
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
 
       public static final PathConstraints constraints = new PathConstraints(
-          4, 3,
+          2, 2,
           Units.degreesToRadians(360), Units.degreesToRadians(720));
 
     public static final Transform3d leftBranchCoral = new Transform3d(0.381, 0.381, 0, new Rotation3d());
@@ -157,7 +157,7 @@ public final class Constants {
   public static final class WristConstants {
     public static final double L1Angle = 7.4;
     public static final double L2_3Angle = 9.7;
-    public static final double L4Angle = 4.4;
+    public static final double L4Angle = 4.5;
     public static final double IntakeAngle = 0;
   }
 
@@ -229,7 +229,7 @@ public final class Constants {
     public static final int[] RED_HUMAN = {1, 2};
 
 
-    public static final double leftReefFieldAlignment = 0.21;
+    public static final double leftReefFieldAlignment = 0.25;
     public static final double rightReefFieldAlignment = 0.18;
   }
 
