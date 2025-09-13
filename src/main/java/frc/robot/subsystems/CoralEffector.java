@@ -97,7 +97,7 @@ public class CoralEffector extends SubsystemBase {
             set(-0.15);
         }
         else {
-            set(-0.12);
+            set(-0.1);
         }
     }
     public void intake(){

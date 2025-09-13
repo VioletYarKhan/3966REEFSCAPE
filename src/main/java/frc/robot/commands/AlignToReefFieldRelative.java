@@ -30,11 +30,11 @@ public class AlignToReefFieldRelative extends SequentialCommandGroup {
     goalPose = PositionCalculations.getAlignmentReefPose(tagID, level.getAsInt(), isLeftScore);
     PIDAdjust = PositionPIDCommand.generateCommand(drivebase, goalPose, Seconds.of(2));
     if (level.getAsInt() == 4){
-      PIDAdjust = PositionPIDCommand.generateCommand(drivebase, goalPose, Seconds.of(1));
+      PIDAdjust = PositionPIDCommand.generateCommand(drivebase, goalPose, Seconds.of(1.5)); 
     }
     addCommands(PIDAdjust);
     if (level.getAsInt() == 4){
-      addCommands(new RunCommand(()->drivebase.driveRobotRelativeChassis(new ChassisSpeeds(0.1, 0, 0)), drivebase).withTimeout(0.5));
+      addCommands(new RunCommand(()->drivebase.driveRobotRelativeChassis(new ChassisSpeeds(0.2, 0, 0)), drivebase).withTimeout(0.5));
     }
   }
 }

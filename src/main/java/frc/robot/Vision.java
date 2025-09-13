@@ -116,7 +116,7 @@ public class Vision extends SubsystemBase {
         if (result == null || !result.hasTargets()){
             return Optional.empty();
         }
-        if (result.getBestTarget().bestCameraToTarget.getTranslation().getNorm() > 1.5){
+        if (result.getBestTarget().bestCameraToTarget.getTranslation().getNorm() > 2){
             return Optional.empty();
         }
         var update = poseEstimator1.update(result);

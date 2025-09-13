@@ -119,8 +119,8 @@ public final class Constants {
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
 
         public static final PathConstraints constraints = new PathConstraints(
-          2, 2,
-          Units.degreesToRadians(360), Units.degreesToRadians(720));
+          1.5, 1,
+          Units.degreesToRadians(360), Units.degreesToRadians(240));
 
     public static final Transform3d leftBranchCoral = new Transform3d(0.381, 0.381, 0, new Rotation3d());
     public static final Transform3d rightBranchCoral = new Transform3d(0.381, -0.381, 0, new Rotation3d());
@@ -130,6 +130,11 @@ public final class Constants {
       new Pose2d(7.260267857142857, 4.06417, new Rotation2d(Math.PI)), // S2
       new Pose2d(7.111, 2.521, new Rotation2d(Math.PI))  // S3 
     };
+
+    public static final PPHolonomicDriveController kFastAutoAlignPIDController = new PPHolonomicDriveController(
+      new PIDConstants(0.4, 0, 0.1),
+      new PIDConstants(0.5, 0, 0.01)
+    );
 
     public static final PPHolonomicDriveController kAutoAlignPIDController = new PPHolonomicDriveController(
       new PIDConstants(0.25, 0, 0.02),
@@ -147,7 +152,7 @@ public final class Constants {
   }
 
   public static final class ElevatorConstants {
-    public static final double L1Height = 3;
+    public static final double L1Height = 2.3;
     public static final double L2Height = 12.3;
     public static final double L3Height = 19;
     public static final double L4Height = 23;
@@ -229,8 +234,8 @@ public final class Constants {
     public static final int[] RED_HUMAN = {1, 2};
 
 
-    public static final double leftReefFieldAlignment = 0.25;
-    public static final double rightReefFieldAlignment = 0.18;
+    public static final double leftReefFieldAlignment = 0.21;
+    public static final double rightReefFieldAlignment = 0.16;
   }
 
   public static class BlinkinConstants{

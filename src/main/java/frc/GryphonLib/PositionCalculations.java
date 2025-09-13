@@ -35,7 +35,7 @@ public class PositionCalculations {
                 transform = new Transform2d(0.5, transform.getY(), new Rotation2d());
             }
         } else {
-            transform = new Transform2d(0.6, 0, new Rotation2d(isLeftScore ? (Math.PI/6)-(Math.PI/64): (-Math.PI/6)+(Math.PI/64)));
+            transform = new Transform2d(0.5, 0, new Rotation2d(isLeftScore ? (Math.PI/6)-(Math.PI/48): (-Math.PI/6)+(Math.PI/48)));
         }
 
         Pose2d tagPose = kTagLayout.getTagPose(tag).get().toPose2d();

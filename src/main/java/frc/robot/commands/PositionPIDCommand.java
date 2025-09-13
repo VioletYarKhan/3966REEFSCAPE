@@ -30,7 +30,7 @@ public class PositionPIDCommand extends Command{
     public final Pose2d goalPose;
     private PPHolonomicDriveController mDriveController = AutoConstants.kAutoAlignPIDController;
     private PPHolonomicDriveController m_slowDriveController = AutoConstants.kSlowAutoAlignPIDController;
-    private boolean fast;
+    private int fast;
 
     private final Timer timer = new Timer();
 
@@ -41,7 +41,7 @@ public class PositionPIDCommand extends Command{
 
 
 
-    private PositionPIDCommand(DriveSubsystem drivetrain, Pose2d goalPose, boolean fast) {
+    private PositionPIDCommand(DriveSubsystem drivetrain, Pose2d goalPose, int fast) {
         this.drivetrain = drivetrain;
         this.goalPose = goalPose;
         this.fast = fast;
@@ -49,13 +49,13 @@ public class PositionPIDCommand extends Command{
     }
 
     public static Command generateCommand(DriveSubsystem swerve, Pose2d goalPose, Time timeout){
-        return new PositionPIDCommand(swerve, goalPose, true).withTimeout(timeout).finallyDo(() -> {
+        return new PositionPIDCommand(swerve, goalPose, 2).withTimeout(timeout).finallyDo(() -> {
             swerve.driveRobotRelativeChassis(new ChassisSpeeds(0,0,0));
             swerve.setX();
         });
     }
 
-    public static Command generateCommand(DriveSubsystem swerve, Pose2d goalPose, Time timeout, boolean fast){
+    public static Command generateCommand(DriveSubsystem swerve, Pose2d goalPose, Time timeout, int fast){
         return new PositionPIDCommand(swerve, goalPose, fast).withTimeout(timeout).finallyDo(() -> {
             swerve.driveRobotRelativeChassis(new ChassisSpeeds(0,0,0));
             swerve.setX();
@@ -74,7 +74,14 @@ public class PositionPIDCommand extends Command{
         goalState.linearVelocity = 0.0;
         goalState.heading = goalPose.getRotation();
 
-        PPHolonomicDriveController usedController = fast ? mDriveController : m_slowDriveController;
+        PPHolonomicDriveController usedController;
+        if (fast == 3){
+            usedController = AutoConstants.kFastAutoAlignPIDController;
+        } else if (fast == 2){
+            usedController = AutoConstants.kAutoAlignPIDController;
+        } else {
+            usedController = AutoConstants.kSlowAutoAlignPIDController;
+        }
 
         drivetrain.driveRobotRelativeChassis(
             usedController.calculateRobotRelativeSpeeds(

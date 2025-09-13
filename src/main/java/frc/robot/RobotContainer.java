@@ -8,6 +8,7 @@ package frc.robot;
 import frc.GryphonLib.PositionCalculations;
 import frc.littletonUtils.AllianceFlipUtil;
 
+import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.Constants.VisionConstants.kTagLayout;
 
 import java.util.ArrayList;
@@ -47,8 +48,10 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.PositionPIDCommand;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -260,10 +263,11 @@ public class RobotContainer {
 
       if (fullCommand instanceof Parser.PutCoralCommand) {
         Parser.PutCoralCommand putCmd = (Parser.PutCoralCommand) fullCommand;
-          Command pathCommand = m_robotDrive.AlignToTagFar(reefTags[putCmd.getSide() - 1]);
+          // Command pathCommand = PositionPIDCommand.generateCommand(m_robotDrive, PositionCalculations.getStraightOutPose(reefTags[putCmd.getSide() - 1]), Seconds.of(5), 3);
+          Command pathCommand = m_robotDrive.AlignToTagFar(reefTags[putCmd.getSide() - 1]).andThen(new WaitCommand(0.5).alongWith(new RunCommand(()->m_robotDrive.stop(), m_robotDrive).withTimeout(0.2)));
           
           // Build the scoring sequence that will run concurrently with the path command.
-          Command subsystemMovement = new MoveToScoringPosition(putCmd.getLevel(), m_wrist, m_elevator);
+          Command subsystemMovement = new WaitCommand(0.5).andThen(new MoveToScoringPosition(putCmd.getLevel(), m_wrist, m_elevator));
           // Create a sequential group:
           // 1. Run the path command and scoringSequence in parallel.
           // 2. Then run ScoreCoral.
@@ -287,7 +291,8 @@ public class RobotContainer {
         } else if (fullCommand instanceof Parser.GetCoralCommand) {
           Parser.GetCoralCommand getCmd = (Parser.GetCoralCommand) fullCommand;
           Pose2d stationTagPose = kTagLayout.getTagPose(stationTags[getCmd.getStation() - 1]).get().toPose2d();
-          Command pathCommand = m_robotDrive.PathToPose(PositionCalculations.translateCoordinates(stationTagPose, stationTagPose.getRotation().getDegrees(), 0.3), 0.0).andThen(new RunCommand(()->m_robotDrive.stop(), m_robotDrive).withTimeout(0.2));;
+          // Command pathCommand = PositionPIDCommand.generateCommand(m_robotDrive, PositionCalculations.translateCoordinates(stationTagPose, stationTagPose.getRotation().getDegrees(), 0.2), Seconds.of(5), 3);
+          Command pathCommand = m_robotDrive.PathToPose(PositionCalculations.translateCoordinates(stationTagPose, stationTagPose.getRotation().getDegrees(), 0.5), 0.0).andThen(PositionPIDCommand.generateCommand(m_robotDrive, stationTagPose, Seconds.of(2)));
             // For GetCoralCommand, run your intake sequence in parallel with the path command.
             Command intakeSequence = new SequentialCommandGroup(
                 new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand),
