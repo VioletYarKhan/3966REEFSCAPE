@@ -118,7 +118,7 @@ public final class Constants {
     public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
 
-      public static final PathConstraints constraints = new PathConstraints(
+        public static final PathConstraints constraints = new PathConstraints(
           2, 2,
           Units.degreesToRadians(360), Units.degreesToRadians(720));
 

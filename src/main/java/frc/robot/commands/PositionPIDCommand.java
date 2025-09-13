@@ -116,9 +116,9 @@ public class PositionPIDCommand extends Command{
             1.0
         );
 
-        var position = diff.getTranslation().getNorm() < Centimeter.of(2).in(Meters);
+        var position = diff.getTranslation().getNorm() < Centimeter.of(5).in(Meters);
 
-        var speed = MovementCalculations.getVelocityMagnitude(drivetrain.getCurrentSpeeds()).magnitude() < InchesPerSecond.of(1).in(MetersPerSecond);
+        var speed = MovementCalculations.getVelocityMagnitude(drivetrain.getCurrentSpeeds()).magnitude() < InchesPerSecond.of(2).in(MetersPerSecond);
 
         // System.out.println("end trigger conditions R: "+ rotation + "\tP: " + position + "\tS: " + speed);
         

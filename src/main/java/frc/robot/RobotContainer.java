@@ -287,7 +287,7 @@ public class RobotContainer {
         } else if (fullCommand instanceof Parser.GetCoralCommand) {
           Parser.GetCoralCommand getCmd = (Parser.GetCoralCommand) fullCommand;
           Pose2d stationTagPose = kTagLayout.getTagPose(stationTags[getCmd.getStation() - 1]).get().toPose2d();
-          Command pathCommand = m_robotDrive.PathToPose(PositionCalculations.translateCoordinates(stationTagPose, stationTagPose.getRotation().getDegrees(), 0.5), 0.0);
+          Command pathCommand = m_robotDrive.PathToPose(PositionCalculations.translateCoordinates(stationTagPose, stationTagPose.getRotation().getDegrees(), 0.3), 0.0).andThen(new RunCommand(()->m_robotDrive.stop(), m_robotDrive).withTimeout(0.2));;
             // For GetCoralCommand, run your intake sequence in parallel with the path command.
             Command intakeSequence = new SequentialCommandGroup(
                 new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand),

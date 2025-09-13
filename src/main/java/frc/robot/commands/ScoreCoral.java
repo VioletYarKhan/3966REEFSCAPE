@@ -30,8 +30,8 @@ public class ScoreCoral extends SequentialCommandGroup{
                 addCommands(
                     new MoveToScoringPosition(level, wrist, elevator),
                     new MoveCoralToL4Position(level, hand),
-                    PositionPIDCommand.generateCommand(drivetrain, PositionCalculations.getAlignmentReefPose(goalTag, level, left), Seconds.of(2)),
-                    new RunCommand(()->{if (Robot.isReal()) {drivetrain.driveRobotRelativeChassis(new ChassisSpeeds(0.3, 0, 0));} else{drivetrain.stop();}}, drivetrain).withTimeout(0.5),
+                    PositionPIDCommand.generateCommand(drivetrain, PositionCalculations.getAlignmentReefPose(goalTag, level, left), Seconds.of(1.5)),
+                    new RunCommand(()->{if (Robot.isReal()) {drivetrain.driveRobotRelativeChassis(new ChassisSpeeds(0.1, 0, 0));} else{drivetrain.stop();}}, drivetrain).withTimeout(0.2),
                     new WaitCommand(0.3),
                     new MoveToIntakePositions(wrist, elevator, funnel, hand).withTimeout(0.5)
                 );
