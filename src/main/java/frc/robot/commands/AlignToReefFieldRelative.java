@@ -34,7 +34,7 @@ public class AlignToReefFieldRelative extends SequentialCommandGroup {
     }
     addCommands(PIDAdjust);
     if (level.getAsInt() == 4){
-      addCommands(new RunCommand(()->drivebase.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0)), drivebase).withTimeout(0.5));
+      addCommands(new RunCommand(()->drivebase.driveRobotRelativeChassis(new ChassisSpeeds(0.3, 0, 0)), drivebase).withTimeout(0.5));
     }
   }
 }

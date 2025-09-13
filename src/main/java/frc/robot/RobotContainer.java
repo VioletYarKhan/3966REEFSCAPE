@@ -209,19 +209,22 @@ public class RobotContainer {
   public SequentialCommandGroup parseAutoCommand(){
     try {
       SequentialCommandGroup autoRoutine = new SequentialCommandGroup();
+
+      Alliance alliance;
+
+      if (DriverStation.getAlliance().isPresent()){
+        alliance = DriverStation.getAlliance().get();
+      } else {
+        alliance = Alliance.Red;
+      }
     
-    int[] reefTags = DriverStation.getAlliance().get() == Alliance.Blue ? AlignmentConstants.BLUE_REEF : AlignmentConstants.RED_REEF;
-    int[] stationTags = DriverStation.getAlliance().get() == Alliance.Blue ? AlignmentConstants.BLUE_HUMAN : AlignmentConstants.RED_HUMAN;
+    int[] reefTags = alliance == Alliance.Blue ? AlignmentConstants.BLUE_REEF : AlignmentConstants.RED_REEF;
+    int[] stationTags = alliance == Alliance.Blue ? AlignmentConstants.BLUE_HUMAN : AlignmentConstants.RED_HUMAN;
 
     String autoString = SmartDashboard.getString("Auto Code", "1S-13L-1C-63L-1C-63R");
     
-    Alliance alliance;
     
-    if (DriverStation.getAlliance().isPresent()){
-      alliance = DriverStation.getAlliance().get();
-    } else {
-      alliance = Alliance.Red;
-    }
+    
 
     ArrayList<Command> commands = Parser.parse(autoString);
     Parser.SetPositionCommand setPositionCommand;
@@ -245,7 +248,7 @@ public class RobotContainer {
     Pose2d actualStart = startPoseHelper;
 
     autoRoutine.addCommands(
-      new InstantCommand(()->m_robotDrive.setHeading(180), m_robotDrive),
+      new InstantCommand(()->m_robotDrive.setHeading(alliance != Alliance.Red ? 0 : 180), m_robotDrive),
       new InstantCommand(()->m_robotDrive.setCurrentPose(
         actualStart), m_robotDrive)
     );

@@ -7,6 +7,8 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
@@ -109,13 +111,19 @@ public class Vision extends SubsystemBase {
         return 0;
     }
 
-    public static Optional<EstimatedRobotPose> getEstimatedGlobalPoseCam1() {
-        Optional<EstimatedRobotPose> update = Optional.empty();
-        if (result1.hasTargets() && result1.getBestTarget().getPoseAmbiguity() < 0.1){
-            update = poseEstimator1.update(result1);
+    public static Optional<EstimatedRobotPose> getEstimatedGlobalPoseCam1(Pose2d prevEstimatedRobotPose, PhotonPipelineResult result) {
+        poseEstimator1.setReferencePose(prevEstimatedRobotPose);
+        if (result == null || !result.hasTargets()){
+            return Optional.empty();
         }
-
-        return update;
+        if (result.getBestTarget().bestCameraToTarget.getTranslation().getNorm() > 1.5){
+            return Optional.empty();
+        }
+        var update = poseEstimator1.update(result);
+        Pose3d currentPose3d = update.get().estimatedPose;
+        double photonTimestamp = update.get().timestampSeconds;
+        
+        return Optional.of(new EstimatedRobotPose(currentPose3d, photonTimestamp, result.getTargets(), PoseStrategy.CLOSEST_TO_REFERENCE_POSE));
     }
 
     public static Optional<EstimatedRobotPose> getEstimatedGlobalPoseCam2() {

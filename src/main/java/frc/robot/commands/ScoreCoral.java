@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -28,8 +30,8 @@ public class ScoreCoral extends SequentialCommandGroup{
                 addCommands(
                     new MoveToScoringPosition(level, wrist, elevator),
                     new MoveCoralToL4Position(level, hand),
-                    drivetrain.AlignToTag(goalTag, level, left),
-                    new RunCommand(()->{if (Robot.isReal()) {drivetrain.driveRobotRelativeChassis(new ChassisSpeeds(0.4, 0, 0));} else{drivetrain.stop();}}, drivetrain).withTimeout(0.2),
+                    PositionPIDCommand.generateCommand(drivetrain, PositionCalculations.getAlignmentReefPose(goalTag, level, left), Seconds.of(2)),
+                    new RunCommand(()->{if (Robot.isReal()) {drivetrain.driveRobotRelativeChassis(new ChassisSpeeds(0.3, 0, 0));} else{drivetrain.stop();}}, drivetrain).withTimeout(0.5),
                     new WaitCommand(0.3),
                     new MoveToIntakePositions(wrist, elevator, funnel, hand).withTimeout(0.5)
                 );
