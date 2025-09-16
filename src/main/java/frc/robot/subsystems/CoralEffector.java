@@ -93,6 +93,7 @@ public class CoralEffector extends SubsystemBase {
 
 
     public void outtake(IntSupplier currentLevel){
+        SmartDashboard.putBoolean("Done Aligning", false);
         if (currentLevel.getAsInt() != 1){
             set(-0.15);
         }
@@ -101,6 +102,7 @@ public class CoralEffector extends SubsystemBase {
         }
     }
     public void intake(){
+        SmartDashboard.putBoolean("Done Aligning", false);
         set(0.15);
     }
     public void stop(){

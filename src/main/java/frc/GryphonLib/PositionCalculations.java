@@ -47,7 +47,7 @@ public class PositionCalculations {
 
     public static Pose2d getStraightOutPose(int tag){
         Pose2d tagPose = kTagLayout.getTagPose(tag).get().toPose2d();
-        Pose2d goalPose = translateCoordinates(tagPose, tagPose.getRotation().getDegrees(), 1.5);
+        Pose2d goalPose = translateCoordinates(tagPose, tagPose.getRotation().getDegrees(), 1);
 
         return goalPose.transformBy(new Transform2d(0, 0, new Rotation2d(Math.PI)));
     }

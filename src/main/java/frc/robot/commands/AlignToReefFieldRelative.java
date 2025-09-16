@@ -20,7 +20,6 @@ import frc.robot.subsystems.DriveSubsystem;
 
 public class AlignToReefFieldRelative extends SequentialCommandGroup {
   private int tagID = -1;
-  private Command pathCommand;
   private Command PIDAdjust;
   private Pose2d goalPose;
 

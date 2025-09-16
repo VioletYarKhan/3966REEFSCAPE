@@ -119,8 +119,8 @@ public final class Constants {
         kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
 
         public static final PathConstraints constraints = new PathConstraints(
-          1.5, 1,
-          Units.degreesToRadians(360), Units.degreesToRadians(240));
+          3, 2,
+          Units.degreesToRadians(360), Units.degreesToRadians(180));
 
     public static final Transform3d leftBranchCoral = new Transform3d(0.381, 0.381, 0, new Rotation3d());
     public static final Transform3d rightBranchCoral = new Transform3d(0.381, -0.381, 0, new Rotation3d());
@@ -132,12 +132,12 @@ public final class Constants {
     };
 
     public static final PPHolonomicDriveController kFastAutoAlignPIDController = new PPHolonomicDriveController(
-      new PIDConstants(0.4, 0, 0.1),
+      new PIDConstants(0.7, 0, 0.1),
       new PIDConstants(0.5, 0, 0.01)
     );
 
     public static final PPHolonomicDriveController kAutoAlignPIDController = new PPHolonomicDriveController(
-      new PIDConstants(0.25, 0, 0.02),
+      new PIDConstants(0.4, 0, 0.1),
       new PIDConstants(0.5, 0, 0.01)
     );
 
@@ -188,14 +188,14 @@ public final class Constants {
     private static final double camPitch2 = Units.degreesToRadians(0);
     private static final double camYaw2 = -Units.degreesToRadians(15);
     public static final Transform3d kRobotToCam2 =
-            new Transform3d(new Translation3d(Units.inchesToMeters(5.75), Units.inchesToMeters(12), Units.inchesToMeters(18)), new Rotation3d(180, camPitch2, camYaw2));
+            new Transform3d(new Translation3d(Units.inchesToMeters(6.25), Units.inchesToMeters(12), Units.inchesToMeters(11.75)), new Rotation3d(Math.PI, camPitch2, camYaw2));
     public static final Transform3d kCamToRobot2 = kRobotToCam2.inverse();
 
 
     private static final double camPitch3 = Units.degreesToRadians(0);
     private static final double camYaw3 = Units.degreesToRadians(15);
     public static final Transform3d kRobotToCam3 =
-            new Transform3d(new Translation3d(Units.inchesToMeters(5.75), -Units.inchesToMeters(12), Units.inchesToMeters(18)), new Rotation3d(Math.PI, camPitch3, camYaw3));
+            new Transform3d(new Translation3d(Units.inchesToMeters(6.25), -Units.inchesToMeters(12), Units.inchesToMeters(11.75)), new Rotation3d(Math.PI, camPitch3, camYaw3));
     public static final Transform3d kCamToRobot3 = kRobotToCam3.inverse();
 
 
@@ -234,8 +234,8 @@ public final class Constants {
     public static final int[] RED_HUMAN = {1, 2};
 
 
-    public static final double leftReefFieldAlignment = 0.21;
-    public static final double rightReefFieldAlignment = 0.16;
+    public static final double leftReefFieldAlignment = 0.12;
+    public static final double rightReefFieldAlignment = 0.25;
   }
 
   public static class BlinkinConstants{

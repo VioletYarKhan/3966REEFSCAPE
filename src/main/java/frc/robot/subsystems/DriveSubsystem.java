@@ -52,6 +52,7 @@ import frc.GryphonLib.PositionCalculations;
 import frc.littletonUtils.PoseEstimator;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.TrajectoryGeneration;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
@@ -171,7 +172,7 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   public void driveRobotRelativeChassis(ChassisSpeeds speeds) {
-    drive(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, false);
+    driveNoSetpointGen(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond, speeds.omegaRadiansPerSecond, false);
   }
 
   /**
@@ -208,6 +209,28 @@ public class DriveSubsystem extends SubsystemBase {
 
     var swerveModuleStates = previousSetpoint.moduleStates();
 
+    m_frontLeft.setDesiredState(swerveModuleStates[0]);
+    m_frontRight.setDesiredState(swerveModuleStates[1]);
+    m_rearLeft.setDesiredState(swerveModuleStates[2]);
+    m_rearRight.setDesiredState(swerveModuleStates[3]);
+  }
+
+  public void driveNoSetpointGen(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
+    // Convert the commanded speeds into the correct units for the drivetrain
+    double xSpeedDelivered = xSpeed * DriveConstants.kMaxSpeedMetersPerSecond;
+    double ySpeedDelivered = ySpeed * DriveConstants.kMaxSpeedMetersPerSecond;
+    double rotDelivered = rot * DriveConstants.kMaxAngularSpeed;
+
+    var deliveredSpeeds = fieldRelative
+    ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered,
+      Rotation2d.fromDegrees(Robot.isReal() ? getHeading() : getCurrentPose().getRotation().getDegrees()))
+      : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered);
+
+    
+    var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(deliveredSpeeds);
+    SwerveDriveKinematics.desaturateWheelSpeeds(
+    swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
+    
     m_frontLeft.setDesiredState(swerveModuleStates[0]);
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_rearLeft.setDesiredState(swerveModuleStates[2]);
@@ -368,21 +391,30 @@ public class DriveSubsystem extends SubsystemBase {
     if (Vision.getResult1() != null){
       Optional<EstimatedRobotPose> visionBotPose1 = Vision.getEstimatedGlobalPoseCam1(getCurrentPose(), Vision.getResult1());
       if (visionBotPose1.isPresent()){
-        poseEstimator.addVisionData(List.of(visionBotPose1.get()), LLstdevsMat);
+        // poseEstimator.addVisionData(List.of(visionBotPose1.get()), LLstdevsMat);
         field2d.getObject("Camera1 Pose Guess").setPose(visionBotPose1.get().estimatedPose.toPose2d());
       }
     }
     if (Vision.getResult2() != null){
-      Optional<EstimatedRobotPose> visionBotPose2 = Vision.getEstimatedGlobalPoseCam2();
+      Optional<EstimatedRobotPose> visionBotPose2 = Vision.getEstimatedGlobalPoseCam2(getCurrentPose(), Vision.getResult2());
       if (visionBotPose2.isPresent()){
-        // poseEstimator.addVisionData(List.of(visionBotPose2.get()), ArdustdevsMat);
+        if(visionBotPose2.get().targetsUsed.size() > 1){
+          poseEstimator.addVisionData(List.of(visionBotPose2.get()), VisionConstants.kMultiTagStdDevs);
+        } else{
+          poseEstimator.addVisionData(List.of(visionBotPose2.get()), ArdustdevsMat);
+        }
         field2d.getObject("Camera2 Pose Guess").setPose(visionBotPose2.get().estimatedPose.toPose2d());
       }
     }
     if (Vision.getResult3() != null){
-      Optional<EstimatedRobotPose> visionBotPose3 = Vision.getEstimatedGlobalPoseCam3();
+      Optional<EstimatedRobotPose> visionBotPose3 = Vision.getEstimatedGlobalPoseCam3(getCurrentPose(), Vision.getResult3());
       if (visionBotPose3.isPresent()){
-        // poseEstimator.addVisionData(List.of(visionBotPose3.get()), ArdustdevsMat);
+        if(visionBotPose3.get().targetsUsed.size() > 1){
+          poseEstimator.addVisionData(List.of(visionBotPose3.get()), VisionConstants.kMultiTagStdDevs);
+        }
+        else{
+          poseEstimator.addVisionData(List.of(visionBotPose3.get()), ArdustdevsMat);
+        }
         field2d.getObject("Camera3 Pose Guess").setPose(visionBotPose3.get().estimatedPose.toPose2d());
       }
     }

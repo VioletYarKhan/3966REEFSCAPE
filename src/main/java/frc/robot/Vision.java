@@ -28,11 +28,11 @@ public class Vision extends SubsystemBase {
     private static PhotonPipelineResult result3 = null;
 
     private static final PhotonPoseEstimator poseEstimator1 = new PhotonPoseEstimator(
-        VisionConstants.kTagLayout, PoseStrategy.AVERAGE_BEST_TARGETS, VisionConstants.kRobotToCam1);
+        VisionConstants.kTagLayout, PoseStrategy.CLOSEST_TO_REFERENCE_POSE, VisionConstants.kRobotToCam1);
     private static final PhotonPoseEstimator poseEstimator2 = new PhotonPoseEstimator(
-        VisionConstants.kTagLayout, PoseStrategy.AVERAGE_BEST_TARGETS, VisionConstants.kRobotToCam2);
+        VisionConstants.kTagLayout, PoseStrategy.CLOSEST_TO_REFERENCE_POSE, VisionConstants.kRobotToCam2);
     private static final PhotonPoseEstimator poseEstimator3 = new PhotonPoseEstimator(
-        VisionConstants.kTagLayout, PoseStrategy.AVERAGE_BEST_TARGETS, VisionConstants.kRobotToCam3);
+        VisionConstants.kTagLayout, PoseStrategy.CLOSEST_TO_REFERENCE_POSE, VisionConstants.kRobotToCam3);
 
     @Override
     public void periodic() {
@@ -120,26 +120,32 @@ public class Vision extends SubsystemBase {
             return Optional.empty();
         }
         var update = poseEstimator1.update(result);
-        Pose3d currentPose3d = update.get().estimatedPose;
-        double photonTimestamp = update.get().timestampSeconds;
         
-        return Optional.of(new EstimatedRobotPose(currentPose3d, photonTimestamp, result.getTargets(), PoseStrategy.CLOSEST_TO_REFERENCE_POSE));
+        return update;
     }
 
-    public static Optional<EstimatedRobotPose> getEstimatedGlobalPoseCam2() {
-        Optional<EstimatedRobotPose> update = Optional.empty();
-        if (result2.hasTargets() && result2.getBestTarget().getPoseAmbiguity() < 0.1){
-            update = poseEstimator2.update(result2);
+    public static Optional<EstimatedRobotPose> getEstimatedGlobalPoseCam2(Pose2d prevEstimatedRobotPose, PhotonPipelineResult result) {
+        poseEstimator2.setReferencePose(prevEstimatedRobotPose);
+        if (result == null || !result.hasTargets()){
+            return Optional.empty();
         }
+        if (result.getBestTarget().bestCameraToTarget.getTranslation().getNorm() > 2){
+            return Optional.empty();
+        }
+        var update = poseEstimator2.update(result);
 
         return update;
     }
 
-    public static Optional<EstimatedRobotPose> getEstimatedGlobalPoseCam3() {
-        Optional<EstimatedRobotPose> update = Optional.empty();
-        if (result3.hasTargets() && result3.getBestTarget().getPoseAmbiguity() < 0.1){
-            update = poseEstimator3.update(result3);
+    public static Optional<EstimatedRobotPose> getEstimatedGlobalPoseCam3(Pose2d prevEstimatedRobotPose, PhotonPipelineResult result) {
+        poseEstimator3.setReferencePose(prevEstimatedRobotPose);
+        if (result == null || !result.hasTargets()){
+            return Optional.empty();
         }
+        if (result.getBestTarget().bestCameraToTarget.getTranslation().getNorm() > 2){
+            return Optional.empty();
+        }
+        var update = poseEstimator3.update(result);
 
         return update;
     }
