@@ -3,13 +3,13 @@ package frc.robot.commands;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.Wrist.WristIO;
 import frc.GryphonLib.PositionCalculations;
-import frc.robot.Robot;
 import frc.robot.subsystems.CoralEffector;
 import frc.robot.subsystems.CoralFunnel;
 import frc.robot.subsystems.DriveSubsystem;
@@ -30,9 +30,9 @@ public class ScoreCoral extends SequentialCommandGroup{
                 addCommands(
                     new MoveToScoringPosition(level, wrist, elevator),
                     new MoveCoralToL4Position(level, hand),
-                    PositionPIDCommand.generateCommand(drivetrain, PositionCalculations.getAlignmentReefPose(goalTag, level, left), Seconds.of(1.5)),
-                    new RunCommand(()->drivetrain.driveRobotRelativeChassis(new ChassisSpeeds(0.15, 0, 0)), drivetrain).withTimeout(0.2),
-                    new WaitCommand(0.05),
+                    PositionPIDCommand.generateCommand(drivetrain, PositionCalculations.getAlignmentReefPose(goalTag, level, left), Seconds.of(2)),
+                    new RunCommand(()->drivetrain.driveRobotRelativeChassis(new ChassisSpeeds(0.2, 0, 0)), drivetrain).withTimeout(0.5).andThen(new InstantCommand(()->drivetrain.stop(), drivetrain)),
+                    new WaitCommand(0.2),
                     new MoveToIntakePositions(wrist, elevator, funnel, hand).withTimeout(0.1)
                     .alongWith(new RunCommand(()->hand.intake(), hand).withTimeout(0.2))
                 );

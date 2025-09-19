@@ -132,12 +132,12 @@ public final class Constants {
     };
 
     public static final PPHolonomicDriveController kFastAutoAlignPIDController = new PPHolonomicDriveController(
-      new PIDConstants(0.7, 0, 0.1),
+      new PIDConstants(0.8, 0, 0.1),
       new PIDConstants(0.5, 0, 0.01)
     );
 
     public static final PPHolonomicDriveController kAutoAlignPIDController = new PPHolonomicDriveController(
-      new PIDConstants(0.4, 0, 0.1),
+      new PIDConstants(0.6, 0, 0.1),
       new PIDConstants(0.5, 0, 0.01)
     );
 
@@ -191,7 +191,7 @@ public final class Constants {
             new Transform3d(new Translation3d(Units.inchesToMeters(6.25), Units.inchesToMeters(12), Units.inchesToMeters(11.75)), new Rotation3d(Math.PI, camPitch2, camYaw2));
     public static final Transform3d kCamToRobot2 = kRobotToCam2.inverse();
 
-
+    // some of these probably need to be flipped
     private static final double camPitch3 = Units.degreesToRadians(0);
     private static final double camYaw3 = Units.degreesToRadians(15);
     public static final Transform3d kRobotToCam3 =

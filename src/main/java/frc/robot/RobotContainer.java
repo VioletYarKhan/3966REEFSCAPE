@@ -104,11 +104,18 @@ public class RobotContainer {
                 double forward = m_driverController.getLeftY();
                 double strafe = m_driverController.getLeftX();
                 double turn = m_driverController.getRightX();
-
+              if (Robot.isSimulation()){
+                m_robotDrive.driveWithSetpoints(
+                -MathUtil.applyDeadband(forward, OIConstants.kDriveDeadband),
+                -MathUtil.applyDeadband(strafe, OIConstants.kDriveDeadband),
+                -MathUtil.applyDeadband(turn, OIConstants.kDriveDeadband), true);
+              } else{
                 m_robotDrive.drive(
                 -MathUtil.applyDeadband(forward, OIConstants.kDriveDeadband),
                 -MathUtil.applyDeadband(strafe, OIConstants.kDriveDeadband),
                 -MathUtil.applyDeadband(turn, OIConstants.kDriveDeadband), true);
+              }
+                
             },
           m_robotDrive));
     

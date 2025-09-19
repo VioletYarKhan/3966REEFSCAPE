@@ -1,9 +1,7 @@
 package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.Centimeter;
-import static edu.wpi.first.units.Units.Centimeters;
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 
@@ -37,6 +35,8 @@ public class PositionPIDCommand extends Command{
 
     private final DoublePublisher xErrLogger = NetworkTableInstance.getDefault().getTable("logging").getDoubleTopic("X Error").publish();
     private final DoublePublisher yErrLogger = NetworkTableInstance.getDefault().getTable("logging").getDoubleTopic("Y Error").publish();
+    private final DoublePublisher thetaErrLogger = NetworkTableInstance.getDefault().getTable("logging").getDoubleTopic("Theta Error").publish();
+
 
 
 
@@ -91,6 +91,7 @@ public class PositionPIDCommand extends Command{
 
         xErrLogger.accept(drivetrain.getCurrentPose().getX() - goalPose.getX());
         yErrLogger.accept(drivetrain.getCurrentPose().getY() - goalPose.getY());
+        thetaErrLogger.accept(drivetrain.getCurrentPose().getRotation().minus(goalPose.getRotation()).getDegrees());
         SmartDashboard.putNumber("PID Control Error", Centimeter.convertFrom(drivetrain.getCurrentPose().relativeTo(goalPose).getTranslation().getNorm(), Meters));
         SmartDashboard.putNumber("PID Control Velocity", MovementCalculations.getVelocityMagnitude(drivetrain.getCurrentSpeeds()).magnitude());
     }
@@ -102,7 +103,9 @@ public class PositionPIDCommand extends Command{
         timer.stop();
 
         Pose2d diff = drivetrain.getCurrentPose().relativeTo(goalPose);
-        SmartDashboard.putBoolean("Done Aligning", true);
+        if (!interrupted){
+            SmartDashboard.putBoolean("Done Aligning", true);
+        }
         SmartDashboard.putString("PID Align Report", "Adjustments to alginment took: " + timer.get() + " seconds and interrupted = " + interrupted
             + "\nPosition offset: " + Centimeter.convertFrom(diff.getTranslation().getNorm(), Meters) + " cm"
             + "\nRotation offset: " + diff.getRotation().getMeasure().in(Degrees) + " deg"
@@ -120,7 +123,7 @@ public class PositionPIDCommand extends Command{
             diff.getRotation().getRotations(), 
             Rotation2d.fromDegrees(1.0).getRotations(), 
             0.0, 
-            1.0
+            3.0
         );
 
         var position = diff.getTranslation().getNorm() < Centimeter.of(8).in(Meters);
