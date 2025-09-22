@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
@@ -30,14 +32,14 @@ public class OperatorScoreCoal extends SequentialCommandGroup{
                 addCommands(
                     new MoveToScoringPosition(level, wrist, elevator),
                     new MoveCoralToL4Position(level, hand),
-                    drivetrain.PathToPose(PositionCalculations.getAlignmentReefPose(goalTag, level, left), 0.0),
+                    PositionPIDCommand.generateCommand(drivetrain, PositionCalculations.getAlignmentReefPose(goalTag, level, left), Seconds.of(2)),
                     new WaitCommand(0.4),
                     new MoveToIntakePositions(wrist, elevator, funnel, hand).withTimeout(0.5)
                 );
             } else {
                 addCommands(
                     new MoveToScoringPosition(level, wrist, elevator),
-                    drivetrain.PathToPose(PositionCalculations.getAlignmentReefPose(goalTag, level, left), 0.0),
+                    PositionPIDCommand.generateCommand(drivetrain, PositionCalculations.getAlignmentReefPose(goalTag, level, left), Seconds.of(2)),
                     new ParallelCommandGroup(
                         new RunCommand(()->hand.outtake(()->level), hand).withTimeout(1)
                     ),

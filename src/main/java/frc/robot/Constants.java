@@ -171,7 +171,6 @@ public final class Constants {
     public static final double ClimbAngle = 0.7;
   }
 
-
   public static class VisionConstants {
     public static final String kCameraName1 = "limelight";
     public static final String kCameraName2 = "ArduR";

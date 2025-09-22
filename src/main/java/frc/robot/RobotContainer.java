@@ -81,14 +81,20 @@ public class RobotContainer {
   private Pose2d operatorStationTagPose;
 
   int currentLevel = 0;
+  Alliance alliance;
 
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    reefTags = DriverStation.getAlliance().get() == Alliance.Blue ? AlignmentConstants.BLUE_REEF : AlignmentConstants.RED_REEF;
-    stationTags = DriverStation.getAlliance().get() == Alliance.Blue ? AlignmentConstants.BLUE_HUMAN : AlignmentConstants.RED_HUMAN;
+    if (DriverStation.getAlliance().isPresent()){
+      alliance = DriverStation.getAlliance().get();
+    } else {
+      alliance = Alliance.Red;
+    }
+    reefTags = alliance == Alliance.Blue ? AlignmentConstants.BLUE_REEF : AlignmentConstants.RED_REEF;
+    stationTags = alliance == Alliance.Blue ? AlignmentConstants.BLUE_HUMAN : AlignmentConstants.RED_HUMAN;
     operatorScoring();
     configureButtonBindings();
     handHasCoral.onTrue(new InstantCommand(m_lights::setHasCoral, m_lights)).onFalse(new InstantCommand(m_lights::setReadyIntake, m_lights));
@@ -174,7 +180,7 @@ public class RobotContainer {
 
   private void operatorScoring(){
     SendableChooser<Integer> operatorScoringLevel = new SendableChooser<>();
-    for (int i = 2; i <= 3; i++){
+    for (int i = 1; i <= 4; i++){
       operatorScoringLevel.addOption(""+i, i);
     }
     operatorScoringLevel.setDefaultOption("4", 4);
@@ -219,8 +225,6 @@ public class RobotContainer {
   public SequentialCommandGroup parseAutoCommand(){
     try {
       SequentialCommandGroup autoRoutine = new SequentialCommandGroup();
-
-      Alliance alliance;
 
       if (DriverStation.getAlliance().isPresent()){
         alliance = DriverStation.getAlliance().get();
