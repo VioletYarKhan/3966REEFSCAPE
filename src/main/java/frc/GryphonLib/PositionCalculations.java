@@ -29,18 +29,24 @@ public class PositionCalculations {
 
     public static Pose2d getAlignmentReefPose(int tag, int level, boolean isLeftScore){
         Transform2d transform = new Transform2d();
-        if (level != 1){
-            transform = new Transform2d(0.7, isLeftScore ? -SmartDashboard.getNumber("Left Reef Align", AlignmentConstants.leftReefFieldAlignment) : SmartDashboard.getNumber("Right Reef Align", AlignmentConstants.rightReefFieldAlignment), new Rotation2d());
-            if (level == 4){
-                transform = new Transform2d(0.5, transform.getY(), new Rotation2d());
+        if (level == 0){
+            transform = new Transform2d(0.5, 0, new Rotation2d());
+        } else{
+            if (level != 1){
+                transform = new Transform2d(0.7, isLeftScore ? -SmartDashboard.getNumber("Left Reef Align", AlignmentConstants.leftReefFieldAlignment) : SmartDashboard.getNumber("Right Reef Align", AlignmentConstants.rightReefFieldAlignment), new Rotation2d());
+                if (level == 4){
+                    transform = new Transform2d(0.5, transform.getY(), new Rotation2d());
+                }
+            } else {
+                transform = new Transform2d(0.5, 0, new Rotation2d(isLeftScore ? (Math.PI/6)-(Math.PI/48): (-Math.PI/6)+(Math.PI/48)));
             }
-        } else {
-            transform = new Transform2d(0.5, 0, new Rotation2d(isLeftScore ? (Math.PI/6)-(Math.PI/48): (-Math.PI/6)+(Math.PI/48)));
         }
 
         Pose2d tagPose = kTagLayout.getTagPose(tag).get().toPose2d();
         Pose2d goalPose = translateCoordinates(tagPose, tagPose.getRotation().getDegrees(), transform.getX());
         goalPose = translateCoordinates(goalPose, tagPose.getRotation().getDegrees() + 90, transform.getY());
+
+        
 
         return goalPose.transformBy(new Transform2d(0, 0, new Rotation2d(Math.PI).plus(transform.getRotation())));
     }

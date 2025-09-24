@@ -3,9 +3,10 @@ package frc.robot.subsystems.Elevator;
 import java.util.Optional;
 
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public interface ElevatorIO {
+public interface ElevatorIO extends Subsystem {
         public void periodic();
     
         public void set(double speed);
