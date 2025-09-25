@@ -43,6 +43,7 @@ import frc.robot.subsystems.CoralEffector;
 import frc.robot.subsystems.CoralFunnel;
 import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
@@ -77,8 +78,6 @@ public class RobotContainer {
   Trigger handHasCoral = new Trigger(m_coralHand::hasCoral);
   int[] reefTags;
   int[] stationTags;
-  
-  private Pose2d operatorStationTagPose;
 
   int currentLevel = 0;
   Alliance alliance;
@@ -95,7 +94,7 @@ public class RobotContainer {
     }
     reefTags = alliance == Alliance.Blue ? AlignmentConstants.BLUE_REEF : AlignmentConstants.RED_REEF;
     stationTags = alliance == Alliance.Blue ? AlignmentConstants.BLUE_HUMAN : AlignmentConstants.RED_HUMAN;
-    operatorScoring();
+    operatorScoring2();
     configureButtonBindings();
     handHasCoral.onTrue(new InstantCommand(m_lights::setHasCoral, m_lights)).onFalse(new InstantCommand(m_lights::setReadyIntake, m_lights));
     m_elevator.returnLigament().get().append(m_wrist.returnLigament().get());
@@ -178,50 +177,58 @@ public class RobotContainer {
     m_operatorController.y().onTrue(new InstantCommand(() -> m_robotDrive.setX(), m_robotDrive));
   }
 
-  private void operatorScoring(){
-    SendableChooser<Integer> operatorScoringLevel = new SendableChooser<>();
-    for (int i = 1; i <= 4; i++){
-      operatorScoringLevel.addOption(""+i, i);
+  private void operatorScoring2() {
+    SendableChooser<Integer> levelChooser = new SendableChooser<>();
+    for (int i = 1; i <= 4; i++) {
+      levelChooser.addOption("L" + i, i);
     }
-    operatorScoringLevel.setDefaultOption("4", 4);
-    SmartDashboard.putData("Operator Height Chooser", operatorScoringLevel);
-    for(int i = 1; i <= 6; i++){
-      int side = i;
-      for (Boolean left : new Boolean[]{true, false}){
-        SmartDashboard.putData("Operator Controls/" + i + (left ? "L" : "R"), 
-        new InstantCommand(()->
-          new SequentialCommandGroup(
-          m_robotDrive.AlignToTagFar(reefTags[side - 1]),
+    levelChooser.setDefaultOption("L1", 1);
+    SmartDashboard.putData("Operator Level Chooser", levelChooser);
+
+    SendableChooser<Integer> destinationChooser = new SendableChooser<>();
+    for (int i = 1; i <= 6; i++) {
+      destinationChooser.addOption("" + i, i);
+    }
+    destinationChooser.addOption("1C", 7);
+    destinationChooser.addOption("2C", 8);
+    destinationChooser.setDefaultOption("1C", 7);
+    SmartDashboard.putData("Operator Destination Chooser", destinationChooser);
+
+    SendableChooser<Boolean> leftChooser = new SendableChooser<>();
+    leftChooser.addOption("Left", true);
+    leftChooser.addOption("Right", false);
+    SmartDashboard.putData("Left or Right?", leftChooser);
+
+    SmartDashboard.putData("Go", new ConditionalCommand(
+      new InstantCommand(() -> {
+        new SequentialCommandGroup(
+          m_robotDrive.AlignToTagFar(reefTags[destinationChooser.getSelected() - 1]),
           new OperatorScoreCoal(
-            left,
+            leftChooser.getSelected(),
             m_coralHand,
             m_wrist,
             m_elevator,
             m_funnel,
             m_robotDrive,
-            reefTags[side - 1]
+            reefTags[destinationChooser.getSelected() - 1]
           )
-        ).schedule()));
-      }
-    }
-
-    // Workaround of weird Java thing
-    int[] station = new int[]{0};
-    for (int i = 1; i <=2; i++){
-      station[0] = i;
-      operatorStationTagPose = kTagLayout.getTagPose(stationTags[station[0] - 1]).get().toPose2d();
-      SmartDashboard.putData(("Operator Controls/" + i + "C"),
+        ).schedule();
+      }),
+      new InstantCommand(() -> {
+        var stationTagPose = kTagLayout.getTagPose(stationTags[destinationChooser.getSelected() - 7]).get().toPose2d();
         new ParallelCommandGroup(
           new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand),
-          m_robotDrive.PathToPose(PositionCalculations.translateCoordinates(operatorStationTagPose, operatorStationTagPose.getRotation().getDegrees(), 0.3), 0.0),
+          m_robotDrive.PathToPose(PositionCalculations.translateCoordinates(stationTagPose, stationTagPose.getRotation().getDegrees(), 0.3), 0.0),
           new SequentialCommandGroup(
-            (new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral())),
-            new RunCommand(() -> m_coralHand.intake(), m_coralHand).withTimeout(0.3))
-        )
-      );
-    }
+            new RunCommand(() -> m_coralHand.intake(), m_coralHand).until(()->m_coralHand.hasCoral()),
+            new RunCommand(() -> m_coralHand.intake(), m_coralHand).withTimeout(0.3)
+          )
+        ).schedule();;
+      }),
+      () -> destinationChooser.getSelected() < 7
+    ));
   }
-  
+
   public SequentialCommandGroup parseAutoCommand(){
     try {
       SequentialCommandGroup autoRoutine = new SequentialCommandGroup();

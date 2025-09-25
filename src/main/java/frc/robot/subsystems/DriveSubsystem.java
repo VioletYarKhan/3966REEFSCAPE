@@ -89,6 +89,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
   private static Vector<N3> LLStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(10));
+  @SuppressWarnings("unused")
   private static Matrix<N3, N1> LLstdevsMat = new Matrix<>(LLStdDevs.getStorage());
   private static Vector<N3> ArduStdDevs = VecBuilder.fill(0.2, 0.2, Units.degreesToRadians(10));
   private static Matrix<N3, N1> ArdustdevsMat = new Matrix<>(ArduStdDevs.getStorage());

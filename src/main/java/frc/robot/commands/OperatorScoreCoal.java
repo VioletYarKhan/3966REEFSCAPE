@@ -25,7 +25,7 @@ public class OperatorScoreCoal extends SequentialCommandGroup{
         DriveSubsystem drivetrain,
         int goalTag){
             @SuppressWarnings("unchecked")
-            SendableChooser<Integer> levelChooser = (SendableChooser<Integer>) SmartDashboard.getData("Operator Height Chooser");
+            SendableChooser<Integer> levelChooser = (SendableChooser<Integer>) SmartDashboard.getData("Operator Level Chooser");
             int level = levelChooser.getSelected();
             SmartDashboard.putNumber("Operator Scoring Level", level);
             if (level == 4) {
