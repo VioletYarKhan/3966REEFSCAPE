@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.AlignmentConstants;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.commands.AlgaeRemoval;
 import frc.robot.commands.AlignToReefFieldRelative;
 import frc.robot.commands.ClimbAngles;
 import frc.robot.commands.FinishClimb;
@@ -177,6 +178,7 @@ public class RobotContainer {
     m_driverController.x().onTrue(new InstantCommand(()->currentState = State.L2).andThen(new MoveToScoringPosition(2, m_wrist, m_elevator)));
     m_driverController.b().onTrue(new InstantCommand(()->currentState = State.L3).andThen(new MoveToScoringPosition(3, m_wrist, m_elevator)));
     m_driverController.y().onTrue(new InstantCommand(()->currentState = State.L4).andThen(new MoveToScoringPosition(4, m_wrist, m_elevator).andThen(Robot.isReal() ? new MoveCoralToL4Position(4, m_coralHand) : new InstantCommand())));
+    m_driverController.povLeft().onTrue(new InstantCommand(() -> currentState = State.AlgaeRemove).andThen(new AlgaeRemoval(m_coralHand, m_wrist, m_elevator, m_robotDrive, m_funnel)));
     m_driverController.leftBumper().whileTrue(new RunCommand(()->new AlignToReefFieldRelative(true, m_robotDrive, ()->currentState.level).andThen(new RunCommand(()->m_robotDrive.stop(), m_robotDrive)).schedule(), m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop, m_robotDrive));
     m_driverController.rightBumper().whileTrue(new RunCommand(()->new AlignToReefFieldRelative(false, m_robotDrive, ()->currentState.level).andThen(new RunCommand(()->m_robotDrive.stop(), m_robotDrive)).schedule(), m_robotDrive)).onFalse(new InstantCommand(m_robotDrive::stop, m_robotDrive));
     m_driverController.leftTrigger().whileTrue(new RunCommand(()->m_coralHand.intake(), m_coralHand)).onTrue(new InstantCommand(()->currentState = State.Intake).andThen(new MoveToIntakePositions(m_wrist, m_elevator, m_funnel, m_coralHand)));
