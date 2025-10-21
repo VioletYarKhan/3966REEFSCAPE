@@ -15,7 +15,7 @@ import frc.robot.subsystems.Wrist.WristIO;
 public class AlgaeRemoval extends SequentialCommandGroup {
 
     private static final Set<Integer> L3_TAGS = Set.of(7, 9, 11, 18, 20, 22);
-    
+    // TODO: Move backwards when gets algae
     public AlgaeRemoval(
         CoralEffector hand,
         WristIO wrist,
@@ -25,11 +25,13 @@ public class AlgaeRemoval extends SequentialCommandGroup {
     ){
         int goalTag = PositionCalculations.closestReefTag(drivetrain::getCurrentPose);
         addCommands(
+            new MoveElevatorToLevel(1, elevator),
             new AlignToReefFieldRelative(false, drivetrain, () -> 0),
+            new InstantCommand(() -> hand.outtake(() -> 2)),
             new ParallelCommandGroup(
-                new InstantCommand(() -> hand.outtake(() -> 2)),
+                
                 new MoveToScoringPosition(getLevel(goalTag), wrist, elevator)
-            ).withTimeout(1),
+            ).until(() -> elevator.atTarget(2)),
             new ParallelCommandGroup(
                 new InstantCommand(hand::stop),
                 new MoveToIntakePositions(wrist, elevator, funnel, hand)
